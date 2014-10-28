@@ -39,10 +39,18 @@ Pe=P.subgroup(3200)
 Pi=P.subgroup(800)
 Ce=Connection(Pe,P,'ge',weight=we,sparseness=0.02)
 Ci=Connection(Pi,P,'gi',weight=wi,sparseness=0.02)
+
 # Initialization
 P.v=El+(randn(len(P))*5-5)*mV
 P.ge=(randn(len(P))*1.5+4)*10.*nS
 P.gi=(randn(len(P))*12+20)*10.*nS
+
+# Record network
+M = SpikeMonitor(P)
+run(1*second)
+raster_plot(M)
+show()
+
 # Record a few trace
 trace=StateMonitor(P,'v',record=[1,10,100])
 run(1000*msecond)
