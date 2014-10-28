@@ -1,0 +1,99 @@
+Guidelines
+----------
+
+The basic principles of developing Brian are:
+
+1. For the user, the emphasis is on making the package flexible, readable and
+   easy to use. See the paper "The Brian simulator" in Frontiers in Neuroscience
+   for more details.
+2. For the developer, the emphasis is on keeping the package maintainable by
+   a small number of people. To this end, we use stable, well maintained,
+   existing open source packages whenever possible, rather than writing our
+   own code.
+
+*Coding conventions.*
+We use the `PEP-8 coding conventions <http://www.python.org/dev/peps/pep-0008/>`__
+for our code. Syntax is chosen as much as possible from the user point of view,
+to reflect the concepts as directly as possible. Ideally, a Brian script
+should be readable by someone who doesn't know Python or Brian, although this
+isn't always possible. Function and class names should be explicit rather
+than abbreviated.
+
+*Documentation.*
+It is very important to maintain documentation. We use the
+`Sphinx documentation generator <http://sphinx.pocoo.org/>`__ tools. The
+documentation is all hand written. Sphinx source files are stored in the
+``docs_sphinx`` folder in the repository, and compiled HTML files are stored in
+the ``docs`` folder. Most of the documentation is stored directly in the Sphinx
+source text files, but reference documentation for important Brian classes and
+functions are kept in the documentation strings of those classes themselves.
+This is automatically pulled from these classes for the reference manual
+section of the documentation. The idea is to keep the definitive reference
+documentation near the code that it documents, serving as both a comment for
+the code itself, and to keep the documentation up to date with the code.
+
+In the code, every class or function should start with an explanation of what it does,
+unless it is trivial. A good idea is to use explicit names rather than abbreviations,
+so that you instantly understand what it is about. Inside a function, important chunks
+should also be commented. 
+
+*Testing.*
+Brian uses the `nose package <http://somethingaboutorange.com/mrl/projects/nose/0.11.1/>`__
+for its testing framework. Tests are stored in the ``brian/tests`` directory.
+Tests associated to a Brian module are stored in ``brian/tests/testinterface``
+and tests of the mathematical correctness of Brian's algorithms are stored in
+``brian/tests/testcorrectness``.
+
+*Errors.*
+It is a good idea to start an important function (e.g. object initialisation)
+with a check of the arguments, and possibly issue errors. This way errors are
+more understandable by the user.
+
+*Enhancements.*
+Brian uses a system parallel to the
+`Python Enhancement Proposals (PEPs) <http://www.python.org/dev/peps/>`__ system
+for Python, called *Brian Enhancement Proposals* (BEPs). These are stored in
+``dev/BEPs``. Ideas for new functionality for Brian are put in here for comment
+and discussion. A BEP typically includes:
+
+* How the feature will look from user point of view, with example scripts.
+* Detailed implementation ideas and options.
+
+We also use the `Brian development <http://groups.google.fr/group/brian-development>`__
+mailing list.
+
+Contributing code
+~~~~~~~~~~~~~~~~~
+
+First of all, you should register to the
+`developers mailing list <http://groups.google.fr/group/brian-development>`__.
+If you want to modify existing modules, you should make sure that you
+work on the latest SVN version. We use the Eclipse IDE because it has a nice Python
+plugin (Pydev) and SVN plugin, but of course you can use your preferred IDE.
+The next step is to carefully read the guidelines in this guide.
+
+Now that you wrote your code:
+
+* Write a test for it in ``brian/tests/testinterface``. If it is a new module,
+  create a new file ``test_mymodule.py``;
+* Write documentation, both in the file (see how it's done in existing modules)
+  and, if appropriate, in the relevant file in ``docs_sphinx``. We use the
+  `Sphinx documentation generator <http://sphinx.pocoo.org/>`__ tools. If you want
+  to see how it looks, generate the html docs by executing ``dev/tools/docs/build_html.py``.
+  The html files will then be in ``docs``.
+* If it is a significant feature, write an example script in ``examples`` and insert a
+  line in ``examples/examples_guide.txt``.
+* Create a patch file. For example with Eclipse, right-click on the Brian project,
+  then Team > Create Patch > Save in filesystem, then Next > Project.
+* Send your patch as an attachment to the
+  `developers mailing list <http://groups.google.fr/group/brian-development>`__
+  and make sure the subject of your message starts with [PATCH]. Then describe your
+  patch in your message.
+
+From that point, your patch will either be directly included in the svn or
+(more likely) will be first discussed in the mailing list.
+
+*New modules.*
+New Brian modules typically start in the ``dev/ideas`` folder, then go to ``brian/experimental``
+when they starting looking like modules. They move to the main folder when they are
+stable (especially the user syntax).

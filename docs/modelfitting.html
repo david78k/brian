@@ -1,0 +1,313 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Model fitting &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="The library" href="library.html" />
+    <link rel="next" title="Brian hears" href="hears.html" />
+    <link rel="prev" title="Electrophysiology: trace analysis" href="traceanalysis.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="hears.html" title="Brian hears"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="traceanalysis.html" title="Electrophysiology: trace analysis"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="library.html" accesskey="U">The library</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="model-fitting">
+<span id="model-fitting-library"></span><h1>Model fitting<a class="headerlink" href="#model-fitting" title="Permalink to this headline">¶</a></h1>
+<p>The modelfitting library is used for fitting a neuron model to data.</p>
+<p>The library provides a single function <a class="reference internal" href="reference-modelfitting.html#brian.library.modelfitting.modelfitting" title="brian.library.modelfitting.modelfitting"><tt class="xref py py-func docutils literal"><span class="pre">modelfitting()</span></tt></a>, which accepts the model
+and the data as arguments and returns the model parameters that fit best the data.
+The model is a spiking neuron model, whereas the data consists of both an input
+(time-varying signal, for example an injected current) and a set of spike trains.
+Only spikes are considered for the fitness. Several target spike trains can be
+specified in order to fit independently several data sets. In this case,
+the <a class="reference internal" href="reference-modelfitting.html#brian.library.modelfitting.modelfitting" title="brian.library.modelfitting.modelfitting"><tt class="xref py py-func docutils literal"><span class="pre">modelfitting()</span></tt></a> function returns as many parameters sets as there are target spike trains.</p>
+<p>The model is defined as any spiking neuron model in Brian, by giving the equations
+as mathematical equations, and the reset and threshold values. The free parameters
+of the model that shall be fitted by the library are also specified. The data is
+specified by the input (a vector containing the time-varying injected current),
+the timestep of the input, and the data as a list of spike times.</p>
+<div class="section" id="how-it-works">
+<h2>How it works<a class="headerlink" href="#how-it-works" title="Permalink to this headline">¶</a></h2>
+<p>Fitting a spiking neuron model to electrophysiological data is performed by maximizing
+a fitness function measuring the adequacy of the model to the data.
+This function is defined as the gamma factor, which is based on
+the number of coincidences between the model spikes and the experimentally-recorded spikes, defined
+as the number of spikes in the experimental train such that there is at least one spike
+in the model train within plus or minus <tt class="docutils literal"><span class="pre">delta</span></tt>, where <tt class="docutils literal"><span class="pre">delta</span></tt> is the size of the temporal window
+(typically a few milliseconds). For more details on the gamma factor, see
+<a class="reference external" href="http://www.ncbi.nlm.nih.gov/pubmed/18160135">Jolivet et al. 2008, &#8220;A benchmark test for a quantitative assessment of simple neuron models&#8221;, J. Neurosci. Methods</a> (available in PDF
+<a class="reference external" href="http://icwww.epfl.ch/~gerstner/PUBLICATIONS/Jolivet08.pdf">here</a>).</p>
+<p>The optimization procedure is performed by an optimization algorithm. The optimization toolbox
+used by modelfitting is implemented in the external Python package <a class="reference external" href="https://code.google.com/p/playdoh/">Playdoh</a>. It also
+supports distributed and parallel optimization across CPUs and machines.
+Different optimization algorithms are supported, the default one is <a class="reference internal" href="reference-modelfitting.html#brian.library.modelfitting.CMAES" title="brian.library.modelfitting.CMAES"><tt class="xref py py-class docutils literal"><span class="pre">CMAES</span></tt></a>.
+All those algorithms require the evaluation of the fitness function for a large number of parameter
+sets. Each iteration of the algorithm
+involves the simulation of a large number of neurons (one neuron corresponding to one parameter set)
+as well as the computation of the gamma factor for each neuron.
+The quality of the result depends
+on the number of neurons used, which is specified in the <a class="reference internal" href="reference-modelfitting.html#brian.library.modelfitting.modelfitting" title="brian.library.modelfitting.modelfitting"><tt class="xref py py-func docutils literal"><span class="pre">modelfitting()</span></tt></a> function.</p>
+<p>Playdoh supports the use of graphical processing
+units (GPUs) in order to accelerate the speed of convergence of the algorithm.
+If multiple cores are detected, the library will use all of them by default.
+Also, if a CUDA-enabled GPU is present on the system, and if PyCUDA is installed,
+the library will automatically use the GPU by default. In addition, several computers
+can be networked over IP, see <a class="reference internal" href="#modelfitting-clusters"><em>Clusters</em></a>.</p>
+</div>
+<div class="section" id="usage-example">
+<h2>Usage example<a class="headerlink" href="#usage-example" title="Permalink to this headline">¶</a></h2>
+<p>To import the library, use</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian.library.modelfitting</span> <span class="kn">import</span> <span class="o">*</span>
+</pre></div>
+</div>
+<p>To fit the parameters of a neuron model with respect to some data, use the
+<a class="reference internal" href="reference-modelfitting.html#brian.library.modelfitting.modelfitting" title="brian.library.modelfitting.modelfitting"><tt class="xref py py-func docutils literal"><span class="pre">modelfitting()</span></tt></a> function</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">results</span> <span class="o">=</span> <span class="n">modelfitting</span><span class="p">(</span><span class="n">model</span> <span class="o">=</span> <span class="n">equations</span><span class="p">,</span> <span class="n">reset</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">threshold</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                     <span class="n">data</span> <span class="o">=</span> <span class="n">spikes</span><span class="p">,</span>
+                     <span class="nb">input</span> <span class="o">=</span> <span class="nb">input</span><span class="p">,</span> <span class="n">dt</span> <span class="o">=</span> <span class="o">.</span><span class="mi">1</span><span class="o">*</span><span class="n">ms</span><span class="p">,</span>
+                     <span class="n">popsize</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">maxiter</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+                     <span class="n">R</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0e9</span><span class="p">,</span> <span class="mf">1.0e10</span><span class="p">],</span> <span class="n">tau</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="o">*</span><span class="n">ms</span><span class="p">,</span> <span class="mi">50</span><span class="o">*</span><span class="n">ms</span><span class="p">])</span>
+
+<span class="n">print_table</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Windows users should read the section <a class="reference internal" href="#note-for-windows-users"><em>Important note for Windows users</em></a>.</p>
+</div>
+<p>The model is defined by <tt class="docutils literal"><span class="pre">equations</span></tt> (an <a class="reference internal" href="reference-models-and-groups.html#brian.Equations" title="brian.Equations"><tt class="xref py py-class docutils literal"><span class="pre">Equations</span></tt></a> object),
+<tt class="docutils literal"><span class="pre">reset</span></tt> (a scalar value or a set of equations as a string) and
+<tt class="docutils literal"><span class="pre">threshold</span></tt> (a scalar value or a set of equations as a string).</p>
+<p>The target spike trains are defined by <tt class="docutils literal"><span class="pre">data</span></tt> (a list of pairs <tt class="docutils literal"><span class="pre">(neuron</span> <span class="pre">index,</span> <span class="pre">spike</span> <span class="pre">time)</span></tt>
+or a list of spike times if there is only one target spike train).</p>
+<p>The input is specified with <tt class="docutils literal"><span class="pre">input</span></tt> (a vector containing the time-varying signal)
+and <tt class="docutils literal"><span class="pre">dt</span></tt> (the time step of the signal).
+The input variable should be <tt class="docutils literal"><span class="pre">I</span></tt> in the equations, although the input variable name
+can be specified with <tt class="docutils literal"><span class="pre">input_var</span></tt>.</p>
+<p>The number of particles per target train used in the optimization algorithm is
+specified with <tt class="docutils literal"><span class="pre">popsize</span></tt>. The total number of neurons is  <tt class="docutils literal"><span class="pre">popsize</span></tt> multiplied
+by the number of target spike trains.
+The number of iterations in the algorithm is specified with <tt class="docutils literal"><span class="pre">maxiter</span></tt>.</p>
+<p>Each free parameter of the model that shall be fitted is defined by two values</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">param_name</span> <span class="o">=</span> <span class="p">[</span><span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">]</span>
+</pre></div>
+</div>
+<p><tt class="docutils literal"><span class="pre">param_name</span></tt> should correspond to the parameter name in the model equations.
+<tt class="docutils literal"><span class="pre">min</span></tt> and <tt class="docutils literal"><span class="pre">max</span></tt> specify the initial interval from which the parameter values
+will be uniformly sampled at the beginning of the optimization algorithm.
+A boundary interval can also be specified by giving four values</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">param_name</span> <span class="o">=</span> <span class="p">[</span><span class="n">bound_min</span><span class="p">,</span> <span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">,</span> <span class="n">bound_max</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>The parameter values will be forced to stay inside the interval [bound_min, bound_max]
+during the optimization.</p>
+<p>The complete list of arguments can be found in the reference
+section of the <a class="reference internal" href="reference-modelfitting.html#brian.library.modelfitting.modelfitting" title="brian.library.modelfitting.modelfitting"><tt class="xref py py-func docutils literal"><span class="pre">modelfitting()</span></tt></a> function.</p>
+<p>The best parameters and the corresponding best fitness values found by the optimization
+procedure are returned in the <tt class="xref py py-class docutils literal"><span class="pre">OptimizationResult</span></tt>
+object <tt class="docutils literal"><span class="pre">result</span></tt>.</p>
+</div>
+<div class="section" id="important-note-for-windows-users">
+<span id="note-for-windows-users"></span><h2>Important note for Windows users<a class="headerlink" href="#important-note-for-windows-users" title="Permalink to this headline">¶</a></h2>
+<p>The model fitting library uses the Python <a class="reference external" href="http://docs.python.org/library/multiprocessing.html">multiprocessing</a>
+package to distribute fitting across processors in a single computer or across
+multiple computers. However, there is a limitation of the Windows version of
+multiprocessing which you can read about <a class="reference external" href="http://docs.python.org/library/multiprocessing.html#windows">here</a>.
+The end result is that a script like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian.library.modelfitting</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="o">...</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">modelfitting</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>will crash, going into an endless loop and creating hundreds of Python processes
+that have to be shut down by hand. Instead, you have to do this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian.library.modelfitting</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="o">...</span>
+<span class="k">if</span> <span class="n">__name__</span><span class="o">==</span><span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">modelfitting</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="clusters">
+<span id="modelfitting-clusters"></span><h2>Clusters<a class="headerlink" href="#clusters" title="Permalink to this headline">¶</a></h2>
+<p>The model fitting package can be used with a cluster of computers connected over
+IP. Every computer must have Brian and Playdoh installed, and they must run
+the Playdoh server: see
+<a class="reference external" href="http://playdoh.googlecode.com/svn/docs/playdoh.html#launching-the-playdoh-server">the Playdoh documentation</a>.
+Then, you can launch the <tt class="docutils literal"><span class="pre">`modelfitting</span></tt> function with the <tt class="docutils literal"><span class="pre">machines</span></tt> keyword,
+which is the list of the IP addresses of the machines to use in parallel
+for the fitting procedure. You must also specify the <tt class="docutils literal"><span class="pre">unit_type</span></tt> keyword, which is <tt class="docutils literal"><span class="pre">CPU</span></tt> or <tt class="docutils literal"><span class="pre">GPU</span></tt>,
+to indicate whether you want to use CPUs or GPUs on these computers. You can&#8217;t mix CPUs and GPUs
+for the same optimization.</p>
+<div class="section" id="ip">
+<h3>IP<a class="headerlink" href="#ip" title="Permalink to this headline">¶</a></h3>
+<p>To connect several machines via IP, pass a list of host names or IP addresses
+as strings to the <tt class="docutils literal"><span class="pre">machines</span></tt> keyword of the <a class="reference internal" href="reference-modelfitting.html#brian.library.modelfitting.modelfitting" title="brian.library.modelfitting.modelfitting"><tt class="xref py py-func docutils literal"><span class="pre">modelfitting()</span></tt></a> function.
+To specify a specific port, use a tuple <tt class="docutils literal"><span class="pre">(IP,</span> <span class="pre">port)</span></tt> instead
+of a string. You can also specify a default port in the Playdoh user preferences, see
+<a class="reference external" href="http://playdoh.googlecode.com/svn/docs/playdoh.html#userpref">the Playdoh documentation</a>.</p>
+</div>
+<div class="section" id="authentication">
+<h3>Authentication<a class="headerlink" href="#authentication" title="Permalink to this headline">¶</a></h3>
+<p>You can specify an authentication string on all the computers running the Playdoh server
+to secure communications.
+See
+<a class="reference external" href="http://playdoh.googlecode.com/svn/docs/playdoh.html#userpref">the Playdoh documentation</a>.</p>
+</div>
+<div class="section" id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
+<p>The following script launches a fitting procedure in parallel on two machines:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="n">loadtxt</span><span class="p">,</span> <span class="n">ms</span><span class="p">,</span> <span class="n">Equations</span>
+<span class="kn">from</span> <span class="nn">brian.library.modelfitting</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="c"># List of machines IP addresses</span>
+    <span class="n">machines</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;bobs-machine.university.com&#39;</span><span class="p">,</span>
+                <span class="s">&#39;jims-machine.university.com&#39;</span><span class="p">]</span>
+
+    <span class="n">equations</span> <span class="o">=</span> <span class="n">Equations</span><span class="p">(</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">        dV/dt=(R*I-V)/tau : 1</span>
+<span class="s">        I : 1</span>
+<span class="s">        R : 1</span>
+<span class="s">        tau : second</span>
+<span class="s">    &#39;&#39;&#39;</span><span class="p">)</span>
+    <span class="nb">input</span> <span class="o">=</span> <span class="n">loadtxt</span><span class="p">(</span><span class="s">&#39;current.txt&#39;</span><span class="p">)</span>
+    <span class="n">spikes</span> <span class="o">=</span> <span class="n">loadtxt</span><span class="p">(</span><span class="s">&#39;spikes.txt&#39;</span><span class="p">)</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">modelfitting</span><span class="p">(</span> <span class="n">model</span> <span class="o">=</span> <span class="n">equations</span><span class="p">,</span>
+                            <span class="n">reset</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                            <span class="n">threshold</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                            <span class="n">data</span> <span class="o">=</span> <span class="n">spikes</span><span class="p">,</span>
+                            <span class="nb">input</span> <span class="o">=</span> <span class="nb">input</span><span class="p">,</span>
+                            <span class="n">dt</span> <span class="o">=</span> <span class="o">.</span><span class="mi">1</span><span class="o">*</span><span class="n">ms</span><span class="p">,</span>
+                            <span class="n">popsize</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+                            <span class="n">maxiter</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+                            <span class="n">delta</span> <span class="o">=</span> <span class="mi">4</span><span class="o">*</span><span class="n">ms</span><span class="p">,</span>
+                            <span class="n">unit_type</span> <span class="o">=</span> <span class="s">&#39;CPU&#39;</span><span class="p">,</span>
+                            <span class="n">machines</span> <span class="o">=</span> <span class="n">machines</span><span class="p">,</span>
+                            <span class="n">R</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0e9</span><span class="p">,</span> <span class="mf">9.0e9</span><span class="p">],</span>
+                            <span class="n">tau</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="o">*</span><span class="n">ms</span><span class="p">,</span> <span class="mi">40</span><span class="o">*</span><span class="n">ms</span><span class="p">],</span>
+                            <span class="n">refractory</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="o">*</span><span class="n">ms</span><span class="p">,</span> <span class="mi">10</span><span class="o">*</span><span class="n">ms</span><span class="p">])</span>
+    <span class="n">print_table</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The two remote machines would run the <a class="reference external" href="http://playdoh.googlecode.com/svn/docs/playdoh.html#launching-the-playdoh-server">Playdoh server</a>.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Model fitting</a><ul>
+<li><a class="reference internal" href="#how-it-works">How it works</a></li>
+<li><a class="reference internal" href="#usage-example">Usage example</a></li>
+<li><a class="reference internal" href="#important-note-for-windows-users">Important note for Windows users</a></li>
+<li><a class="reference internal" href="#clusters">Clusters</a><ul>
+<li><a class="reference internal" href="#ip">IP</a></li>
+<li><a class="reference internal" href="#authentication">Authentication</a></li>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="traceanalysis.html"
+                        title="previous chapter">Electrophysiology: trace analysis</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="hears.html"
+                        title="next chapter">Brian hears</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/modelfitting.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="hears.html" title="Brian hears"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="traceanalysis.html" title="Electrophysiology: trace analysis"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="library.html" >The library</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Installation &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="next" title="Getting started" href="slowstart.html" />
+    <link rel="prev" title="Introduction" href="introduction.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="slowstart.html" title="Getting started"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="introduction.html" title="Introduction"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="installation">
+<span id="id1"></span><h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>If you already have a copy of Python 2.5-2.7, try the <a class="reference internal" href="#quick-installation">Quick installation</a> below,
+otherwise take a look at <a class="reference internal" href="#manual-installation">Manual installation</a>.</p>
+<div class="section" id="quick-installation">
+<h2>Quick installation<a class="headerlink" href="#quick-installation" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="easy-install-pip">
+<h3>easy_install / pip<a class="headerlink" href="#easy-install-pip" title="Permalink to this headline">¶</a></h3>
+<p>The easiest way to install the most recent version of Brian if you already have
+a version of Python 2.5-2.7 including the <tt class="docutils literal"><span class="pre">easy_install</span></tt> script is to simply
+run the following in a shell:</p>
+<div class="highlight-python"><pre>easy_install brian</pre>
+</div>
+<p>This will download and install Brian and all its required packages (NumPy, SciPy, etc.).</p>
+<p>Similarly, you can use the <tt class="docutils literal"><span class="pre">pip</span></tt> utility:</p>
+<div class="highlight-python"><pre>pip install brian</pre>
+</div>
+<p>Note that there are some optimisations you can make after installation, see the
+section below on <a class="reference internal" href="#optimisations">Optimisations</a>.</p>
+</div>
+<div class="section" id="debian-ubuntu-packages">
+<h3>Debian/Ubuntu packages<a class="headerlink" href="#debian-ubuntu-packages" title="Permalink to this headline">¶</a></h3>
+<p>If you use a Debian-based Linux distribution (in addition to Debian itself, this
+includes for example Ubuntu or Linux Mint), you can install Brian directly
+from your favourite package manager (e.g. Synaptic or the Ubuntu Software
+Centre), thanks to the packages provided by the
+<a class="reference external" href="http://neuro.debian.net/">NeuroDebian</a> team.</p>
+<p>The package is called <tt class="docutils literal"><span class="pre">python-brian</span></tt>, the documentation and tutorials can be
+found in <tt class="docutils literal"><span class="pre">python-brian-doc</span></tt>. To install these packages from the command-line
+use:</p>
+<div class="highlight-python"><pre>sudo apt-get install python-brian python-brian-doc</pre>
+</div>
+<p>Note that in contrast to the procedure described above for
+<a class="reference internal" href="#easy-install-pip">easy_install / pip</a>, you will not necessarily get the most recent version of
+Brian this way. On the other hand, you do not have to take care of future
+updates yourself, as the Brian package gets updated with the standard update
+process. Additionally, the Brian package already includes all the compiled C
+code mentioned in the <a class="reference internal" href="#optimisations">Optimisations</a> section.
+Another way to install Brian which combines these advantages with up-to-date
+versions is to directly add the
+<a class="reference external" href="http://neuro.debian.net/index.html#repository-howto">NeuroDebian repository</a>
+to your software sources.</p>
+</div>
+</div>
+<div class="section" id="manual-installation">
+<h2>Manual installation<a class="headerlink" href="#manual-installation" title="Permalink to this headline">¶</a></h2>
+<p>Installing Brian requires the following components:</p>
+<ol class="arabic simple">
+<li><a class="reference external" href="http://www.python.org/download/">Python</a> version 2.5-2.7.</li>
+<li><a class="reference external" href="http://www.scipy.org/Download">NumPy and Scipy</a> packages for Python:
+an efficient scientific library.</li>
+<li><a class="reference external" href="http://matplotlib.sourceforge.net/">PyLab</a> package for Python:
+a plotting library similar to Matlab
+(see the <a class="reference external" href="http://matplotlib.sourceforge.net/installing.html">detailed installation instructions</a>).</li>
+<li><a class="reference external" href="http://code.google.com/p/sympy/">SymPy</a> package for Python:
+a library for symbolic mathematics (not mandatory yet for Brian).</li>
+<li><a class="reference external" href="http://neuralensemble.org/trac/brian/wiki/Downloads">Brian</a> itself (don&#8217;t forget to download the extras.zip file,
+which includes examples, tutorials, and a complete copy of the documentation).
+Brian is also a Python package and can be installed as explained below.</li>
+</ol>
+<p>Fortunately, Python packages are very quick and easy to install, so the whole process shouldn&#8217;t
+take very long.</p>
+<p>We also recommend using the following for writing programs in Python (see details below):</p>
+<ol class="arabic simple">
+<li><a class="reference external" href="http://www.eclipse.org/">Eclipse</a> IDE with <a class="reference external" href="http://pydev.sourceforge.net/">PyDev</a></li>
+<li><a class="reference external" href="http://ipython.scipy.org/moin/">IPython</a> shell</li>
+</ol>
+<p>Finally, if you want to use the (optional) automatic C++ code generation features of Brian, you should
+have the <tt class="docutils literal"><span class="pre">gcc</span></tt> compiler installed (on <a class="reference external" href="http://www.cygwin.com/">Cygwin</a> if you are
+running on Windows).</p>
+<p>Mac users: The Enthought Python Distribution (<a class="reference external" href="http://www.enthought.com/products/edudownload.php/">EPD</a> ) is free for academics and contains all the libraries necessary to run Brian. Otherwise, the <a class="reference external" href="http://fonnesbeck.github.com/ScipySuperpack/">Scipy Superpack for Intel OS X</a> also includes versions of Numpy, Scipy, Pylab and IPython.</p>
+<p>Windows users: the <a class="reference external" href="http://www.pythonxy.com/">Python(x,y)</a> distribution includes all the packages
+(including Eclipse and IPython) above except Brian (which is available as an optional plugin).</p>
+<p>Another option is the <a class="reference external" href="http://continuum.io/anaconda.html">Anaconda distribution</a>, which also includes
+all the packages above except Brian and Eclipse.</p>
+<div class="section" id="installing-python-packages">
+<h3>Installing Python packages<a class="headerlink" href="#installing-python-packages" title="Permalink to this headline">¶</a></h3>
+<p>On Windows, Python packages (including Brian) are generally installed simply by running an .exe file.
+On other operating systems, you can download the source release (typically a compressed
+archive .tar.gz or .zip that you need to unzip) and then install the package by typing the following in your
+shell:</p>
+<div class="highlight-python"><pre>python setup.py install</pre>
+</div>
+</div>
+<div class="section" id="installing-eclipse">
+<h3>Installing Eclipse<a class="headerlink" href="#installing-eclipse" title="Permalink to this headline">¶</a></h3>
+<p>Eclipse is an Integrated Development Environment (IDE) for any programming language. PyDev is a plugin
+for Eclipse with features specifically for Python development. The combination of these two is
+excellent for Python development (it&#8217;s what we use for writing Brian).</p>
+<p>To install Eclipse, go to <a class="reference external" href="http://www.eclipse.org/">their web page</a> and download any of the base
+language IDEs. It doesn&#8217;t matter which one, but Python is not one of the base languages so you have
+to choose an alternative language. Probably the most useful is the C++ one or the Java one. The C++
+one can be downloaded <a class="reference external" href="http://www.eclipse.org/cdt/downloads.php">here</a>.</p>
+<p>Having downloaded and installed Eclipse, you should download and install the PyDev plugin from
+<a class="reference external" href="http://pydev.sourceforge.net/">their web site</a>. The best way to do this is directly from within
+the Eclipse IDE. Follow the instructions on the <a class="reference external" href="http://pydev.org/manual_101_root.html">PyDev manual page</a>.</p>
+</div>
+<div class="section" id="installing-ipython">
+<h3>Installing IPython<a class="headerlink" href="#installing-ipython" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="http://ipython.scipy.org/moin/">IPython</a> is an interactive shell for Python.
+It has features for SciPy and PyLab built in, so it is a good choice for scientific work.
+Download from <a class="reference external" href="http://ipython.scipy.org/moin/Download">their page</a>. If you are using Windows, you
+will also need to download PyReadline from the same page.</p>
+</div>
+<div class="section" id="c-compilers">
+<h3>C++ compilers<a class="headerlink" href="#c-compilers" title="Permalink to this headline">¶</a></h3>
+<p>The default for Brian is to use the <tt class="docutils literal"><span class="pre">gcc</span></tt> compiler which will
+be installed already on most unix or linux distributions. If you are using Windows, you can
+install <a class="reference external" href="http://www.cygwin.com/">cygwin</a> (make sure to include the <tt class="docutils literal"><span class="pre">gcc</span></tt> package). Alternatively,
+some but not all versions of Microsoft Visual C++ should be compatible, but this is untested
+so far. See the documentation for the <a class="reference external" href="http://www.scipy.org/Weave">SciPy Weave</a> package for
+more information on this. Mac users should have XCode installed so as to have access to gcc and hence take advantage of brian compiled code. See also the section on <a class="reference internal" href="compiledcode.html#compiled-code"><em>Compiled code</em></a>.</p>
+</div>
+</div>
+<div class="section" id="testing">
+<h2>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h2>
+<p>You can test whether Brian has installed properly by running Python and typing
+the following two lines:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="n">brian_sample_run</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>A sample network should run and produce a raster plot.</p>
+</div>
+<div class="section" id="optimisations">
+<h2>Optimisations<a class="headerlink" href="#optimisations" title="Permalink to this headline">¶</a></h2>
+<p>After a successful installation, there are some optimisations you can make to
+your Brian installation to get it running faster using compiled C code. We do
+not include these as standard because they do not work on all computers, and
+we want Brian to install without problems on all computers. Note that including
+all the optimisations can result in significant speed increases (around 30%).</p>
+<p>These optimisations are described in detail in the section on <a class="reference internal" href="compiledcode.html#compiled-code"><em>Compiled code</em></a>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Installation</a><ul>
+<li><a class="reference internal" href="#quick-installation">Quick installation</a><ul>
+<li><a class="reference internal" href="#easy-install-pip">easy_install / pip</a></li>
+<li><a class="reference internal" href="#debian-ubuntu-packages">Debian/Ubuntu packages</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#manual-installation">Manual installation</a><ul>
+<li><a class="reference internal" href="#installing-python-packages">Installing Python packages</a></li>
+<li><a class="reference internal" href="#installing-eclipse">Installing Eclipse</a></li>
+<li><a class="reference internal" href="#installing-ipython">Installing IPython</a></li>
+<li><a class="reference internal" href="#c-compilers">C++ compilers</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#testing">Testing</a></li>
+<li><a class="reference internal" href="#optimisations">Optimisations</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="introduction.html"
+                        title="previous chapter">Introduction</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="slowstart.html"
+                        title="next chapter">Getting started</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/installation.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="slowstart.html" title="Getting started"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="introduction.html" title="Introduction"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Remote control &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Reference" href="reference.html" />
+    <link rel="next" title="Progress reporting" href="reference-progressreporting.html" />
+    <link rel="prev" title="Task farming" href="reference-taskfarm.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="reference-progressreporting.html" title="Progress reporting"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="reference-taskfarm.html" title="Task farming"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="reference.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="remote-control">
+<span id="index-0"></span><h1>Remote control<a class="headerlink" href="#remote-control" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="brian.RemoteControlServer">
+<em class="property">class </em><tt class="descclassname">brian.</tt><tt class="descname">RemoteControlServer</tt><big>(</big><em>server=None</em>, <em>authkey='brian'</em>, <em>clock=None</em>, <em>global_ns=None</em>, <em>local_ns=None</em>, <em>level=0</em><big>)</big><a class="headerlink" href="#brian.RemoteControlServer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allows remote control (via IP) of a running Brian script</p>
+<p>Initialisation arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">server</span></tt></dt>
+<dd>The IP server details, a pair (host, port). If you want to allow control
+only on the one machine (for example, by an IPython shell), leave this
+as <tt class="docutils literal"><span class="pre">None</span></tt> (which defaults to host=&#8217;localhost&#8217;, port=2719). To allow
+remote control, use (&#8216;&#8217;, portnumber).</dd>
+<dt><tt class="docutils literal"><span class="pre">authkey</span></tt></dt>
+<dd>The authentication key to allow access, change it from &#8216;brian&#8217; if you
+are allowing access from outside (otherwise you allow others to run
+arbitrary code on your machine).</dd>
+<dt><tt class="docutils literal"><span class="pre">clock</span></tt></dt>
+<dd>The clock specifying how often to poll for incoming commands.</dd>
+<dt><tt class="docutils literal"><span class="pre">global_ns</span></tt>, <tt class="docutils literal"><span class="pre">local_ns</span></tt>, <tt class="docutils literal"><span class="pre">level</span></tt></dt>
+<dd>Namespaces in which incoming commands will be executed or evaluated,
+if you leave them blank it will be the local and global namespace of
+the frame from which this function was called (if level=1, or from
+a higher level if you specify a different level here).</dd>
+</dl>
+<p>Once this object has been created, use a <a class="reference internal" href="#brian.RemoteControlClient" title="brian.RemoteControlClient"><tt class="xref py py-class docutils literal"><span class="pre">RemoteControlClient</span></tt></a> to
+issue commands.</p>
+<p><strong>Example usage</strong></p>
+<p>Main simulation code includes a line like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">server</span> <span class="o">=</span> <span class="n">RemoteControlServer</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>In an IPython shell you can do something like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">client</span> <span class="o">=</span> <span class="n">RemoteControlClient</span><span class="p">()</span>
+<span class="n">spikes</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s">&#39;M.spikes&#39;</span><span class="p">)</span>
+<span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">spikes</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="s">&#39;.&#39;</span><span class="p">)</span>
+<span class="n">client</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&#39;stop()&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.RemoteControlClient">
+<em class="property">class </em><tt class="descclassname">brian.</tt><tt class="descname">RemoteControlClient</tt><big>(</big><em>server=None</em>, <em>authkey='brian'</em><big>)</big><a class="headerlink" href="#brian.RemoteControlClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used to remotely control (via IP) a running Brian script</p>
+<p>Initialisation arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">server</span></tt></dt>
+<dd>The IP server details, a pair (host, port). If you want to allow control
+only on the one machine (for example, by an IPython shell), leave this
+as <tt class="docutils literal"><span class="pre">None</span></tt> (which defaults to host=&#8217;localhost&#8217;, port=2719). To allow
+remote control, use (&#8216;&#8217;, portnumber).</dd>
+<dt><tt class="docutils literal"><span class="pre">authkey</span></tt></dt>
+<dd>The authentication key to allow access, change it from &#8216;brian&#8217; if you
+are allowing access from outside (otherwise you allow others to run
+arbitrary code on your machine).</dd>
+</dl>
+<p>Use a <a class="reference internal" href="#brian.RemoteControlServer" title="brian.RemoteControlServer"><tt class="xref py py-class docutils literal"><span class="pre">RemoteControlServer</span></tt></a> on the simulation you want to control.</p>
+<p>Has the following methods:</p>
+<dl class="method">
+<dt id="brian.RemoteControlClient.execute">
+<tt class="descname">execute</tt><big>(</big><em>code</em><big>)</big><a class="headerlink" href="#brian.RemoteControlClient.execute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Executes the specified code in the server process.
+If it raises an
+exception, the server process will catch it and reraise it in the
+client process.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.RemoteControlClient.evaluate">
+<tt class="descname">evaluate</tt><big>(</big><em>code</em><big>)</big><a class="headerlink" href="#brian.RemoteControlClient.evaluate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the code in the server process and return the result.
+If it raises an
+exception, the server process will catch it and reraise it in the
+client process.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.RemoteControlClient.set">
+<tt class="descname">set</tt><big>(</big><em>name</em>, <em>value</em><big>)</big><a class="headerlink" href="#brian.RemoteControlClient.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the variable <tt class="docutils literal"><span class="pre">name</span></tt> (a string) to the given value (can be an
+array, etc.). Note that the variable is set in the local namespace, not
+the global one, and so this cannot be used to modify global namespace
+variables. To do that, set a local namespace variable and then
+call <a class="reference internal" href="#brian.RemoteControlClient.execute" title="brian.RemoteControlClient.execute"><tt class="xref py py-meth docutils literal"><span class="pre">execute()</span></tt></a> with an instruction to change
+the global namespace variable.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.RemoteControlClient.pause">
+<tt class="descname">pause</tt><big>(</big><big>)</big><a class="headerlink" href="#brian.RemoteControlClient.pause" title="Permalink to this definition">¶</a></dt>
+<dd><p>Temporarily stop the simulation in the server process, continue
+simulation with the :meth:&#8217;go&#8217; method.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.RemoteControlClient.go">
+<tt class="descname">go</tt><big>(</big><big>)</big><a class="headerlink" href="#brian.RemoteControlClient.go" title="Permalink to this definition">¶</a></dt>
+<dd><p>Continue a simulation that was paused.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.RemoteControlClient.stop">
+<tt class="descname">stop</tt><big>(</big><big>)</big><a class="headerlink" href="#brian.RemoteControlClient.stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop a simulation, equivalent to <tt class="docutils literal"><span class="pre">execute('stop()')</span></tt>.</p>
+</dd></dl>
+
+<p><strong>Example usage</strong></p>
+<p>Main simulation code includes a line like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">server</span> <span class="o">=</span> <span class="n">RemoteControlServer</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>In an IPython shell you can do something like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">client</span> <span class="o">=</span> <span class="n">RemoteControlClient</span><span class="p">()</span>
+<span class="n">spikes</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s">&#39;M.spikes&#39;</span><span class="p">)</span>
+<span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">spikes</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="s">&#39;.&#39;</span><span class="p">)</span>
+<span class="n">client</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s">&#39;stop()&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="reference-taskfarm.html"
+                        title="previous chapter">Task farming</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="reference-progressreporting.html"
+                        title="next chapter">Progress reporting</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/reference-remotecontrol.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="reference-progressreporting.html" title="Progress reporting"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="reference-taskfarm.html" title="Task farming"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="reference.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

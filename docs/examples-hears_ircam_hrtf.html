@@ -1,0 +1,150 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: ircam_hrtf (hears) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: butterworth (hears)" href="examples-hears_butterworth.html" />
+    <link rel="prev" title="Example: sounds (hears)" href="examples-hears_sounds.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-hears_butterworth.html" title="Example: butterworth (hears)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-hears_sounds.html" title="Example: sounds (hears)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-ircam-hrtf-hears">
+<span id="example-hears-ircam-hrtf"></span><span id="index-0"></span><h1>Example: ircam_hrtf (hears)<a class="headerlink" href="#example-ircam-hrtf-hears" title="Permalink to this headline">¶</a></h1>
+<p>Example showing the use of HRTFs in Brian hears. Note that you will need to
+download the <tt class="xref py py-class docutils literal"><span class="pre">IRCAM_LISTEN</span></tt> database.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">brian.hears</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="c"># Load database</span>
+<span class="n">hrtfdb</span> <span class="o">=</span> <span class="n">IRCAM_LISTEN</span><span class="p">(</span><span class="s">r&#39;F:\HRTF\IRCAM&#39;</span><span class="p">)</span>
+<span class="n">hrtfset</span> <span class="o">=</span> <span class="n">hrtfdb</span><span class="o">.</span><span class="n">load_subject</span><span class="p">(</span><span class="mi">1002</span><span class="p">)</span>
+<span class="c"># Select only the horizontal plane</span>
+<span class="n">hrtfset</span> <span class="o">=</span> <span class="n">hrtfset</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="k">lambda</span> <span class="n">elev</span><span class="p">:</span> <span class="n">elev</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span>
+<span class="c"># Set up a filterbank</span>
+<span class="n">sound</span> <span class="o">=</span> <span class="n">whitenoise</span><span class="p">(</span><span class="mi">10</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+<span class="n">fb</span> <span class="o">=</span> <span class="n">hrtfset</span><span class="o">.</span><span class="n">filterbank</span><span class="p">(</span><span class="n">sound</span><span class="p">)</span>
+<span class="c"># Extract the filtered response and plot</span>
+<span class="n">img</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">process</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+<span class="n">img_left</span> <span class="o">=</span> <span class="n">img</span><span class="p">[:</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span>
+<span class="n">img_right</span> <span class="o">=</span> <span class="n">img</span><span class="p">[</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span><span class="p">:,</span> <span class="p">:]</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">)</span>
+<span class="n">imshow</span><span class="p">(</span><span class="n">img_left</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s">&#39;lower left&#39;</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s">&#39;auto&#39;</span><span class="p">,</span>
+       <span class="n">extent</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">sound</span><span class="o">.</span><span class="n">duration</span><span class="o">/</span><span class="n">ms</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">360</span><span class="p">))</span>
+<span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;Time (ms)&#39;</span><span class="p">)</span>
+<span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;Azimuth&#39;</span><span class="p">)</span>
+<span class="n">title</span><span class="p">(</span><span class="s">&#39;Left ear&#39;</span><span class="p">)</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">)</span>
+<span class="n">imshow</span><span class="p">(</span><span class="n">img_right</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s">&#39;lower left&#39;</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s">&#39;auto&#39;</span><span class="p">,</span>
+       <span class="n">extent</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">sound</span><span class="o">.</span><span class="n">duration</span><span class="o">/</span><span class="n">ms</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">360</span><span class="p">))</span>
+<span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;Time (ms)&#39;</span><span class="p">)</span>
+<span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;Azimuth&#39;</span><span class="p">)</span>
+<span class="n">title</span><span class="p">(</span><span class="s">&#39;Right ear&#39;</span><span class="p">)</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-hears_sounds.html"
+                        title="previous chapter">Example: sounds (hears)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-hears_butterworth.html"
+                        title="next chapter">Example: butterworth (hears)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-hears_ircam_hrtf.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-hears_butterworth.html" title="Example: butterworth (hears)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-hears_sounds.html" title="Example: sounds (hears)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

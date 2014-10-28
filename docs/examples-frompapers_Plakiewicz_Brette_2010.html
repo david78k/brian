@@ -1,0 +1,316 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: Plakiewicz_Brette_2010 (frompapers) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: Goodman_Brette_2010 (frompapers)" href="examples-frompapers_Goodman_Brette_2010.html" />
+    <link rel="prev" title="Example: Rothman_Manis_2003 (frompapers)" href="examples-frompapers_Rothman_Manis_2003.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers_Goodman_Brette_2010.html" title="Example: Goodman_Brette_2010 (frompapers)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers_Rothman_Manis_2003.html" title="Example: Rothman_Manis_2003 (frompapers)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-plakiewicz-brette-2010-frompapers">
+<span id="example-frompapers-plakiewicz-brette-2010"></span><span id="index-0"></span><h1>Example: Plakiewicz_Brette_2010 (frompapers)<a class="headerlink" href="#example-plakiewicz-brette-2010-frompapers" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="spike-threshold-variability-in-single-compartment-model">
+<h2>Spike threshold variability in single compartment model<a class="headerlink" href="#spike-threshold-variability-in-single-compartment-model" title="Permalink to this headline">¶</a></h2>
+<p>Figure 7 from:
+Platkiewicz J, Brette R (2010). A Threshold Equation for Action Potential
+Initiation. PLoS Comput Biol 6(7): e1000850. doi:10.1371/journal.pcbi.1000850</p>
+<p>The original HH model is from Traub and Miles 1991, modified by Destexhe et al. 2001,
+and we shift Na inactivation to -62 mV. This shift produces threshold variability,
+but also spikes with variable shapes (unavoidable in a single-compartment model).</p>
+<p>The script demonstrates that the spike threshold is proportional to the logarithm of h.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
+<span class="kn">from</span> <span class="nn">brian.library.electrophysiology</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">defaultclock</span><span class="o">.</span><span class="n">dt</span><span class="o">=</span><span class="mf">0.05</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">duration</span><span class="o">=</span><span class="mi">500</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">N</span><span class="o">=</span><span class="mi">1000</span> <span class="c"># we simulate 1000 neurons to have more threshold statistics</span>
+
+<span class="n">rectify</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">clip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">inf</span><span class="p">)</span><span class="o">*</span><span class="n">siemens</span>
+
+<span class="c"># Biophysical parameters</span>
+<span class="c">#--Passive parameters</span>
+<span class="n">area</span><span class="o">=</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="mi">105</span><span class="o">*</span><span class="n">umetre</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+<span class="n">C</span><span class="o">=</span><span class="mi">1</span><span class="o">*</span><span class="n">uF</span>
+<span class="n">GL</span><span class="o">=</span><span class="mf">0.0452</span><span class="o">*</span><span class="n">msiemens</span>
+<span class="n">EL</span><span class="o">=-</span><span class="mi">80</span><span class="o">*</span><span class="n">mV</span>
+<span class="c">#--Active fixed parameters</span>
+<span class="n">celsius</span><span class="o">=</span><span class="mi">36</span>
+<span class="n">temp</span><span class="o">=</span><span class="mi">23</span>
+<span class="n">q10</span><span class="o">=</span><span class="mf">2.3</span>
+<span class="c">#----Sodium channel parameters</span>
+<span class="n">ENa</span><span class="o">=</span><span class="mi">50</span><span class="o">*</span><span class="n">mV</span>
+<span class="n">GNa</span><span class="o">=</span><span class="mf">51.6</span><span class="o">*</span><span class="n">msiemens</span>
+<span class="n">vTraub_Na</span><span class="o">=-</span><span class="mi">63</span><span class="o">*</span><span class="n">mV</span>               <span class="c">#Traub convention</span>
+<span class="n">vshift</span><span class="o">=-</span><span class="mi">20</span><span class="o">*</span><span class="n">mV</span>                <span class="c">#Inactivation shift (-62 mV instead of -42 mV)</span>
+<span class="c">#--------activation</span>
+<span class="n">A_alpham</span><span class="o">=</span><span class="mf">0.32</span><span class="o">/</span><span class="p">(</span><span class="n">ms</span><span class="o">*</span><span class="n">mV</span><span class="p">)</span>                    <span class="c">#open (V)</span>
+<span class="n">A_betam</span><span class="o">=</span><span class="mf">0.28</span><span class="o">/</span><span class="p">(</span><span class="n">ms</span><span class="o">*</span><span class="n">mV</span><span class="p">)</span>                    <span class="c">#close (V)</span>
+<span class="n">v12_alpham</span><span class="o">=</span><span class="mi">13</span><span class="o">*</span><span class="n">mV</span>                     <span class="c">#v1/2 for act</span>
+<span class="n">v12_betam</span><span class="o">=</span><span class="mi">40</span><span class="o">*</span><span class="n">mV</span>                     <span class="c">#v1/2 for act</span>
+<span class="n">k_alpham</span><span class="o">=</span><span class="mi">4</span><span class="o">*</span><span class="n">mV</span>                       <span class="c">#act slope</span>
+<span class="n">k_betam</span><span class="o">=</span><span class="mi">5</span><span class="o">*</span><span class="n">mV</span>                       <span class="c">#act slope</span>
+<span class="c">#--------inactivation</span>
+<span class="n">A_alphah</span><span class="o">=</span><span class="mf">0.128</span><span class="o">/</span><span class="n">ms</span>                   <span class="c">#inact recov (V)</span>
+<span class="n">A_betah</span><span class="o">=</span><span class="mi">4</span><span class="o">/</span><span class="n">ms</span>                    <span class="c">#inact (V)</span>
+<span class="n">v12_alphah</span><span class="o">=</span><span class="mi">17</span><span class="o">*</span><span class="n">mV</span>                    <span class="c">#v1/2 for inact</span>
+<span class="n">v12_betah</span><span class="o">=</span><span class="mi">40</span><span class="o">*</span><span class="n">mV</span>                    <span class="c">#v1/2 for inact</span>
+<span class="n">k_alphah</span><span class="o">=</span><span class="mi">18</span><span class="o">*</span><span class="n">mV</span>                     <span class="c">#inact tau slope</span>
+<span class="n">k_betah</span><span class="o">=</span><span class="mi">5</span><span class="o">*</span><span class="n">mV</span>                      <span class="c">#inact tau slope</span>
+<span class="c">#----Potassium channel parameters</span>
+<span class="n">EK</span><span class="o">=-</span><span class="mi">90</span><span class="o">*</span><span class="n">mV</span>
+<span class="c">#--------&quot;delay-rectifier&quot;</span>
+<span class="n">GK</span><span class="o">=</span><span class="mi">10</span><span class="o">*</span><span class="n">msiemens</span>
+<span class="n">vTraub_K</span><span class="o">=-</span><span class="mi">63</span><span class="o">*</span><span class="n">mV</span>
+<span class="n">A_alphan</span><span class="o">=</span><span class="mf">0.032</span><span class="o">/</span><span class="p">(</span><span class="n">ms</span><span class="o">*</span><span class="n">mV</span><span class="p">)</span>              <span class="c">#open (V)</span>
+<span class="n">A_betan</span><span class="o">=</span><span class="mf">0.5</span><span class="o">/</span><span class="n">ms</span>                      <span class="c">#close (V)</span>
+<span class="n">v12_alphan</span><span class="o">=</span><span class="mi">15</span><span class="o">*</span><span class="n">mV</span>                    <span class="c">#v1/2 for act</span>
+<span class="n">v12_betan</span><span class="o">=</span><span class="mi">10</span><span class="o">*</span><span class="n">mV</span>                     <span class="c">#v1/2 for act</span>
+<span class="n">k_alphan</span><span class="o">=</span><span class="mi">5</span><span class="o">*</span><span class="n">mV</span>                       <span class="c">#act slope</span>
+<span class="n">k_betan</span><span class="o">=</span><span class="mi">40</span><span class="o">*</span><span class="n">mV</span>                       <span class="c">#act slope</span>
+<span class="c">#--------muscarinic</span>
+<span class="n">GK_m</span><span class="o">=</span><span class="mf">0.5</span><span class="o">*</span><span class="n">msiemens</span>
+<span class="n">A_alphan_m</span><span class="o">=</span><span class="mf">1e-4</span><span class="o">/</span><span class="p">(</span><span class="n">ms</span><span class="o">*</span><span class="n">mV</span><span class="p">)</span>
+<span class="n">A_betan_m</span><span class="o">=</span><span class="mf">1e-4</span><span class="o">/</span><span class="p">(</span><span class="n">ms</span><span class="o">*</span><span class="n">mV</span><span class="p">)</span>
+<span class="n">v12_alphan_m</span><span class="o">=-</span><span class="mi">30</span><span class="o">*</span><span class="n">mV</span>
+<span class="n">v12_betan_m</span><span class="o">=-</span><span class="mi">30</span><span class="o">*</span><span class="n">mV</span>
+<span class="n">k_alphan_m</span><span class="o">=</span><span class="mi">9</span><span class="o">*</span><span class="n">mV</span>
+<span class="n">k_betan_m</span><span class="o">=</span><span class="mi">9</span><span class="o">*</span><span class="n">mV</span>
+<span class="c"># Input parameters</span>
+<span class="n">Ee</span><span class="o">=</span><span class="mi">0</span><span class="o">*</span><span class="n">mV</span>
+<span class="n">Ei</span><span class="o">=-</span><span class="mi">75</span><span class="o">*</span><span class="n">mV</span>
+<span class="n">taue</span><span class="o">=</span><span class="mf">2.728</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">taui</span><span class="o">=</span><span class="mf">10.49</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">Ge0</span><span class="o">=</span><span class="mf">0.0121</span><span class="o">*</span><span class="n">usiemens</span><span class="o">*</span><span class="n">cm</span><span class="o">**</span><span class="mi">2</span>
+<span class="n">Gi0</span><span class="o">=</span><span class="mf">0.0573</span><span class="o">*</span><span class="n">usiemens</span><span class="o">*</span><span class="n">cm</span><span class="o">**</span><span class="mi">2</span>
+<span class="n">Sigmae</span><span class="o">=</span><span class="mf">0.012</span><span class="o">*</span><span class="n">usiemens</span><span class="o">*</span><span class="n">cm</span><span class="o">**</span><span class="mi">2</span>
+<span class="n">Sigmai</span><span class="o">=</span><span class="mf">0.0264</span><span class="o">*</span><span class="n">usiemens</span><span class="o">*</span><span class="n">cm</span><span class="o">**</span><span class="mi">2</span>
+<span class="n">tadj</span><span class="o">=</span><span class="n">q10</span><span class="o">**</span><span class="p">((</span><span class="n">celsius</span><span class="o">-</span><span class="n">temp</span><span class="p">)</span><span class="o">/</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">ge0</span><span class="o">=</span><span class="n">Ge0</span><span class="o">/</span><span class="n">area</span>
+<span class="n">gi0</span><span class="o">=</span><span class="n">Gi0</span><span class="o">/</span><span class="n">area</span>
+<span class="n">sigmae</span><span class="o">=</span><span class="n">Sigmae</span><span class="o">/</span><span class="n">area</span>
+<span class="n">sigmai</span><span class="o">=</span><span class="n">Sigmai</span><span class="o">/</span><span class="n">area</span>
+
+<span class="n">Traubm</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span><span class="n">v</span><span class="o">-</span><span class="n">vTraub_Na</span>
+<span class="n">alpham</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span><span class="n">A_alpham</span><span class="o">*</span><span class="p">(</span><span class="n">Traubm</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">-</span><span class="n">v12_alpham</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">exp</span><span class="p">((</span><span class="n">v12_alpham</span><span class="o">-</span><span class="n">Traubm</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="o">/</span><span class="n">k_alpham</span><span class="p">))</span>
+<span class="n">betam</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span><span class="o">-</span><span class="n">A_betam</span><span class="o">*</span><span class="p">(</span><span class="n">Traubm</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">-</span><span class="n">v12_betam</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">v12_betam</span><span class="o">-</span><span class="n">Traubm</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="o">/</span><span class="n">k_betam</span><span class="p">))</span>
+<span class="n">minf</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span><span class="n">alpham</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">alpham</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">+</span><span class="n">betam</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+<span class="n">taum</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">alpham</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">+</span><span class="n">betam</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+<span class="n">Shift</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span><span class="n">Traubm</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">-</span><span class="n">vshift</span>
+<span class="n">alphah</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span><span class="n">A_alphah</span><span class="o">*</span><span class="n">exp</span><span class="p">((</span><span class="n">v12_alphah</span><span class="o">-</span><span class="n">Shift</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="o">/</span><span class="n">k_alphah</span><span class="p">)</span>
+<span class="n">betah</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span><span class="n">A_betah</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">exp</span><span class="p">((</span><span class="n">v12_betah</span><span class="o">-</span><span class="n">Shift</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="o">/</span><span class="n">k_betah</span><span class="p">))</span>
+<span class="n">hinf</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span><span class="n">alphah</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">alphah</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">+</span><span class="n">betah</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+<span class="n">tauh</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">alphah</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">+</span><span class="n">betah</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+<span class="n">TraubK</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span><span class="n">v</span><span class="o">-</span><span class="n">vTraub_K</span>
+<span class="n">alphan</span><span class="o">=</span> <span class="k">lambda</span> <span class="n">v</span><span class="p">:</span><span class="n">A_alphan</span><span class="o">*</span><span class="p">(</span><span class="n">TraubK</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">-</span><span class="n">v12_alphan</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">exp</span><span class="p">((</span><span class="n">v12_alphan</span><span class="o">-</span><span class="n">TraubK</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="o">/</span><span class="n">k_alphan</span><span class="p">))</span>
+<span class="n">betan</span><span class="o">=</span> <span class="k">lambda</span> <span class="n">v</span><span class="p">:</span><span class="n">A_betan</span><span class="o">*</span><span class="n">exp</span><span class="p">((</span><span class="n">v12_betan</span><span class="o">-</span><span class="n">TraubK</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="o">/</span><span class="n">k_betan</span><span class="p">)</span>
+<span class="n">ninf</span><span class="o">=</span> <span class="k">lambda</span> <span class="n">v</span><span class="p">:</span><span class="n">alphan</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">alphan</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">+</span><span class="n">betan</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+<span class="n">taun</span><span class="o">=</span> <span class="k">lambda</span> <span class="n">v</span><span class="p">:</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">alphan</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">+</span><span class="n">betan</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="o">/</span><span class="n">tadj</span>
+
+<span class="n">eqs</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">dv/dt=(3*GNa*h*m**3*(ENa-v)+(GK*n**4+GK_m*n_m)*(EK-v)+GL*(EL-v)+I)/C : volt</span>
+
+<span class="s"># Sodium activation</span>
+<span class="s">m_inf=minf(v) : 1   #minf(v)</span>
+<span class="s">tau_m=taum(v) : second</span>
+<span class="s">dm/dt=(m_inf-m)/tau_m : 1</span>
+
+<span class="s"># Sodium inactivation</span>
+<span class="s">h_inf=hinf(v) : 1</span>
+<span class="s">tau_h=tauh(v) : second</span>
+<span class="s">dh/dt=(h_inf-h)/tau_h : 1</span>
+
+<span class="s"># Potassium : delay-rectifier</span>
+<span class="s">n_inf=ninf(v) : 1</span>
+<span class="s">tau_n=taun(v) : second</span>
+<span class="s">dn/dt=(n_inf-n)/tau_n : 1</span>
+<span class="s">gK=GK*n**4 : siemens</span>
+
+<span class="s"># Potassium : muscarinic</span>
+<span class="s">alphan_m=A_alphan_m*(v-v12_alphan_m)/(1-exp((v12_alphan_m-v)/k_alphan_m)) : hertz</span>
+<span class="s">betan_m=-A_alphan_m*(v-v12_alphan_m)/(1-exp(-(v12_alphan_m-v)/k_alphan_m)) : hertz</span>
+<span class="s">n_minf=alphan_m/(alphan_m+betan_m) : 1</span>
+<span class="s">taun_m=1/(alphan_m+betan_m)/tadj : second</span>
+<span class="s">dn_m/dt=(n_minf-n_m)/taun_m : 1</span>
+<span class="s">gK_m=GK_m*n_m : siemens</span>
+
+<span class="s"># Fluctuating synaptic conductances</span>
+<span class="s">I=rectify(ge)*(Ee-v)+rectify(gi)*(Ei-v) : amp</span>
+<span class="s">dge/dt=(1.5*ge0-ge)/taue+1.5*sigmae*(2./taue)**.5*xi : siemens</span>
+<span class="s">dgi/dt=(gi0-gi)/taui+2*sigmai*(2./taui)**.5*xi : siemens</span>
+<span class="s">gtot=GL+rectify(ge)+rectify(gi)+gK+gK_m : siemens</span>
+<span class="s">&quot;&quot;&quot;</span>
+
+<span class="n">neurons</span><span class="o">=</span><span class="n">NeuronGroup</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="n">eqs</span><span class="p">,</span><span class="n">implicit</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">neurons</span><span class="o">.</span><span class="n">v</span><span class="o">=</span><span class="n">EL</span>
+<span class="n">neurons</span><span class="o">.</span><span class="n">m</span><span class="o">=</span><span class="n">minf</span><span class="p">(</span><span class="n">EL</span><span class="p">)</span>
+<span class="n">neurons</span><span class="o">.</span><span class="n">h</span><span class="o">=</span><span class="n">hinf</span><span class="p">(</span><span class="n">EL</span><span class="p">)</span>
+<span class="n">neurons</span><span class="o">.</span><span class="n">n</span><span class="o">=</span><span class="n">ninf</span><span class="p">(</span><span class="n">EL</span><span class="p">)</span>
+<span class="n">neurons</span><span class="o">.</span><span class="n">n_m</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">M</span><span class="o">=</span><span class="n">StateMonitor</span><span class="p">(</span><span class="n">neurons</span><span class="p">,</span><span class="s">&#39;v&#39;</span><span class="p">,</span><span class="n">record</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">Mh</span><span class="o">=</span><span class="n">StateMonitor</span><span class="p">(</span><span class="n">neurons</span><span class="p">,</span><span class="s">&#39;h&#39;</span><span class="p">,</span><span class="n">record</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="n">run</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span><span class="n">report</span><span class="o">=</span><span class="s">&#39;text&#39;</span><span class="p">)</span>
+
+<span class="c"># Collect spike thresholds and values of h</span>
+<span class="n">threshold</span><span class="p">,</span><span class="n">logh</span><span class="o">=</span><span class="p">[],[]</span>
+<span class="n">valuesv</span><span class="p">,</span><span class="n">valuesh</span><span class="o">=</span><span class="n">array</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">_values</span><span class="p">),</span><span class="n">array</span><span class="p">(</span><span class="n">Mh</span><span class="o">.</span><span class="n">_values</span><span class="p">)</span>
+<span class="n">criterion</span><span class="o">=</span><span class="mi">10</span><span class="o">*</span><span class="n">mV</span><span class="o">/</span><span class="n">ms</span> <span class="c"># criterion for spike threshold</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+    <span class="n">v</span><span class="o">=</span><span class="n">valuesv</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">h</span><span class="o">=</span><span class="n">valuesh</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">onsets</span><span class="o">=</span><span class="n">spike_onsets</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">criterion</span><span class="o">=</span><span class="n">defaultclock</span><span class="o">.</span><span class="n">dt</span><span class="o">*</span><span class="n">criterion</span><span class="p">,</span><span class="n">vc</span><span class="o">=-</span><span class="mi">35</span><span class="o">*</span><span class="n">mV</span><span class="p">)</span>
+    <span class="n">threshold</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="n">onsets</span><span class="p">])</span>
+    <span class="n">logh</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="o">-</span><span class="n">log</span><span class="p">(</span><span class="n">h</span><span class="p">[</span><span class="n">onsets</span><span class="p">]))</span><span class="c">#+log(g[onsets]))</span>
+<span class="n">threshold</span><span class="o">=</span><span class="n">array</span><span class="p">(</span><span class="n">threshold</span><span class="p">)</span><span class="o">/</span><span class="n">mV</span>
+<span class="n">logh</span><span class="o">=</span><span class="n">array</span><span class="p">(</span><span class="n">logh</span><span class="p">)</span><span class="o">/</span><span class="n">log</span><span class="p">(</span><span class="mf">10.</span><span class="p">)</span> <span class="c"># for display</span>
+
+<span class="c"># Voltage trace with spike onsets</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">311</span><span class="p">)</span>
+<span class="n">v</span><span class="o">=</span><span class="n">valuesv</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">onsets</span><span class="o">=</span><span class="n">spike_onsets</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">criterion</span><span class="o">=</span><span class="n">defaultclock</span><span class="o">.</span><span class="n">dt</span><span class="o">*</span><span class="n">criterion</span><span class="p">,</span><span class="n">vc</span><span class="o">=-</span><span class="mi">35</span><span class="o">*</span><span class="n">mV</span><span class="p">)</span>
+<span class="n">t</span><span class="o">=</span><span class="n">M</span><span class="o">.</span><span class="n">times</span><span class="p">[</span><span class="n">onsets</span><span class="p">]</span><span class="o">/</span><span class="n">ms</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">times</span><span class="o">/</span><span class="n">ms</span><span class="p">,</span><span class="n">M</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">mV</span><span class="p">,</span><span class="s">&#39;k&#39;</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">v</span><span class="p">[</span><span class="n">onsets</span><span class="p">]</span><span class="o">/</span><span class="n">mV</span><span class="p">,</span><span class="s">&#39;.r&#39;</span><span class="p">)</span>
+<span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;t (ms)&#39;</span><span class="p">)</span>
+<span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;V (mV)&#39;</span><span class="p">)</span>
+
+<span class="c"># Distribution of Vm and spike onsets</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">312</span><span class="p">)</span>
+<span class="n">hist</span><span class="p">(</span><span class="n">threshold</span><span class="p">,</span><span class="mi">30</span><span class="p">,</span><span class="n">normed</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">histtype</span><span class="o">=</span><span class="s">&#39;stepfilled&#39;</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span><span class="n">facecolor</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">)</span>
+<span class="n">hist</span><span class="p">(</span><span class="n">valuesv</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">/</span><span class="n">mV</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="n">normed</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">histtype</span><span class="o">=</span><span class="s">&#39;stepfilled&#39;</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span><span class="n">facecolor</span><span class="o">=</span><span class="s">&#39;k&#39;</span><span class="p">)</span>
+<span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;V (mV)&#39;</span><span class="p">)</span>
+<span class="n">xlim</span><span class="p">(</span><span class="o">-</span><span class="mi">80</span><span class="p">,</span><span class="o">-</span><span class="mi">40</span><span class="p">)</span>
+
+<span class="c"># Relationship between h and spike threshold</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">313</span><span class="p">)</span>
+<span class="n">slope</span><span class="p">,</span><span class="n">intercept</span><span class="o">=</span><span class="mf">3.1</span><span class="p">,</span><span class="o">-</span><span class="mf">54.</span> <span class="c"># linear regression for the prediction of threshold</span>
+<span class="n">p1</span><span class="p">,</span><span class="n">p2</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="n">logh</span><span class="p">),</span><span class="nb">max</span><span class="p">(</span><span class="n">logh</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">logh</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">logh</span><span class="p">)</span><span class="o">/</span><span class="mi">10</span><span class="p">],</span><span class="n">threshold</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">logh</span><span class="p">)</span><span class="o">/</span><span class="mi">10</span><span class="p">],</span><span class="s">&#39;.k&#39;</span><span class="p">)</span> <span class="c"># don&#39;t show everything</span>
+<span class="n">plot</span><span class="p">([</span><span class="n">p1</span><span class="p">,</span><span class="n">p2</span><span class="p">],</span><span class="n">intercept</span><span class="o">+</span><span class="n">slope</span><span class="o">*</span><span class="n">array</span><span class="p">([</span><span class="n">p1</span><span class="p">,</span><span class="n">p2</span><span class="p">])</span><span class="o">*</span><span class="n">log</span><span class="p">(</span><span class="mf">10.</span><span class="p">),</span><span class="s">&#39;r&#39;</span><span class="p">)</span>
+<span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;h&#39;</span><span class="p">)</span>
+<span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;Threshold (mV)&#39;</span><span class="p">)</span>
+<span class="n">ylim</span><span class="p">(</span><span class="o">-</span><span class="mi">55</span><span class="p">,</span><span class="o">-</span><span class="mi">40</span><span class="p">)</span>
+<span class="n">xticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="n">log</span><span class="p">(</span><span class="mf">5e-1</span><span class="p">)</span><span class="o">/</span><span class="n">log</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="n">log</span><span class="p">(</span><span class="mf">5e-2</span><span class="p">)</span><span class="o">/</span><span class="n">log</span><span class="p">(</span><span class="mi">10</span><span class="p">)],[</span><span class="mi">1</span><span class="p">,</span><span class="mf">5e-1</span><span class="p">,</span><span class="mf">1e-1</span><span class="p">,</span><span class="mf">5e-2</span><span class="p">])</span>
+<span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">1.5</span><span class="p">)</span>
+
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Example: Plakiewicz_Brette_2010 (frompapers)</a><ul>
+<li><a class="reference internal" href="#spike-threshold-variability-in-single-compartment-model">Spike threshold variability in single compartment model</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-frompapers_Rothman_Manis_2003.html"
+                        title="previous chapter">Example: Rothman_Manis_2003 (frompapers)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-frompapers_Goodman_Brette_2010.html"
+                        title="next chapter">Example: Goodman_Brette_2010 (frompapers)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-frompapers_Plakiewicz_Brette_2010.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers_Goodman_Brette_2010.html" title="Example: Goodman_Brette_2010 (frompapers)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers_Rothman_Manis_2003.html" title="Example: Rothman_Manis_2003 (frompapers)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

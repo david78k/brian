@@ -1,0 +1,254 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: Fig2A_synchrony_partition (frompapers/computing with neural synchrony/duration selectivity) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: Fig1A_rebound_neurons (frompapers/computing with neural synchrony/duration selectivity)" href="examples-frompapers-computing with neural synchrony-duration selectivity_Fig1A_rebound_neurons.html" />
+    <link rel="prev" title="Example: Fig7B_Licklider (frompapers/computing with neural synchrony/hearing)" href="examples-frompapers-computing with neural synchrony-hearing_Fig7B_Licklider.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-duration selectivity_Fig1A_rebound_neurons.html" title="Example: Fig1A_rebound_neurons (frompapers/computing with neural synchrony/duration selectivity)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-hearing_Fig7B_Licklider.html" title="Example: Fig7B_Licklider (frompapers/computing with neural synchrony/hearing)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-fig2a-synchrony-partition-frompapers-computing-with-neural-synchrony-duration-selectivity">
+<span id="example-frompapers-computing-with-neural-synchrony-duration-selectivity-fig2a-synchrony-partition"></span><span id="index-0"></span><h1>Example: Fig2A_synchrony_partition (frompapers/computing with neural synchrony/duration selectivity)<a class="headerlink" href="#example-fig2a-synchrony-partition-frompapers-computing-with-neural-synchrony-duration-selectivity" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="brette-r-2012-computing-with-neural-synchrony-plos-comp-biol-8-6-e1002561-doi-10-1371-journal-pcbi-1002561">
+<h2>Brette R (2012). Computing with neural synchrony. PLoS Comp Biol. 8(6): e1002561. doi:10.1371/journal.pcbi.1002561<a class="headerlink" href="#brette-r-2012-computing-with-neural-synchrony-plos-comp-biol-8-6-e1002561-doi-10-1371-journal-pcbi-1002561" title="Permalink to this headline">¶</a></h2>
+<p>Figure 2A. Synchrony partition for duration selective neurons.</p>
+<p>Caption (Fig. 2A)
+Decoding synchrony patterns in a heterogeneous
+population.
+Color represents the latency of the spike produced by each neuron
+responding to the stimulus (white if the neuron did not spike). Thus,
+neurons with the same color are synchronous for that specific stimulus
+(duration). The population can be divided in groups of synchronous
+neurons (i.e., with the same color), forming the &#8220;synchrony partition&#8221;.
+Circled neurons belong to the same synchronous group.</p>
+<p>This script calculates and displays the synchrony partition for one particular duration.
+It also saves the results in file, that is required by the script Fig2C_decoding_synchrony.
+The synchrony partition is calculated empirically, by simulating the responses of the neurons at
+the specific inhibitory duration
+and grouping neurons that respond in synchrony (+- 2 ms).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">seed</span>
+<span class="kn">from</span> <span class="nn">params</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="n">cm</span>
+
+<span class="c"># Graphics</span>
+<span class="n">radius</span><span class="o">=.</span><span class="mi">15</span>
+<span class="n">selected_neuron</span><span class="o">=</span><span class="mi">7</span>
+<span class="c"># Parameters</span>
+<span class="n">ginh_max</span><span class="o">=</span><span class="mf">5.</span>
+<span class="n">Nx</span><span class="o">=</span><span class="mi">5</span>                <span class="c"># number of neurons per row</span>
+<span class="n">N</span><span class="o">=</span><span class="n">Nx</span><span class="o">*</span><span class="n">Nx</span>             <span class="c"># number of neurons</span>
+<span class="n">rest_time</span><span class="o">=</span><span class="mi">1</span><span class="o">*</span><span class="n">second</span>  <span class="c"># initial time</span>
+<span class="n">duration</span><span class="o">=</span><span class="mi">500</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">delta_t</span><span class="o">=</span><span class="mi">2</span><span class="o">*</span><span class="n">ms</span>        <span class="c"># Size of synchronous groups (maximum time difference)</span>
+
+<span class="c"># Duration-selective neurons</span>
+<span class="n">eqs</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">dv/dt=(El-v+(gmax*gK+gmax2*gK2+ginh)*(EK-v))/tau : volt</span>
+<span class="s">dgK/dt=(gKinf-gK)/tauK : 1 # IKLT</span>
+<span class="s">dgK2/dt=-gK2/tauK2 : 1 # Delayed rectifier</span>
+<span class="s">gKinf=1./(1+exp((Va-v)/ka)) : 1</span>
+<span class="s">ginh = ginh_max*((t&gt;rest_time) &amp; (t&lt;(rest_time+duration))) : 1</span>
+<span class="s">tauK : ms</span>
+<span class="s">tau : ms</span>
+<span class="s">gmax : 1</span>
+<span class="s">&#39;&#39;&#39;</span>
+
+<span class="n">uniform</span><span class="o">=</span><span class="k">lambda</span> <span class="n">N</span><span class="p">:(</span><span class="n">rand</span><span class="p">(</span><span class="n">N</span><span class="p">)</span><span class="o">-.</span><span class="mi">5</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span> <span class="c"># uniform between -1 and 1</span>
+<span class="n">seed</span><span class="p">(</span><span class="mi">31418</span><span class="p">)</span> <span class="c"># Get the same neurons every time</span>
+
+<span class="n">neurons</span><span class="o">=</span><span class="n">NeuronGroup</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="n">eqs</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="s">&#39;v&gt;Vt&#39;</span><span class="p">,</span><span class="n">reset</span><span class="o">=</span><span class="s">&#39;v=Vr;gK2=1&#39;</span><span class="p">)</span>
+<span class="n">neurons</span><span class="o">.</span><span class="n">v</span><span class="o">=</span><span class="n">Vr</span>
+<span class="n">neurons</span><span class="o">.</span><span class="n">gK</span><span class="o">=</span><span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">exp</span><span class="p">((</span><span class="n">Va</span><span class="o">-</span><span class="n">El</span><span class="p">)</span><span class="o">/</span><span class="n">ka</span><span class="p">))</span>
+<span class="n">neurons</span><span class="o">.</span><span class="n">tauK</span><span class="o">=</span><span class="mi">400</span><span class="o">*</span><span class="n">ms</span><span class="o">+</span><span class="n">uniform</span><span class="p">(</span><span class="n">N</span><span class="p">)</span><span class="o">*</span><span class="n">tauK_spread</span>
+<span class="n">alpha</span><span class="o">=</span><span class="p">(</span><span class="n">El</span><span class="o">-</span><span class="n">Vt</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">Vt</span><span class="o">-</span><span class="n">EK</span><span class="p">)</span>
+<span class="n">neurons</span><span class="o">.</span><span class="n">gmax</span><span class="o">=</span><span class="n">alpha</span><span class="o">*</span><span class="p">(</span><span class="n">minx</span><span class="o">+</span><span class="p">(</span><span class="n">maxx</span><span class="o">-</span><span class="n">minx</span><span class="p">)</span><span class="o">*</span><span class="n">rand</span><span class="p">(</span><span class="n">N</span><span class="p">))</span>
+<span class="n">neurons</span><span class="o">.</span><span class="n">tau</span><span class="o">=</span><span class="mi">30</span><span class="o">*</span><span class="n">ms</span><span class="o">+</span><span class="n">uniform</span><span class="p">(</span><span class="n">N</span><span class="p">)</span><span class="o">*</span><span class="n">tau_spread</span>
+
+<span class="n">spikes</span><span class="o">=</span><span class="n">SpikeMonitor</span><span class="p">(</span><span class="n">neurons</span><span class="p">)</span>
+
+<span class="n">run</span><span class="p">(</span><span class="n">rest_time</span><span class="o">+</span><span class="mf">1.1</span><span class="o">*</span><span class="n">second</span><span class="p">)</span>
+
+<span class="c"># Calculate first spike time of each neuron</span>
+<span class="n">times</span><span class="o">=</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="c"># First spike time of each neuron</span>
+<span class="n">times</span><span class="p">[:]</span><span class="o">=</span><span class="n">Inf</span> <span class="c"># Inf means: no response, or response before the start of the stimulus</span>
+<span class="n">blacklist</span><span class="o">=</span><span class="p">[]</span> <span class="c"># neurons that fire spontaneously</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">t</span> <span class="ow">in</span> <span class="n">spikes</span><span class="o">.</span><span class="n">spikes</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">times</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="n">Inf</span><span class="p">:</span>
+        <span class="n">times</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">t</span><span class="o">-</span><span class="n">duration</span><span class="o">-</span><span class="n">rest_time</span>
+        <span class="k">if</span> <span class="n">times</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">blacklist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+<span class="n">times</span><span class="p">[</span><span class="n">blacklist</span><span class="p">]</span><span class="o">=</span><span class="n">Inf</span>
+<span class="n">tmin</span><span class="p">,</span><span class="n">tmax</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="n">times</span><span class="p">[</span><span class="n">times</span><span class="o">!=</span><span class="n">Inf</span><span class="p">]),</span><span class="nb">max</span><span class="p">(</span><span class="n">times</span><span class="p">[</span><span class="n">times</span><span class="o">!=</span><span class="n">Inf</span><span class="p">])</span>
+<span class="c"># Color of each neuron between 0 and 1</span>
+<span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="n">times</span><span class="o">-</span><span class="n">tmin</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">tmax</span><span class="o">+</span><span class="mf">1e-10</span><span class="o">-</span><span class="n">tmin</span><span class="p">)</span> <span class="c"># (to avoid zero division)</span>
+
+<span class="c"># Assign groups; each responding neuron gets a group number</span>
+<span class="n">group_size</span><span class="o">=</span><span class="n">delta_t</span><span class="o">/</span><span class="p">(</span><span class="n">tmax</span><span class="o">-</span><span class="n">tmin</span><span class="p">)</span> <span class="c"># size of a group, as a proportion of the timing range</span>
+<span class="n">group_number</span><span class="o">=</span><span class="n">array</span><span class="p">(</span><span class="n">color</span><span class="o">/</span><span class="n">group_size</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+<span class="n">group_number</span><span class="p">[</span><span class="n">color</span><span class="o">==</span><span class="n">Inf</span><span class="p">]</span><span class="o">=-</span><span class="mi">1</span>
+
+<span class="c"># Get the size of each group</span>
+<span class="n">count</span><span class="o">=</span><span class="n">zeros</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">group_number</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="c"># number of neurons in each group</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">group_number</span><span class="p">)):</span>
+    <span class="k">if</span> <span class="n">group_number</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">!=-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">count</span><span class="p">[</span><span class="n">group_number</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">+=</span><span class="mi">1</span>
+
+<span class="n">selected_group</span><span class="o">=</span><span class="n">group_number</span><span class="p">[</span><span class="n">selected_neuron</span><span class="p">]</span>
+
+<span class="c"># Display the synchrony partition (Fig. 2A)</span>
+<span class="n">axes</span><span class="p">(</span><span class="n">frameon</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">axis</span><span class="p">(</span><span class="s">&#39;scaled&#39;</span><span class="p">)</span>
+<span class="n">xticks</span><span class="p">([])</span>
+<span class="n">yticks</span><span class="p">([])</span>
+<span class="n">i</span><span class="o">=</span><span class="mi">0</span>
+<span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">Nx</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">Nx</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">color</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">!=</span><span class="n">Inf</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">group_number</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="n">selected_group</span><span class="p">:</span>
+                <span class="n">w</span><span class="o">=</span><span class="mi">4</span>
+                <span class="n">ec</span><span class="o">=</span><span class="s">&quot;k&quot;</span> <span class="c"># edge color</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">w</span><span class="o">=</span><span class="mi">1</span>
+                <span class="n">ec</span><span class="o">=</span><span class="s">&#39;k&#39;</span>
+            <span class="n">cir</span><span class="o">=</span><span class="n">Circle</span><span class="p">((</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">),</span><span class="n">radius</span><span class="p">,</span><span class="n">fc</span><span class="o">=</span><span class="n">cm</span><span class="o">.</span><span class="n">jet</span><span class="p">(</span><span class="n">color</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span><span class="n">linewidth</span><span class="o">=</span><span class="n">w</span><span class="p">,</span><span class="n">ec</span><span class="o">=</span><span class="n">ec</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cir</span><span class="o">=</span><span class="n">Circle</span><span class="p">((</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">),</span><span class="n">radius</span><span class="p">,</span><span class="n">fc</span><span class="o">=</span><span class="s">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">i</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">cir</span><span class="p">)</span>
+<span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">radius</span><span class="p">,</span><span class="mi">1</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">radius</span><span class="p">)</span>
+<span class="n">ylim</span><span class="p">(</span><span class="mi">0</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">radius</span><span class="p">,</span><span class="mi">1</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">radius</span><span class="p">)</span>
+
+<span class="c"># Remove groups with fewer than two neurons and recalculate group numbers</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">group_number</span><span class="p">)):</span>
+    <span class="k">if</span> <span class="n">group_number</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">&gt;=</span><span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">count</span><span class="p">[</span><span class="n">group_number</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">&gt;=</span><span class="mi">2</span><span class="p">:</span>
+            <span class="n">group_number</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">count</span><span class="p">[:</span><span class="n">group_number</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">&gt;=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">group_number</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=-</span><span class="mi">1</span>
+
+<span class="c"># Save assignment to groups</span>
+<span class="n">f</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="s">&#39;groups&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">duration</span><span class="o">/</span><span class="n">ms</span><span class="p">))</span><span class="o">+</span><span class="s">&#39;.txt&#39;</span><span class="p">,</span><span class="s">&#39;w&#39;</span><span class="p">)</span>
+<span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">group_number</span><span class="p">]))</span>
+<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Example: Fig2A_synchrony_partition (frompapers/computing with neural synchrony/duration selectivity)</a><ul>
+<li><a class="reference internal" href="#brette-r-2012-computing-with-neural-synchrony-plos-comp-biol-8-6-e1002561-doi-10-1371-journal-pcbi-1002561">Brette R (2012). Computing with neural synchrony. PLoS Comp Biol. 8(6): e1002561. doi:10.1371/journal.pcbi.1002561</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-frompapers-computing with neural synchrony-hearing_Fig7B_Licklider.html"
+                        title="previous chapter">Example: Fig7B_Licklider (frompapers/computing with neural synchrony/hearing)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-frompapers-computing with neural synchrony-duration selectivity_Fig1A_rebound_neurons.html"
+                        title="next chapter">Example: Fig1A_rebound_neurons (frompapers/computing with neural synchrony/duration selectivity)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-frompapers-computing with neural synchrony-duration selectivity_Fig2A_synchrony_partition.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-duration selectivity_Fig1A_rebound_neurons.html" title="Example: Fig1A_rebound_neurons (frompapers/computing with neural synchrony/duration selectivity)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-hearing_Fig7B_Licklider.html" title="Example: Fig7B_Licklider (frompapers/computing with neural synchrony/hearing)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

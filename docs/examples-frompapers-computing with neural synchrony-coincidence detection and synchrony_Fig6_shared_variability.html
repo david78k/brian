@@ -1,0 +1,245 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: Fig6_shared_variability (frompapers/computing with neural synchrony/coincidence detection and synchrony) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: Fig5E_precision_reliability (frompapers/computing with neural synchrony/coincidence detection and synchrony)" href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig5E_precision_reliability.html" />
+    <link rel="prev" title="Example: Kremer_et_al_2011 (frompapers)" href="examples-frompapers_Kremer_et_al_2011.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig5E_precision_reliability.html" title="Example: Fig5E_precision_reliability (frompapers/computing with neural synchrony/coincidence detection and synchrony)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers_Kremer_et_al_2011.html" title="Example: Kremer_et_al_2011 (frompapers)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-fig6-shared-variability-frompapers-computing-with-neural-synchrony-coincidence-detection-and-synchrony">
+<span id="example-frompapers-computing-with-neural-synchrony-coincidence-detection-and-synchrony-fig6-shared-variability"></span><span id="index-0"></span><h1>Example: Fig6_shared_variability (frompapers/computing with neural synchrony/coincidence detection and synchrony)<a class="headerlink" href="#example-fig6-shared-variability-frompapers-computing-with-neural-synchrony-coincidence-detection-and-synchrony" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="brette-r-2012-computing-with-neural-synchrony-plos-comp-biol-8-6-e1002561-doi-10-1371-journal-pcbi-1002561">
+<h2>Brette R (2012). Computing with neural synchrony. PLoS Comp Biol. 8(6): e1002561. doi:10.1371/journal.pcbi.1002561<a class="headerlink" href="#brette-r-2012-computing-with-neural-synchrony-plos-comp-biol-8-6-e1002561-doi-10-1371-journal-pcbi-1002561" title="Permalink to this headline">¶</a></h2>
+<p>Figure 6. Shared variability.</p>
+<p>This example shows that synchrony may be reproducible without individual responses being reproducible,
+because of shared variability (here due to a common input).</p>
+<p>Caption (Fig 6).
+Neurons A and B receive the same stimulus-driven input, neuron C
+receives a different one. The stimuli are identical in all trials but all
+neurons receive a shared input that varies between trials. Each neuron
+also has a private source of noise.
+Top, Responses of neurons A (black), B
+(red) and C (blue) in 25 trials, with a signal-to-noise ratio (SNR) of 10 dB
+(shared vs. private).
+Bottom left, The shuffled autocorrelogram of neuron A
+indicates that spike trains are not reproducible at a fine timescale.
+Botto right, Nevertheless, the average cross-correlogram between A and B shows
+synchrony at a millisecond timescale, which does not appear between A
+and C.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="c"># Inputs</span>
+<span class="n">N</span><span class="o">=</span><span class="mi">100</span> <span class="c"># number of trials</span>
+<span class="n">tau</span><span class="o">=</span><span class="mi">10</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">sigma</span><span class="o">=</span><span class="mf">0.7</span>
+
+<span class="n">eqs_input</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">dx/dt=-x/tau+(2/tau)**.5*xi : 1</span>
+<span class="s">&#39;&#39;&#39;</span>
+
+<span class="nb">input</span><span class="o">=</span><span class="n">NeuronGroup</span><span class="p">(</span><span class="n">N</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span><span class="n">eqs_input</span><span class="p">)</span>
+<span class="n">shared</span><span class="o">=</span><span class="nb">input</span><span class="p">[:</span><span class="n">N</span><span class="p">]</span>        <span class="c"># different in all trials, but common to all neurons</span>
+<span class="n">stimulus1</span><span class="o">=</span><span class="nb">input</span><span class="p">[</span><span class="n">N</span><span class="p">:</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>  <span class="c"># identical in all trials</span>
+<span class="n">stimulus2</span><span class="o">=</span><span class="nb">input</span><span class="p">[</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>   <span class="c"># identical in all trials</span>
+
+<span class="c"># Neurons</span>
+<span class="n">taum</span><span class="o">=</span><span class="mi">10</span><span class="o">*</span><span class="n">ms</span>
+<span class="c">#sigma_noise=.05</span>
+<span class="n">duration</span><span class="o">=</span><span class="mi">3000</span><span class="o">*</span><span class="n">ms</span>
+
+<span class="c">#sigma=sigma*sqrt(2.)</span>
+<span class="n">SNRdB</span><span class="o">=</span><span class="mf">10.</span>
+<span class="n">SNR</span> <span class="o">=</span> <span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="n">SNRdB</span><span class="o">/</span><span class="mf">10.</span><span class="p">)</span>
+<span class="n">Z</span><span class="o">=</span><span class="n">sigma</span><span class="o">*</span><span class="n">sqrt</span><span class="p">((</span><span class="n">taum</span><span class="o">+</span><span class="n">tau</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">tau</span><span class="o">*</span><span class="p">(</span><span class="n">SNR</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">)))</span> <span class="c"># normalizing factor</span>
+<span class="c">#print Z,Z*SNR</span>
+<span class="c">#Z=sigma*sqrt(1./(SNR**2+1))</span>
+<span class="n">eqs_neurons</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">dv/dt=(Z*(SNR*I+n)-v)/taum: 1</span>
+<span class="s">dn/dt=-n/tau+(2./tau)**.5*xi : 1</span>
+<span class="s">I : 1</span>
+<span class="s">&#39;&#39;&#39;</span>
+
+<span class="n">neuron</span><span class="o">=</span><span class="n">NeuronGroup</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">N</span><span class="p">,</span><span class="n">eqs_neurons</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">reset</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">neuronA</span><span class="o">=</span><span class="n">neuron</span><span class="p">[:</span><span class="n">N</span><span class="p">]</span>
+<span class="n">neuronB</span><span class="o">=</span><span class="n">neuron</span><span class="p">[</span><span class="n">N</span><span class="p">:</span><span class="mi">2</span><span class="o">*</span><span class="n">N</span><span class="p">]</span>
+<span class="n">neuronC</span><span class="o">=</span><span class="n">neuron</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">N</span><span class="p">:]</span>
+<span class="n">neuron</span><span class="o">.</span><span class="n">n</span><span class="o">=</span><span class="n">randn</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">neuron</span><span class="p">))</span>
+
+<span class="nd">@network_operation</span>
+<span class="k">def</span> <span class="nf">inject</span><span class="p">():</span>
+    <span class="n">neuronA</span><span class="o">.</span><span class="n">I</span><span class="o">=</span><span class="n">shared</span><span class="o">.</span><span class="n">x</span><span class="o">+</span><span class="n">stimulus1</span><span class="o">.</span><span class="n">x</span>
+    <span class="n">neuronB</span><span class="o">.</span><span class="n">I</span><span class="o">=</span><span class="n">shared</span><span class="o">.</span><span class="n">x</span><span class="o">+</span><span class="n">stimulus1</span><span class="o">.</span><span class="n">x</span>
+    <span class="n">neuronC</span><span class="o">.</span><span class="n">I</span><span class="o">=</span><span class="n">shared</span><span class="o">.</span><span class="n">x</span><span class="o">+</span><span class="n">stimulus2</span><span class="o">.</span><span class="n">x</span>
+
+<span class="n">spikes</span><span class="o">=</span><span class="n">SpikeMonitor</span><span class="p">(</span><span class="n">neuron</span><span class="p">)</span>
+
+<span class="n">run</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span><span class="n">report</span><span class="o">=</span><span class="s">&#39;text&#39;</span><span class="p">)</span>
+
+<span class="c"># Figure</span>
+<span class="n">figure</span><span class="p">()</span>
+<span class="c"># Raster plot</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span> <span class="c"># Fig. 6B</span>
+<span class="n">i</span><span class="p">,</span><span class="n">t</span><span class="o">=</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">t</span> <span class="ow">in</span> <span class="n">spikes</span><span class="o">.</span><span class="n">spikes</span> <span class="k">if</span> <span class="p">(</span><span class="n">i</span><span class="o">&lt;</span><span class="mi">25</span><span class="p">)])</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">array</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">+</span><span class="mi">50</span><span class="p">,</span><span class="s">&#39;.k&#39;</span><span class="p">)</span>
+<span class="n">i</span><span class="p">,</span><span class="n">t</span><span class="o">=</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">t</span> <span class="ow">in</span> <span class="n">spikes</span><span class="o">.</span><span class="n">spikes</span> <span class="k">if</span> <span class="p">(</span><span class="n">i</span><span class="o">&gt;=</span><span class="n">N</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">i</span><span class="o">&lt;</span><span class="n">N</span><span class="o">+</span><span class="mi">25</span><span class="p">)])</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">array</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">-</span><span class="n">N</span><span class="o">+</span><span class="mi">25</span><span class="p">,</span><span class="s">&#39;.r&#39;</span><span class="p">)</span>
+<span class="n">i</span><span class="p">,</span><span class="n">t</span><span class="o">=</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">t</span> <span class="ow">in</span> <span class="n">spikes</span><span class="o">.</span><span class="n">spikes</span> <span class="k">if</span> <span class="p">(</span><span class="n">i</span><span class="o">&gt;=</span><span class="mi">2</span><span class="o">*</span><span class="n">N</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">i</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">*</span><span class="n">N</span><span class="o">+</span><span class="mi">25</span><span class="p">)])</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">array</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">N</span><span class="p">,</span><span class="s">&#39;.b&#39;</span><span class="p">)</span>
+<span class="n">ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">75</span><span class="p">)</span>
+<span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;Time (s)&#39;</span><span class="p">)</span>
+<span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;Trials&#39;</span><span class="p">)</span>
+
+<span class="c"># Cross-correlograms (CC)</span>
+<span class="n">width</span><span class="o">=</span><span class="mi">100</span><span class="o">*</span><span class="n">ms</span>
+<span class="nb">bin</span><span class="o">=</span><span class="mi">1</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">spikes</span><span class="o">=</span><span class="n">spikes</span><span class="o">.</span><span class="n">spiketimes</span>
+<span class="n">C_AB</span><span class="o">=</span><span class="n">correlogram</span><span class="p">(</span><span class="n">spikes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">spikes</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span><span class="n">T</span><span class="o">=</span><span class="n">duration</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">N</span><span class="p">):</span>
+    <span class="n">C_AB</span><span class="o">+=</span><span class="n">correlogram</span><span class="p">(</span><span class="n">spikes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">spikes</span><span class="p">[</span><span class="n">N</span><span class="o">+</span><span class="n">i</span><span class="p">],</span><span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span><span class="n">T</span><span class="o">=</span><span class="n">duration</span><span class="p">)</span>
+<span class="n">C_AC</span><span class="o">=</span><span class="n">correlogram</span><span class="p">(</span><span class="n">spikes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">spikes</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">N</span><span class="p">],</span><span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span><span class="n">T</span><span class="o">=</span><span class="n">duration</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">N</span><span class="p">):</span>
+    <span class="n">C_AC</span><span class="o">+=</span><span class="n">correlogram</span><span class="p">(</span><span class="n">spikes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">spikes</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">N</span><span class="o">+</span><span class="n">i</span><span class="p">],</span><span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span><span class="n">T</span><span class="o">=</span><span class="n">duration</span><span class="p">)</span>
+
+<span class="c"># Shuffled auto-correlogram (SAC)</span>
+<span class="n">C</span><span class="o">=</span><span class="mi">0</span><span class="o">*</span><span class="n">C_AB</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">N</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">N</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">i</span><span class="o">!=</span><span class="n">j</span><span class="p">:</span>
+            <span class="n">C</span><span class="o">+=</span><span class="n">correlogram</span><span class="p">(</span><span class="n">spikes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">spikes</span><span class="p">[</span><span class="n">j</span><span class="p">],</span><span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span><span class="n">T</span><span class="o">=</span><span class="n">duration</span><span class="p">)</span>
+
+<span class="n">lag</span><span class="o">=</span><span class="p">(</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">C</span><span class="p">))</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">C</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="nb">bin</span>
+
+<span class="n">subplot</span><span class="p">(</span><span class="mi">223</span><span class="p">)</span> <span class="c"># Fig. 6C</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">lag</span><span class="o">/</span><span class="n">ms</span><span class="p">,</span><span class="n">C</span><span class="o">/</span><span class="p">(</span><span class="nb">bin</span><span class="o">*</span><span class="n">N</span><span class="o">*</span><span class="p">(</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span><span class="p">)),</span><span class="s">&#39;k&#39;</span><span class="p">)</span>
+<span class="n">ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">1.1</span><span class="o">*</span><span class="nb">max</span><span class="p">(</span><span class="n">C_AB</span><span class="o">/</span><span class="p">(</span><span class="nb">bin</span><span class="o">*</span><span class="n">N</span><span class="p">)))</span>
+<span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;Lag (ms)&#39;</span><span class="p">)</span>
+<span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;Coincidences&#39;</span><span class="p">)</span>
+
+<span class="n">subplot</span><span class="p">(</span><span class="mi">224</span><span class="p">)</span> <span class="c"># Fig. 6D</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">lag</span><span class="o">/</span><span class="n">ms</span><span class="p">,</span><span class="n">C_AB</span><span class="o">/</span><span class="p">(</span><span class="nb">bin</span><span class="o">*</span><span class="n">N</span><span class="p">),</span><span class="s">&#39;k&#39;</span><span class="p">)</span> <span class="c"># A vs. B</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">lag</span><span class="o">/</span><span class="n">ms</span><span class="p">,</span><span class="n">C_AC</span><span class="o">/</span><span class="p">(</span><span class="nb">bin</span><span class="o">*</span><span class="n">N</span><span class="p">),</span><span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="c"># A vs. C</span>
+<span class="n">ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">1.1</span><span class="o">*</span><span class="nb">max</span><span class="p">(</span><span class="n">C_AB</span><span class="o">/</span><span class="p">(</span><span class="nb">bin</span><span class="o">*</span><span class="n">N</span><span class="p">)))</span>
+<span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;Lag (ms)&#39;</span><span class="p">)</span>
+<span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;Coincidences&#39;</span><span class="p">)</span>
+
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Example: Fig6_shared_variability (frompapers/computing with neural synchrony/coincidence detection and synchrony)</a><ul>
+<li><a class="reference internal" href="#brette-r-2012-computing-with-neural-synchrony-plos-comp-biol-8-6-e1002561-doi-10-1371-journal-pcbi-1002561">Brette R (2012). Computing with neural synchrony. PLoS Comp Biol. 8(6): e1002561. doi:10.1371/journal.pcbi.1002561</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-frompapers_Kremer_et_al_2011.html"
+                        title="previous chapter">Example: Kremer_et_al_2011 (frompapers)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig5E_precision_reliability.html"
+                        title="next chapter">Example: Fig5E_precision_reliability (frompapers/computing with neural synchrony/coincidence detection and synchrony)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig6_shared_variability.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig5E_precision_reliability.html" title="Example: Fig5E_precision_reliability (frompapers/computing with neural synchrony/coincidence detection and synchrony)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers_Kremer_et_al_2011.html" title="Example: Kremer_et_al_2011 (frompapers)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

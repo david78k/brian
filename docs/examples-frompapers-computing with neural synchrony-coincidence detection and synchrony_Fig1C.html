@@ -1,0 +1,154 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: Fig1C (frompapers/computing with neural synchrony/coincidence detection and synchrony) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: Fig1F_ROC (frompapers/computing with neural synchrony/coincidence detection and synchrony)" href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig1F_ROC.html" />
+    <link rel="prev" title="Example: Fig5D_reproducibility (frompapers/computing with neural synchrony/coincidence detection and synchrony)" href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig5D_reproducibility.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig1F_ROC.html" title="Example: Fig1F_ROC (frompapers/computing with neural synchrony/coincidence detection and synchrony)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig5D_reproducibility.html" title="Example: Fig5D_reproducibility (frompapers/computing with neural synchrony/coincidence detection and synchrony)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-fig1c-frompapers-computing-with-neural-synchrony-coincidence-detection-and-synchrony">
+<span id="example-frompapers-computing-with-neural-synchrony-coincidence-detection-and-synchrony-fig1c"></span><span id="index-0"></span><h1>Example: Fig1C (frompapers/computing with neural synchrony/coincidence detection and synchrony)<a class="headerlink" href="#example-fig1c-frompapers-computing-with-neural-synchrony-coincidence-detection-and-synchrony" title="Permalink to this headline">¶</a></h1>
+<p>Timescale and strength</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">rc</span><span class="p">(</span><span class="s">&#39;lines&#39;</span><span class="p">,</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">rc</span><span class="p">(</span><span class="s">&#39;font&#39;</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">rc</span><span class="p">(</span><span class="s">&#39;xtick&#39;</span><span class="p">,</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">rc</span><span class="p">(</span><span class="s">&#39;ytick&#39;</span><span class="p">,</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">rc</span><span class="p">(</span><span class="s">&#39;legend&#39;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">rc</span><span class="p">(</span><span class="s">&#39;axes&#39;</span><span class="p">,</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span><span class="n">titlesize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">w</span><span class="p">,</span><span class="n">h</span><span class="o">=</span><span class="n">rcParamsDefault</span><span class="p">[</span><span class="s">&#39;figure.figsize&#39;</span><span class="p">]</span>
+<span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span>
+
+<span class="n">SNR</span><span class="p">,</span><span class="n">timescale</span><span class="p">,</span><span class="n">strength</span><span class="o">=</span><span class="n">loadtxt</span><span class="p">(</span><span class="s">&#39;reproducibility.txt&#39;</span><span class="p">)</span>
+<span class="n">SNR</span><span class="o">=</span><span class="mi">10</span><span class="o">*</span><span class="n">log</span><span class="p">(</span><span class="n">SNR</span><span class="p">)</span><span class="o">/</span><span class="n">log</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="c">#SNR=SNR[1:]</span>
+<span class="c">#timescale=timescale[1:]</span>
+<span class="c">#strength=strength[1:]</span>
+
+<span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">w</span><span class="o">*</span><span class="mf">1.5</span><span class="p">,</span><span class="n">h</span><span class="o">*.</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">SNR</span><span class="p">,</span><span class="n">timescale</span><span class="o">/</span><span class="n">ms</span><span class="p">,</span><span class="s">&#39;k&#39;</span><span class="p">)</span>
+<span class="c">#plot(SNR,timescale/ms,&#39;r.&#39;)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">SNR</span><span class="p">,</span><span class="mi">0</span><span class="o">*</span><span class="n">SNR</span><span class="o">+</span><span class="mi">7</span><span class="p">,</span><span class="s">&#39;k--&#39;</span><span class="p">)</span>
+<span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;SNR (dB)&#39;</span><span class="p">)</span>
+<span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;Precision (ms)&#39;</span><span class="p">)</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">SNR</span><span class="p">,</span><span class="n">strength</span><span class="o">*</span><span class="mi">100</span><span class="p">,</span><span class="s">&#39;k&#39;</span><span class="p">)</span>
+<span class="n">ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">100</span><span class="p">)</span>
+<span class="c">#plot(SNR,strength*100,&#39;r.&#39;)</span>
+<span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;SNR (dB)&#39;</span><span class="p">)</span>
+<span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;Reliability (%)&#39;</span><span class="p">)</span>
+<span class="n">savefig</span><span class="p">(</span><span class="s">&#39;FigC.eps&#39;</span><span class="p">)</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig5D_reproducibility.html"
+                        title="previous chapter">Example: Fig5D_reproducibility (frompapers/computing with neural synchrony/coincidence detection and synchrony)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig1F_ROC.html"
+                        title="next chapter">Example: Fig1F_ROC (frompapers/computing with neural synchrony/coincidence detection and synchrony)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig1C.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig1F_ROC.html" title="Example: Fig1F_ROC (frompapers/computing with neural synchrony/coincidence detection and synchrony)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig5D_reproducibility.html" title="Example: Fig5D_reproducibility (frompapers/computing with neural synchrony/coincidence detection and synchrony)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

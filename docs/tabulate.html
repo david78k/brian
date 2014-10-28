@@ -1,0 +1,154 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Precalculated tables &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Advanced concepts" href="advanced.html" />
+    <link rel="next" title="Preferences" href="reference-preferences.html" />
+    <link rel="prev" title="Parameters" href="parameters.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="reference-preferences.html" title="Preferences"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="parameters.html" title="Parameters"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="advanced.html" accesskey="U">Advanced concepts</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="precalculated-tables">
+<h1>Precalculated tables<a class="headerlink" href="#precalculated-tables" title="Permalink to this headline">¶</a></h1>
+<p>One way to speed up simulations is to use precalculated tables for complicated
+functions. The <a class="reference internal" href="#brian.Tabulate" title="brian.Tabulate"><tt class="xref py py-class docutils literal"><span class="pre">Tabulate</span></tt></a> class defines a table of values of the
+given function at regularly sampled points. The <a class="reference internal" href="#brian.TabulateInterp" title="brian.TabulateInterp"><tt class="xref py py-class docutils literal"><span class="pre">TabulateInterp</span></tt></a> class
+defines a table with linear interpolation, which is much more precise. Both work
+with scalar and vector arguments.</p>
+<dl class="class">
+<dt id="brian.Tabulate">
+<em class="property">class </em><tt class="descclassname">brian.</tt><tt class="descname">Tabulate</tt><big>(</big><em>f</em>, <em>xmin</em>, <em>xmax</em>, <em>n</em><big>)</big><a class="headerlink" href="#brian.Tabulate" title="Permalink to this definition">¶</a></dt>
+<dd><p>An object to tabulate a numerical function.</p>
+<p>Sample use:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">g</span><span class="o">=</span><span class="n">Tabulate</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">1.</span><span class="p">,</span><span class="mi">1000</span><span class="p">)</span>
+<span class="n">y</span><span class="o">=</span><span class="n">g</span><span class="p">(</span><span class="o">.</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">v</span><span class="o">=</span><span class="n">g</span><span class="p">([</span><span class="o">.</span><span class="mi">1</span><span class="p">,</span><span class="o">.</span><span class="mi">3</span><span class="p">])</span>
+<span class="n">v</span><span class="o">=</span><span class="n">g</span><span class="p">(</span><span class="n">array</span><span class="p">([</span><span class="o">.</span><span class="mi">1</span><span class="p">,</span><span class="o">.</span><span class="mi">3</span><span class="p">]))</span>
+</pre></div>
+</div>
+<p>Arguments of g must lie in [xmin,xmax).
+An IndexError is raised is arguments are above xmax, but
+not always when they are below xmin (it can give weird results).</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.TabulateInterp">
+<em class="property">class </em><tt class="descclassname">brian.</tt><tt class="descname">TabulateInterp</tt><big>(</big><em>f</em>, <em>xmin</em>, <em>xmax</em>, <em>n</em><big>)</big><a class="headerlink" href="#brian.TabulateInterp" title="Permalink to this definition">¶</a></dt>
+<dd><p>An object to tabulate a numerical function with linear interpolation.</p>
+<p>Sample use:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">g</span><span class="o">=</span><span class="n">TabulateInterp</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">1.</span><span class="p">,</span><span class="mi">1000</span><span class="p">)</span>
+<span class="n">y</span><span class="o">=</span><span class="n">g</span><span class="p">(</span><span class="o">.</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">v</span><span class="o">=</span><span class="n">g</span><span class="p">([</span><span class="o">.</span><span class="mi">1</span><span class="p">,</span><span class="o">.</span><span class="mi">3</span><span class="p">])</span>
+<span class="n">v</span><span class="o">=</span><span class="n">g</span><span class="p">(</span><span class="n">array</span><span class="p">([</span><span class="o">.</span><span class="mi">1</span><span class="p">,</span><span class="o">.</span><span class="mi">3</span><span class="p">]))</span>
+</pre></div>
+</div>
+<p>Arguments of g must lie in [xmin,xmax).
+An IndexError is raised is arguments are above xmax, but
+not always when they are below xmin (it can give weird results).</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="parameters.html"
+                        title="previous chapter">Parameters</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="reference-preferences.html"
+                        title="next chapter">Preferences</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/tabulate.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="reference-preferences.html" title="Preferences"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="parameters.html" title="Parameters"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="advanced.html" >Advanced concepts</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

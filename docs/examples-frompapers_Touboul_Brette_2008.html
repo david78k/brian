@@ -1,0 +1,177 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: Touboul_Brette_2008 (frompapers) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: Kremer_et_al_2011 (frompapers)" href="examples-frompapers_Kremer_et_al_2011.html" />
+    <link rel="prev" title="Example: Rossant_et_al_2011bis (frompapers)" href="examples-frompapers_Rossant_et_al_2011bis.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers_Kremer_et_al_2011.html" title="Example: Kremer_et_al_2011 (frompapers)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers_Rossant_et_al_2011bis.html" title="Example: Rossant_et_al_2011bis (frompapers)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-touboul-brette-2008-frompapers">
+<span id="example-frompapers-touboul-brette-2008"></span><span id="index-0"></span><h1>Example: Touboul_Brette_2008 (frompapers)<a class="headerlink" href="#example-touboul-brette-2008-frompapers" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="chaos-in-the-adex-model">
+<h2>Chaos in the AdEx model<a class="headerlink" href="#chaos-in-the-adex-model" title="Permalink to this headline">¶</a></h2>
+<p>Fig. 8B from:
+Touboul, J. and Brette, R. (2008). Dynamics and bifurcations of the adaptive
+exponential integrate-and-fire model. Biological Cybernetics 99(4-5):319-34.</p>
+<p>This shows the bifurcation structure when the reset value is varied
+(vertical axis shows the values of w at spike times for a given a reset value
+Vr).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">defaultclock</span><span class="o">.</span><span class="n">dt</span><span class="o">=</span><span class="mf">0.01</span><span class="o">*</span><span class="n">ms</span>
+
+<span class="n">C</span><span class="o">=</span><span class="mi">281</span><span class="o">*</span><span class="n">pF</span>
+<span class="n">gL</span><span class="o">=</span><span class="mi">30</span><span class="o">*</span><span class="n">nS</span>
+<span class="n">EL</span><span class="o">=-</span><span class="mf">70.6</span><span class="o">*</span><span class="n">mV</span>
+<span class="n">VT</span><span class="o">=-</span><span class="mf">50.4</span><span class="o">*</span><span class="n">mV</span>
+<span class="n">DeltaT</span><span class="o">=</span><span class="mi">2</span><span class="o">*</span><span class="n">mV</span>
+<span class="n">tauw</span><span class="o">=</span><span class="mi">40</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">a</span><span class="o">=</span><span class="mi">4</span><span class="o">*</span><span class="n">nS</span>
+<span class="n">b</span><span class="o">=</span><span class="mf">0.08</span><span class="o">*</span><span class="n">nA</span>
+<span class="n">I</span><span class="o">=.</span><span class="mi">8</span><span class="o">*</span><span class="n">nA</span>
+<span class="n">Vcut</span><span class="o">=</span><span class="n">VT</span><span class="o">+</span><span class="mi">5</span><span class="o">*</span><span class="n">DeltaT</span> <span class="c"># practical threshold condition</span>
+<span class="n">N</span><span class="o">=</span><span class="mi">500</span>
+
+<span class="n">eqs</span><span class="o">=</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">dvm/dt=(gL*(EL-vm)+gL*DeltaT*exp((vm-VT)/DeltaT)+I-w)/C : volt</span>
+<span class="s">dw/dt=(a*(vm-EL)-w)/tauw : amp</span>
+<span class="s">Vr:volt</span>
+<span class="s">&quot;&quot;&quot;</span>
+
+<span class="n">neuron</span><span class="o">=</span><span class="n">NeuronGroup</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="n">eqs</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="n">Vcut</span><span class="p">,</span><span class="n">reset</span><span class="o">=</span><span class="s">&quot;vm=Vr;w+=b&quot;</span><span class="p">)</span>
+<span class="n">neuron</span><span class="o">.</span><span class="n">vm</span><span class="o">=</span><span class="n">EL</span>
+<span class="n">neuron</span><span class="o">.</span><span class="n">w</span><span class="o">=</span><span class="n">a</span><span class="o">*</span><span class="p">(</span><span class="n">neuron</span><span class="o">.</span><span class="n">vm</span><span class="o">-</span><span class="n">EL</span><span class="p">)</span>
+<span class="n">neuron</span><span class="o">.</span><span class="n">Vr</span><span class="o">=</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">48.3</span><span class="o">*</span><span class="n">mV</span><span class="p">,</span><span class="o">-</span><span class="mf">47.7</span><span class="o">*</span><span class="n">mV</span><span class="p">,</span><span class="n">N</span><span class="p">)</span> <span class="c"># bifurcation parameter</span>
+
+<span class="n">run</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">second</span><span class="p">,</span><span class="n">report</span><span class="o">=</span><span class="s">&#39;text&#39;</span><span class="p">)</span> <span class="c"># we discard the first spikes</span>
+
+<span class="n">M</span><span class="o">=</span><span class="n">StateSpikeMonitor</span><span class="p">(</span><span class="n">neuron</span><span class="p">,(</span><span class="s">&quot;Vr&quot;</span><span class="p">,</span><span class="s">&quot;w&quot;</span><span class="p">))</span> <span class="c"># record Vr and w at spike times</span>
+<span class="n">run</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">second</span><span class="p">,</span><span class="n">report</span><span class="o">=</span><span class="s">&#39;text&#39;</span><span class="p">)</span>
+
+<span class="n">Vr</span><span class="p">,</span><span class="n">w</span><span class="o">=</span><span class="n">M</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="s">&quot;Vr&quot;</span><span class="p">),</span><span class="n">M</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="s">&quot;w&quot;</span><span class="p">)</span>
+
+<span class="n">figure</span><span class="p">()</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">Vr</span><span class="o">/</span><span class="n">mV</span><span class="p">,</span><span class="n">w</span><span class="o">/</span><span class="n">nA</span><span class="p">,</span><span class="s">&#39;.k&#39;</span><span class="p">)</span>
+<span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;Vr (mV)&#39;</span><span class="p">)</span>
+<span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;w (nA)&#39;</span><span class="p">)</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Example: Touboul_Brette_2008 (frompapers)</a><ul>
+<li><a class="reference internal" href="#chaos-in-the-adex-model">Chaos in the AdEx model</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-frompapers_Rossant_et_al_2011bis.html"
+                        title="previous chapter">Example: Rossant_et_al_2011bis (frompapers)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-frompapers_Kremer_et_al_2011.html"
+                        title="next chapter">Example: Kremer_et_al_2011 (frompapers)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-frompapers_Touboul_Brette_2008.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers_Kremer_et_al_2011.html" title="Example: Kremer_et_al_2011 (frompapers)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers_Rossant_et_al_2011bis.html" title="Example: Rossant_et_al_2011bis (frompapers)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

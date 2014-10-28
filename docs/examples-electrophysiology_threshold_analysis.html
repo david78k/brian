@@ -1,0 +1,165 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: threshold_analysis (electrophysiology) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: AEC (electrophysiology)" href="examples-electrophysiology_AEC.html" />
+    <link rel="prev" title="Example: SEVC (electrophysiology)" href="examples-electrophysiology_SEVC.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-electrophysiology_AEC.html" title="Example: AEC (electrophysiology)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-electrophysiology_SEVC.html" title="Example: SEVC (electrophysiology)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-threshold-analysis-electrophysiology">
+<span id="example-electrophysiology-threshold-analysis"></span><h1>Example: threshold_analysis (electrophysiology)<a class="headerlink" href="#example-threshold-analysis-electrophysiology" title="Permalink to this headline">¶</a></h1>
+<p>Analysis of spike threshold.</p>
+<p>Loads a current clamp voltage trace, compensates (remove electrode voltage)
+and analyses the spikes.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">brian.library.electrophysiology</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="n">dt</span><span class="o">=.</span><span class="mi">1</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">Vraw</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;trace.npy&quot;</span><span class="p">)</span> <span class="c"># Raw current clamp trace</span>
+<span class="n">I</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;current.npy&quot;</span><span class="p">)</span>
+<span class="n">V</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">Lp_compensate</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">Vraw</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span> <span class="c"># Electrode compensation</span>
+
+<span class="c"># Peaks</span>
+<span class="n">spike_criterion</span><span class="o">=</span><span class="n">find_spike_criterion</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">&quot;Spike detected when V exceeds&quot;</span><span class="p">,</span><span class="nb">float</span><span class="p">(</span><span class="n">spike_criterion</span><span class="o">/</span><span class="n">mV</span><span class="p">),</span><span class="s">&quot;mV&quot;</span>
+<span class="n">peaks</span><span class="o">=</span><span class="n">spike_peaks</span><span class="p">(</span><span class="n">V</span><span class="p">,</span><span class="n">vc</span><span class="o">=</span><span class="n">spike_criterion</span><span class="p">)</span> <span class="c"># vc is optional</span>
+
+<span class="c"># Onsets (= spike threshold)</span>
+<span class="n">onsets</span><span class="o">=</span><span class="n">spike_onsets</span><span class="p">(</span><span class="n">V</span><span class="p">,</span><span class="n">criterion</span><span class="o">=</span><span class="mi">3</span><span class="o">*</span><span class="n">dt</span><span class="p">,</span><span class="n">vc</span><span class="o">=</span><span class="n">spike_criterion</span><span class="p">)</span> <span class="c"># Criterion: dV/dt&gt;3 V/s</span>
+
+<span class="c"># Spike-triggered average of V</span>
+<span class="n">STA</span><span class="o">=</span><span class="n">spike_shape</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">onsets</span><span class="o">=</span><span class="n">onsets</span><span class="p">,</span> <span class="n">before</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">after</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+
+<span class="k">print</span> <span class="s">&quot;Spike duration:&quot;</span><span class="p">,</span><span class="nb">float</span><span class="p">(</span><span class="n">spike_duration</span><span class="p">(</span><span class="n">V</span><span class="p">,</span><span class="n">onsets</span><span class="o">=</span><span class="n">onsets</span><span class="p">)</span><span class="o">*</span><span class="n">dt</span><span class="o">/</span><span class="n">ms</span><span class="p">),</span><span class="s">&quot;ms&quot;</span>
+<span class="k">print</span> <span class="s">&quot;Reset potential:&quot;</span><span class="p">,</span><span class="nb">float</span><span class="p">(</span><span class="n">reset_potential</span><span class="p">(</span><span class="n">V</span><span class="p">,</span><span class="n">peaks</span><span class="o">=</span><span class="n">peaks</span><span class="p">)</span><span class="o">/</span><span class="n">mV</span><span class="p">),</span><span class="s">&quot;mV&quot;</span>
+
+<span class="c"># Spike threshold statistics</span>
+<span class="n">slope</span><span class="o">=</span><span class="n">slope_threshold</span><span class="p">(</span><span class="n">V</span><span class="p">,</span><span class="n">onsets</span><span class="o">=</span><span class="n">onsets</span><span class="p">,</span><span class="n">T</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mi">5</span><span class="o">*</span><span class="n">ms</span><span class="o">/</span><span class="n">dt</span><span class="p">))</span>
+
+<span class="c"># Subthreshold trace</span>
+<span class="n">subthreshold</span><span class="o">=-</span><span class="n">spike_mask</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+
+<span class="n">t</span><span class="o">=</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">V</span><span class="p">))</span><span class="o">*</span><span class="n">dt</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">221</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="o">/</span><span class="n">ms</span><span class="p">,</span><span class="n">V</span><span class="o">/</span><span class="n">mV</span><span class="p">,</span><span class="s">&#39;k&#39;</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">peaks</span><span class="p">]</span><span class="o">/</span><span class="n">ms</span><span class="p">,</span><span class="n">V</span><span class="p">[</span><span class="n">peaks</span><span class="p">]</span><span class="o">/</span><span class="n">mV</span><span class="p">,</span><span class="s">&quot;.b&quot;</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">onsets</span><span class="p">]</span><span class="o">/</span><span class="n">ms</span><span class="p">,</span><span class="n">V</span><span class="p">[</span><span class="n">onsets</span><span class="p">]</span><span class="o">/</span><span class="n">mV</span><span class="p">,</span><span class="s">&quot;.r&quot;</span><span class="p">)</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">222</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(((</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">STA</span><span class="p">))</span><span class="o">-</span><span class="mi">100</span><span class="p">)</span><span class="o">*</span><span class="n">dt</span><span class="p">)</span><span class="o">/</span><span class="n">ms</span><span class="p">,</span><span class="n">STA</span><span class="o">/</span><span class="n">mV</span><span class="p">,</span><span class="s">&#39;k&#39;</span><span class="p">)</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">223</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">subthreshold</span><span class="p">]</span><span class="o">/</span><span class="n">ms</span><span class="p">,</span><span class="n">V</span><span class="p">[</span><span class="n">subthreshold</span><span class="p">]</span><span class="o">/</span><span class="n">mV</span><span class="p">,</span><span class="s">&#39;k&#39;</span><span class="p">)</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">224</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">slope</span><span class="o">/</span><span class="n">ms</span><span class="p">,</span><span class="n">V</span><span class="p">[</span><span class="n">onsets</span><span class="p">]</span><span class="o">/</span><span class="n">mV</span><span class="p">,</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-electrophysiology_SEVC.html"
+                        title="previous chapter">Example: SEVC (electrophysiology)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-electrophysiology_AEC.html"
+                        title="next chapter">Example: AEC (electrophysiology)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-electrophysiology_threshold_analysis.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-electrophysiology_AEC.html" title="Example: AEC (electrophysiology)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-electrophysiology_SEVC.html" title="Example: SEVC (electrophysiology)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

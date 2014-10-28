@@ -1,0 +1,666 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Brian hears &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="The library" href="library.html" />
+    <link rel="next" title="Advanced concepts" href="advanced.html" />
+    <link rel="prev" title="Model fitting" href="modelfitting.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="advanced.html" title="Advanced concepts"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="modelfitting.html" title="Model fitting"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="library.html" accesskey="U">The library</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="brian-hears">
+<span id="brianhears"></span><span id="index-0"></span><h1>Brian hears<a class="headerlink" href="#brian-hears" title="Permalink to this headline">¶</a></h1>
+<img alt="_images/brianhearslogo.png" class="align-right" src="_images/brianhearslogo.png" />
+<p>Brian hears is an auditory modelling library for Python. It is part of the
+neural network simulator package Brian, but can also be used on its own.
+To download Brian hears, simply <a class="reference internal" href="installation.html#installation"><em>download Brian</em></a>:
+Brian hears is included as part of the package.</p>
+<p>Brian hears is primarily designed for generating and manipulating sounds, and applying
+large banks of filters. We import the package by writing:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">brian.hears</span> <span class="kn">import</span> <span class="o">*</span>
+</pre></div>
+</div>
+<p>Then, for example, to generate a tone or a whitenoise we would write:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">sound1</span> <span class="o">=</span> <span class="n">tone</span><span class="p">(</span><span class="mi">1</span><span class="o">*</span><span class="n">kHz</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="o">*</span><span class="n">second</span><span class="p">)</span>
+<span class="n">sound2</span> <span class="o">=</span> <span class="n">whitenoise</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="o">*</span><span class="n">second</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>These sounds can then be manipulated in various ways, for example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">sound</span> <span class="o">=</span> <span class="n">sound1</span><span class="o">+</span><span class="n">sound2</span>
+<span class="n">sound</span> <span class="o">=</span> <span class="n">sound</span><span class="o">.</span><span class="n">ramp</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>If you have the <a class="reference external" href="http://www.pygame.org">pygame</a> package installed, you can
+also play these sounds:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">sound</span><span class="o">.</span><span class="n">play</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>We can filter these sounds through a bank of 3000 gammatone filters covering
+the human auditory range as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">cf</span> <span class="o">=</span> <span class="n">erbspace</span><span class="p">(</span><span class="mi">20</span><span class="o">*</span><span class="n">Hz</span><span class="p">,</span> <span class="mi">20</span><span class="o">*</span><span class="n">kHz</span><span class="p">,</span> <span class="mi">3000</span><span class="p">)</span>
+<span class="n">fb</span> <span class="o">=</span> <span class="n">Gammatone</span><span class="p">(</span><span class="n">sound</span><span class="p">,</span> <span class="n">cf</span><span class="p">)</span>
+<span class="n">output</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">process</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The output of this would look something like this (zoomed into one region):</p>
+<img alt="_images/cochleagram.png" src="_images/cochleagram.png" />
+<p>Alternatively, if we&#8217;re interested in modelling auditory nerve fibres, we could
+feed the output of this filterbank directly into a group of neurons defined with
+Brian:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Half-wave rectification and compression [x]^(1/3)</span>
+<span class="n">ihc</span> <span class="o">=</span> <span class="n">FunctionFilterbank</span><span class="p">(</span><span class="n">fb</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mi">3</span><span class="o">*</span><span class="n">clip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Inf</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="mf">3.0</span><span class="p">))</span>
+<span class="c"># Leaky integrate-and-fire model with noise and refractoriness</span>
+<span class="n">eqs</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">dv/dt = (I-v)/(1*ms)+0.2*xi*(2/(1*ms))**.5 : 1</span>
+<span class="s">I : 1</span>
+<span class="s">&#39;&#39;&#39;</span>
+<span class="n">anf</span> <span class="o">=</span> <span class="n">FilterbankGroup</span><span class="p">(</span><span class="n">ihc</span><span class="p">,</span> <span class="s">&#39;I&#39;</span><span class="p">,</span> <span class="n">eqs</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">refractory</span><span class="o">=</span><span class="mi">5</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This model would give output something like this:</p>
+<img alt="_images/auditory-nerve-fibre-rasterplot.png" src="_images/auditory-nerve-fibre-rasterplot.png" />
+<p>The human cochlea applies the equivalent of 3000 auditory
+filters, which causes a technical problem for modellers which this package is
+designed to address. At a typical sample rate, the output of 3000 filters would
+saturate the computer&#8217;s RAM in a few seconds. To deal with this, we use
+online computation, that is we only ever keep in memory the output of the
+filters for a relatively short duration (say, the most recent 20ms), do our
+modelling with these values, and then discard them. Although this requires that
+some models be rewritten for online rather than offline computation, it allows
+us to easily handle models with very large numbers of channels. 3000 or 6000 for
+human monaural or binaural processing is straightforward, and even much larger
+banks of filters can be used (for example, around 30,000 in
+<a class="reference external" href="http://www.ploscompbiol.org/article/info:doi/10.1371/journal.pcbi.1000993">Goodman DFM, Brette R (2010). Spike-timing-based computation in sound localization. PLoS Comput. Biol. 6(11): e1000993. doi:10.1371/journal.pcbi.1000993</a>).
+Techniques for online computation are discussed below in the section
+<a class="reference internal" href="#online-computation">Online computation</a>.</p>
+<p>Brian hears consists of classes and functions
+for defining <a class="reference internal" href="#sounds">sounds</a>, <a class="reference internal" href="#filter-chains">filter chains</a>, cochlear models, neuron models and
+<a class="reference internal" href="#head-related-transfer-functions">head-related transfer functions</a>.
+These classes
+are designed to be modular and easily extendable. Typically, a model will
+consist of a chain starting with a sound which is plugged into a chain of
+filter banks, which are then plugged into a neuron model.</p>
+<p>The two main classes in Brian hears are <a class="reference internal" href="reference-hears.html#brian.hears.Sound" title="brian.hears.Sound"><tt class="xref py py-class docutils literal"><span class="pre">Sound</span></tt></a> and <a class="reference internal" href="reference-hears.html#brian.hears.Filterbank" title="brian.hears.Filterbank"><tt class="xref py py-class docutils literal"><span class="pre">Filterbank</span></tt></a>,
+which function very similarly. Each consists of multiple channels (typically
+just 1 or 2 in the case of sounds, and many in the case of filterbanks,
+but in principle any number of channels is possible for either). The difference
+is that a filterbank has an input source, which can be either a sound or
+another filterbank.</p>
+<p>All scripts using Brian hears should start by importing the Brian and Brian
+hears packages as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">brian.hears</span> <span class="kn">import</span> <span class="o">*</span>
+</pre></div>
+</div>
+<p>To download Brian hears, simply <a class="reference internal" href="installation.html#installation"><em>download Brian</em></a>:
+Brian hears is included as part of the package.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last">Reference documentation for <a class="reference internal" href="reference-hears.html#brian-hears-reference"><em>Brian hears</em></a>, which
+covers everything in this overview in detail, and more. List of
+<a class="reference internal" href="examples.html#examples-hears"><em>examples of using Brian hears</em></a>.</p>
+</div>
+<div class="section" id="sounds">
+<span id="sounds-overview"></span><span id="index-1"></span><h2>Sounds<a class="headerlink" href="#sounds" title="Permalink to this headline">¶</a></h2>
+<p>Sounds can be loaded from a WAV or AIFF file with the <a class="reference internal" href="reference-hears.html#brian.hears.loadsound" title="brian.hears.loadsound"><tt class="xref py py-func docutils literal"><span class="pre">loadsound()</span></tt></a>
+function (and saved with the <a class="reference internal" href="reference-hears.html#brian.hears.savesound" title="brian.hears.savesound"><tt class="xref py py-func docutils literal"><span class="pre">savesound()</span></tt></a> function or <a class="reference internal" href="reference-hears.html#brian.hears.Sound.save" title="brian.hears.Sound.save"><tt class="xref py py-meth docutils literal"><span class="pre">Sound.save()</span></tt></a>
+method), or by initialising with a filename:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">sound</span> <span class="o">=</span> <span class="n">loadsound</span><span class="p">(</span><span class="s">&#39;test.wav&#39;</span><span class="p">)</span>
+<span class="n">sound</span> <span class="o">=</span> <span class="n">Sound</span><span class="p">(</span><span class="s">&#39;test.aif&#39;</span><span class="p">)</span>
+<span class="n">sound</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s">&#39;test.wav&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Various standard types of sounds can also be constructed, e.g. pure tones,
+white noise, clicks and silence:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">sound</span> <span class="o">=</span> <span class="n">tone</span><span class="p">(</span><span class="mi">1</span><span class="o">*</span><span class="n">kHz</span><span class="p">,</span> <span class="mi">1</span><span class="o">*</span><span class="n">second</span><span class="p">)</span>
+<span class="n">sound</span> <span class="o">=</span> <span class="n">whitenoise</span><span class="p">(</span><span class="mi">1</span><span class="o">*</span><span class="n">second</span><span class="p">)</span>
+<span class="n">sound</span> <span class="o">=</span> <span class="n">click</span><span class="p">(</span><span class="mi">1</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+<span class="n">sound</span> <span class="o">=</span> <span class="n">silence</span><span class="p">(</span><span class="mi">1</span><span class="o">*</span><span class="n">second</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can pass a function of time or an array to initialise a sound:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Equivalent to Sound.tone</span>
+<span class="n">sound</span> <span class="o">=</span> <span class="n">Sound</span><span class="p">(</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span><span class="n">sin</span><span class="p">(</span><span class="mi">50</span><span class="o">*</span><span class="n">Hz</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">t</span><span class="p">),</span> <span class="n">duration</span><span class="o">=</span><span class="mi">1</span><span class="o">*</span><span class="n">second</span><span class="p">)</span>
+
+<span class="c"># Equivalent to Sound.whitenoise</span>
+<span class="n">sound</span> <span class="o">=</span> <span class="n">Sound</span><span class="p">(</span><span class="n">randn</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mi">1</span><span class="o">*</span><span class="n">second</span><span class="o">*</span><span class="mf">44.1</span><span class="o">*</span><span class="n">kHz</span><span class="p">)),</span> <span class="n">samplerate</span><span class="o">=</span><span class="mf">44.1</span><span class="o">*</span><span class="n">kHz</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Multiple channel sounds can be passed as a list or tuple of filenames,
+arrays or <a class="reference internal" href="reference-hears.html#brian.hears.Sound" title="brian.hears.Sound"><tt class="xref py py-class docutils literal"><span class="pre">Sound</span></tt></a> objects:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">sound</span> <span class="o">=</span> <span class="n">Sound</span><span class="p">((</span><span class="s">&#39;left.wav&#39;</span><span class="p">,</span> <span class="s">&#39;right.wav&#39;</span><span class="p">))</span>
+<span class="n">sound</span> <span class="o">=</span> <span class="n">Sound</span><span class="p">((</span><span class="n">randn</span><span class="p">(</span><span class="mi">44100</span><span class="p">),</span> <span class="n">randn</span><span class="p">(</span><span class="mi">44100</span><span class="p">)),</span> <span class="n">samplerate</span><span class="o">=</span><span class="mf">44.1</span><span class="o">*</span><span class="n">kHz</span><span class="p">)</span>
+<span class="n">sound</span> <span class="o">=</span> <span class="n">Sound</span><span class="p">((</span><span class="n">Sound</span><span class="o">.</span><span class="n">tone</span><span class="p">(</span><span class="mi">1</span><span class="o">*</span><span class="n">kHz</span><span class="p">,</span> <span class="mi">1</span><span class="o">*</span><span class="n">second</span><span class="p">),</span>
+               <span class="n">Sound</span><span class="o">.</span><span class="n">tone</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">kHz</span><span class="p">,</span> <span class="mi">1</span><span class="o">*</span><span class="n">second</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>A multi-channel sound is also a numpy array of shape <tt class="docutils literal"><span class="pre">(nsamples,</span> <span class="pre">nchannels)</span></tt>,
+and can be initialised as this (or converted to a standard numpy array):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">sound</span> <span class="o">=</span> <span class="n">Sound</span><span class="p">(</span><span class="n">randn</span><span class="p">(</span><span class="mi">44100</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">samplerate</span><span class="o">=</span><span class="mf">44.1</span><span class="o">*</span><span class="n">kHz</span><span class="p">)</span>
+<span class="n">arr</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">sound</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Sounds can be added and multiplied:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">sound</span> <span class="o">=</span> <span class="n">Sound</span><span class="o">.</span><span class="n">tone</span><span class="p">(</span><span class="mi">1</span><span class="o">*</span><span class="n">kHz</span><span class="p">,</span> <span class="mi">1</span><span class="o">*</span><span class="n">second</span><span class="p">)</span><span class="o">+</span><span class="mf">0.1</span><span class="o">*</span><span class="n">Sound</span><span class="o">.</span><span class="n">whitenoise</span><span class="p">(</span><span class="mi">1</span><span class="o">*</span><span class="n">second</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For more details on combining and operating on sounds, including shifting them
+in time, repeating them, resampling them, ramping them, finding and setting
+intensities, plotting spectrograms, etc., see <a class="reference internal" href="reference-hears.html#brian.hears.Sound" title="brian.hears.Sound"><tt class="xref py py-class docutils literal"><span class="pre">Sound</span></tt></a>.</p>
+<p>Sounds can be played using the <a class="reference internal" href="reference-hears.html#brian.hears.play" title="brian.hears.play"><tt class="xref py py-func docutils literal"><span class="pre">play()</span></tt></a> function or <a class="reference internal" href="reference-hears.html#brian.hears.Sound.play" title="brian.hears.Sound.play"><tt class="xref py py-meth docutils literal"><span class="pre">Sound.play()</span></tt></a> method:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">play</span><span class="p">(</span><span class="n">sound</span><span class="p">)</span>
+<span class="n">sound</span><span class="o">.</span><span class="n">play</span><span class="p">()</span>
+</pre></div>
+</div>
+<p id="index-2">Sequences of sounds can be played as:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">play</span><span class="p">(</span><span class="n">sound1</span><span class="p">,</span> <span class="n">sound2</span><span class="p">,</span> <span class="n">sound3</span><span class="p">)</span>
+</pre></div>
+</div>
+<p id="index-3">The number of channels in a sound can be found using the <tt class="docutils literal"><span class="pre">nchannels</span></tt>
+attribute, and individual channels can be extracted using the
+<a class="reference internal" href="reference-hears.html#brian.hears.Sound.channel" title="brian.hears.Sound.channel"><tt class="xref py py-meth docutils literal"><span class="pre">Sound.channel()</span></tt></a> method, or using the <tt class="docutils literal"><span class="pre">left</span></tt> and <tt class="docutils literal"><span class="pre">right</span></tt> attributes
+in the case of stereo sounds:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">print</span> <span class="n">sound</span><span class="o">.</span><span class="n">nchannels</span>
+<span class="k">print</span> <span class="n">amax</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">sound</span><span class="o">.</span><span class="n">left</span><span class="o">-</span><span class="n">sound</span><span class="o">.</span><span class="n">channel</span><span class="p">(</span><span class="mi">0</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>As an example of using this, the following swaps the channels in a stereo sound:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">sound</span> <span class="o">=</span> <span class="n">Sound</span><span class="p">(</span><span class="s">&#39;test_stereo.wav&#39;</span><span class="p">)</span>
+<span class="n">swappedsound</span> <span class="o">=</span> <span class="n">Sound</span><span class="p">((</span><span class="n">sound</span><span class="o">.</span><span class="n">right</span><span class="p">,</span> <span class="n">sound</span><span class="o">.</span><span class="n">left</span><span class="p">))</span>
+<span class="n">swappedsound</span><span class="o">.</span><span class="n">play</span><span class="p">()</span>
+</pre></div>
+</div>
+<p id="index-4">The level of the sound can be computed and changed with the <tt class="docutils literal"><span class="pre">sound.level</span></tt>
+attribute. Levels are returned in dB which is a special unit in Brian hears.
+For example, <tt class="docutils literal"><span class="pre">10*dB+10</span></tt> will raise an error because <tt class="docutils literal"><span class="pre">10</span></tt> does not have
+units of dB. The multiplicative gain of a value in dB can be computed with
+the function <tt class="docutils literal"><span class="pre">gain(level)</span></tt>. All dB values are measured as RMS dB SPL assuming
+that the values of the sound object are measured in Pascals. Some examples:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">sound</span> <span class="o">=</span> <span class="n">whitenoise</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">sound</span><span class="o">.</span><span class="n">level</span>
+<span class="n">sound</span><span class="o">.</span><span class="n">level</span> <span class="o">=</span> <span class="mi">60</span><span class="o">*</span><span class="n">dB</span>
+<span class="n">sound</span><span class="o">.</span><span class="n">level</span> <span class="o">+=</span> <span class="mi">10</span><span class="o">*</span><span class="n">dB</span>
+<span class="n">sound</span> <span class="o">*=</span> <span class="n">gain</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="o">*</span><span class="n">dB</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="filter-chains">
+<span id="index-5"></span><h2>Filter chains<a class="headerlink" href="#filter-chains" title="Permalink to this headline">¶</a></h2>
+<p>The standard way to set up a model based on filterbanks is to start with a
+sound and then construct a chain of filterbanks that modify it, for example
+a common model of cochlear filtering is to apply a bank of gammatone filters,
+and then half wave rectify and compress it (for example, with a 1/3 power law).
+This can be achieved in Brian hears as follows (for 3000 channels in the
+human hearing range from 20 Hz to 20 kHz):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">cfmin</span><span class="p">,</span> <span class="n">cfmax</span><span class="p">,</span> <span class="n">cfN</span> <span class="o">=</span> <span class="mi">20</span><span class="o">*</span><span class="n">Hz</span><span class="p">,</span> <span class="mi">20</span><span class="o">*</span><span class="n">kHz</span><span class="p">,</span> <span class="mi">3000</span>
+<span class="n">cf</span> <span class="o">=</span> <span class="n">erbspace</span><span class="p">(</span><span class="n">cfmin</span><span class="p">,</span> <span class="n">cfmax</span><span class="p">,</span> <span class="n">cfN</span><span class="p">)</span>
+<span class="n">sound</span> <span class="o">=</span> <span class="n">Sound</span><span class="p">(</span><span class="s">&#39;test.wav&#39;</span><span class="p">)</span>
+<span class="n">gfb</span> <span class="o">=</span> <span class="n">GammatoneFilterbank</span><span class="p">(</span><span class="n">sound</span><span class="p">,</span> <span class="n">cf</span><span class="p">)</span>
+<span class="n">ihc</span> <span class="o">=</span> <span class="n">FunctionFilterbank</span><span class="p">(</span><span class="n">gfb</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">clip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Inf</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="mf">3.0</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="reference-hears.html#brian.hears.erbspace" title="brian.hears.erbspace"><tt class="xref py py-func docutils literal"><span class="pre">erbspace()</span></tt></a> function constructs an array of centre frequencies on the
+ERB scale. The <tt class="docutils literal"><span class="pre">GammatoneFilterbank(source,</span> <span class="pre">cf)</span></tt> class creates a bank
+of gammatone filters with inputs coming from <tt class="docutils literal"><span class="pre">source</span></tt> and the centre
+frequencies in the array <tt class="docutils literal"><span class="pre">cf</span></tt>. The <tt class="docutils literal"><span class="pre">FunctionFilterbank(source,</span> <span class="pre">func)</span></tt>
+creates a bank of filters that applies the given function <tt class="docutils literal"><span class="pre">func</span></tt> to the inputs
+in <tt class="docutils literal"><span class="pre">source</span></tt>.</p>
+<p>Filterbanks can be added and multiplied, for example for creating a linear and
+nonlinear path, e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">sum_path_fb</span> <span class="o">=</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">linear_path_fb</span><span class="o">+</span><span class="mf">0.2</span><span class="o">*</span><span class="n">nonlinear_path_fb</span>
+</pre></div>
+</div>
+<p>A filterbank must have an input with either a single channel or an equal number
+of channels. In the former case, the single channel is duplicated for each of
+the output channels. However, you might want to apply gammatone filters to a
+stereo sound, for example, but in this case it&#8217;s not clear how to duplicate
+the channels and you have to specify it explicitly. You can do this using the
+<a class="reference internal" href="reference-hears.html#brian.hears.Repeat" title="brian.hears.Repeat"><tt class="xref py py-class docutils literal"><span class="pre">Repeat</span></tt></a>, <a class="reference internal" href="reference-hears.html#brian.hears.Tile" title="brian.hears.Tile"><tt class="xref py py-class docutils literal"><span class="pre">Tile</span></tt></a>, <a class="reference internal" href="reference-hears.html#brian.hears.Join" title="brian.hears.Join"><tt class="xref py py-class docutils literal"><span class="pre">Join</span></tt></a> and <a class="reference internal" href="reference-hears.html#brian.hears.Interleave" title="brian.hears.Interleave"><tt class="xref py py-class docutils literal"><span class="pre">Interleave</span></tt></a>
+filterbanks. For example, if the input is a stereo sound
+with channels LR then you can get an output with channels LLLRRR or LRLRLR
+by writing (respectively):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">fb</span> <span class="o">=</span> <span class="n">Repeat</span><span class="p">(</span><span class="n">sound</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">fb</span> <span class="o">=</span> <span class="n">Tile</span><span class="p">(</span><span class="n">sound</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To combine multiple filterbanks into one, you can either
+join them in series or interleave them, as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">fb</span> <span class="o">=</span> <span class="n">Join</span><span class="p">(</span><span class="n">source1</span><span class="p">,</span> <span class="n">source2</span><span class="p">)</span>
+<span class="n">fb</span> <span class="o">=</span> <span class="n">Interleave</span><span class="p">(</span><span class="n">source1</span><span class="p">,</span> <span class="n">source2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For a more general (but more complicated) approach, see
+<a class="reference internal" href="reference-hears.html#brian.hears.RestructureFilterbank" title="brian.hears.RestructureFilterbank"><tt class="xref py py-class docutils literal"><span class="pre">RestructureFilterbank</span></tt></a>.</p>
+<p>Two of the most important generic filterbanks (upon which many of the others
+are based) are <a class="reference internal" href="reference-hears.html#brian.hears.LinearFilterbank" title="brian.hears.LinearFilterbank"><tt class="xref py py-class docutils literal"><span class="pre">LinearFilterbank</span></tt></a> and <a class="reference internal" href="reference-hears.html#brian.hears.FIRFilterbank" title="brian.hears.FIRFilterbank"><tt class="xref py py-class docutils literal"><span class="pre">FIRFilterbank</span></tt></a>. The former
+is a generic digital filter for FIR and IIR filters. The latter is specifically
+for FIR filters. These can be implemented with the former, but the
+implementation is optimised using FFTs with the latter (which can often be
+hundreds of times faster, particularly for long impulse responses). IIR filter
+banks can be designed using <a class="reference internal" href="reference-hears.html#brian.hears.IIRFilterbank" title="brian.hears.IIRFilterbank"><tt class="xref py py-class docutils literal"><span class="pre">IIRFilterbank</span></tt></a> which is based on the
+syntax of the <tt class="docutils literal"><span class="pre">iirdesign</span></tt> scipy function.</p>
+<p>You can change the input source to a <a class="reference internal" href="reference-hears.html#brian.hears.Filterbank" title="brian.hears.Filterbank"><tt class="xref py py-class docutils literal"><span class="pre">Filterbank</span></tt></a> by modifying its
+<tt class="docutils literal"><span class="pre">source</span></tt> attribute, e.g. to change the input sound of a filterbank <tt class="docutils literal"><span class="pre">fb</span></tt>
+you might do:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">fb</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">newsound</span>
+</pre></div>
+</div>
+<p>Note that the new source should have the same number of channels.</p>
+<p id="index-6">You can implement control paths (using the output of one filter chain path
+to modify the parameters of another filter chain path) using
+<a class="reference internal" href="reference-hears.html#brian.hears.ControlFilterbank" title="brian.hears.ControlFilterbank"><tt class="xref py py-class docutils literal"><span class="pre">ControlFilterbank</span></tt></a> (see reference documentation for more details).
+For examples of this in action, see the following:</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference internal" href="examples-hears_time_varying_filter1.html#example-hears-time-varying-filter1"><em>Example: time_varying_filter1 (hears)</em></a>.</li>
+<li><a class="reference internal" href="examples-hears_time_varying_filter2.html#example-hears-time-varying-filter2"><em>Example: time_varying_filter2 (hears)</em></a>.</li>
+<li><a class="reference internal" href="examples-hears_dcgc.html#example-hears-dcgc"><em>Example: dcgc (hears)</em></a>.</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="connecting-with-brian">
+<h2>Connecting with Brian<a class="headerlink" href="#connecting-with-brian" title="Permalink to this headline">¶</a></h2>
+<p>To create spiking neuron models based on filter chains, you use the
+<a class="reference internal" href="reference-hears.html#brian.hears.FilterbankGroup" title="brian.hears.FilterbankGroup"><tt class="xref py py-class docutils literal"><span class="pre">FilterbankGroup</span></tt></a> class. This acts exactly like a standard Brian
+<a class="reference internal" href="reference-models-and-groups.html#brian.NeuronGroup" title="brian.NeuronGroup"><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></a> except that you give a source filterbank and choose
+a state variable in the target equations for the output of the filterbank.
+A simple auditory nerve fibre model would take the inner hair cell model from
+earlier, and feed it into a noisy leaky integrate-and-fire model as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Inner hair cell model as before</span>
+<span class="n">cfmin</span><span class="p">,</span> <span class="n">cfmax</span><span class="p">,</span> <span class="n">cfN</span> <span class="o">=</span> <span class="mi">20</span><span class="o">*</span><span class="n">Hz</span><span class="p">,</span> <span class="mi">20</span><span class="o">*</span><span class="n">kHz</span><span class="p">,</span> <span class="mi">3000</span>
+<span class="n">cf</span> <span class="o">=</span> <span class="n">erbspace</span><span class="p">(</span><span class="n">cfmin</span><span class="p">,</span> <span class="n">cfmax</span><span class="p">,</span> <span class="n">cfN</span><span class="p">)</span>
+<span class="n">sound</span> <span class="o">=</span> <span class="n">Sound</span><span class="o">.</span><span class="n">whitenoise</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+<span class="n">gfb</span> <span class="o">=</span> <span class="n">Gammatone</span><span class="p">(</span><span class="n">sound</span><span class="p">,</span> <span class="n">cf</span><span class="p">)</span>
+<span class="n">ihc</span> <span class="o">=</span> <span class="n">FunctionFilterbank</span><span class="p">(</span><span class="n">gfb</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mi">3</span><span class="o">*</span><span class="n">clip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Inf</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="mf">3.0</span><span class="p">))</span>
+<span class="c"># Leaky integrate-and-fire model with noise and refractoriness</span>
+<span class="n">eqs</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">dv/dt = (I-v)/(1*ms)+0.2*xi*(2/(1*ms))**.5 : 1</span>
+<span class="s">I : 1</span>
+<span class="s">&#39;&#39;&#39;</span>
+<span class="n">G</span> <span class="o">=</span> <span class="n">FilterbankGroup</span><span class="p">(</span><span class="n">ihc</span><span class="p">,</span> <span class="s">&#39;I&#39;</span><span class="p">,</span> <span class="n">eqs</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">refractory</span><span class="o">=</span><span class="mi">5</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+<span class="c"># Run, and raster plot of the spikes</span>
+<span class="n">M</span> <span class="o">=</span> <span class="n">SpikeMonitor</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+<span class="n">run</span><span class="p">(</span><span class="n">sound</span><span class="o">.</span><span class="n">duration</span><span class="p">)</span>
+<span class="n">raster_plot</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>And here&#8217;s the output (after 6 seconds of computation on a 2GHz laptop):</p>
+<img alt="_images/auditory-nerve-fibre-rasterplot.png" src="_images/auditory-nerve-fibre-rasterplot.png" />
+</div>
+<div class="section" id="plotting">
+<h2>Plotting<a class="headerlink" href="#plotting" title="Permalink to this headline">¶</a></h2>
+<p>Often, you want to use log-scaled axes for frequency in plots, but the
+built-in matplotlib axis labelling for log-scaled axes doesn&#8217;t work well for
+frequencies. We provided two functions (<a class="reference internal" href="reference-hears.html#brian.hears.log_frequency_xaxis_labels" title="brian.hears.log_frequency_xaxis_labels"><tt class="xref py py-func docutils literal"><span class="pre">log_frequency_xaxis_labels()</span></tt></a> and
+<a class="reference internal" href="reference-hears.html#brian.hears.log_frequency_yaxis_labels" title="brian.hears.log_frequency_yaxis_labels"><tt class="xref py py-func docutils literal"><span class="pre">log_frequency_yaxis_labels()</span></tt></a>) to automatically set useful axis labels.
+For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">cf</span> <span class="o">=</span> <span class="n">erbspace</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">Hz</span><span class="p">,</span> <span class="mi">10</span><span class="o">*</span><span class="n">kHz</span><span class="p">)</span>
+<span class="o">...</span>
+<span class="n">semilogx</span><span class="p">(</span><span class="n">cf</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span>
+<span class="n">axis</span><span class="p">(</span><span class="s">&#39;tight&#39;</span><span class="p">)</span>
+<span class="n">log_frequency_xaxis_labels</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="online-computation">
+<span id="index-7"></span><h2>Online computation<a class="headerlink" href="#online-computation" title="Permalink to this headline">¶</a></h2>
+<p>Typically in auditory modelling, we precompute the entire output of each
+channel of the filterbank (&#8220;offline computation&#8221;), and then work with that.
+This is straightforward,
+but puts a severe limit on the number of channels we can use or the length of
+time we can work with (otherwise the RAM would be quickly exhausted).
+Brian hears allows us to use a very large number of channels in filterbanks,
+but at the cost of only storing the output of the filterbanks for a relatively
+short period of time (&#8220;online computation&#8221;).
+This requires a slight change in the way we use the
+output of the filterbanks, but is actually not too difficult. For example,
+suppose we wanted to compute the vector of RMS values for each channel of the
+output of the filterbank. Traditionally, or if we just use the syntax
+<tt class="docutils literal"><span class="pre">output</span> <span class="pre">=</span> <span class="pre">fb.process()</span></tt> in Brian hears, we have an array <tt class="docutils literal"><span class="pre">output</span></tt> of
+shape <tt class="docutils literal"><span class="pre">(nsamples,</span> <span class="pre">nchannels)</span></tt>. We could compute the vector of RMS values as:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">rms</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">mean</span><span class="p">(</span><span class="n">output</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>To do the same thing with online computation, we simply store a vector of the
+running sum of squares, and update it for each buffered segment as it is
+computed. At the end of the processing, we divide the sum of squares by the
+number of samples and take the square root.</p>
+<p>The <a class="reference internal" href="reference-hears.html#brian.hears.Filterbank.process" title="brian.hears.Filterbank.process"><tt class="xref py py-meth docutils literal"><span class="pre">Filterbank.process()</span></tt></a>
+method allows us to pass an optional function <tt class="docutils literal"><span class="pre">f(output,</span> <span class="pre">running)</span></tt> of
+two arguments. In this case, <a class="reference internal" href="reference-hears.html#brian.hears.Filterbank.process" title="brian.hears.Filterbank.process"><tt class="xref py py-meth docutils literal"><span class="pre">process()</span></tt></a> will first call
+<tt class="docutils literal"><span class="pre">running</span> <span class="pre">=</span> <span class="pre">f(output,</span> <span class="pre">0)</span></tt> for the first buffered segment <tt class="docutils literal"><span class="pre">output</span></tt>. It will
+then call <tt class="docutils literal"><span class="pre">running</span> <span class="pre">=</span> <span class="pre">f(output,</span> <span class="pre">running)</span></tt> for each subsequent segment. In
+other words, it will &#8220;accumulate&#8221; the output of <tt class="docutils literal"><span class="pre">f</span></tt>, passing the output of
+each call to the subsequent call. To compute the vector of RMS values then,
+we simply do:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">sum_of_squares</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">running</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">running</span><span class="o">+</span><span class="nb">sum</span><span class="p">(</span><span class="nb">input</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">rms</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">fb</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">sum_of_squares</span><span class="p">)</span><span class="o">/</span><span class="n">nsamples</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If the computation you wish to perform is more complicated than can be
+achieved with the <a class="reference internal" href="reference-hears.html#brian.hears.Filterbank.process" title="brian.hears.Filterbank.process"><tt class="xref py py-meth docutils literal"><span class="pre">process()</span></tt></a> method, you can derive a class
+from <a class="reference internal" href="reference-hears.html#brian.hears.Filterbank" title="brian.hears.Filterbank"><tt class="xref py py-class docutils literal"><span class="pre">Filterbank</span></tt></a> (see that class&#8217; reference documentation for more
+details on this).</p>
+</div>
+<div class="section" id="buffering-interface">
+<span id="index-8"></span><h2>Buffering interface<a class="headerlink" href="#buffering-interface" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="reference-hears.html#brian.hears.Sound" title="brian.hears.Sound"><tt class="xref py py-class docutils literal"><span class="pre">Sound</span></tt></a>, <a class="reference internal" href="reference-hears.html#brian.hears.OnlineSound" title="brian.hears.OnlineSound"><tt class="xref py py-class docutils literal"><span class="pre">OnlineSound</span></tt></a> and <a class="reference internal" href="reference-hears.html#brian.hears.Filterbank" title="brian.hears.Filterbank"><tt class="xref py py-class docutils literal"><span class="pre">Filterbank</span></tt></a> classes
+(and all classes derived from them) all implement the same buffering
+mechanism. The purpose of this is to allow for efficient processing of
+multiple channels in buffers. Rather than precomputing the application of
+filters to all channels (which for large numbers of channels or long sounds
+would not fit in memory), we process small chunks at a time. The entire design
+of these classes is based on the idea of buffering, as defined by the base
+class <a class="reference internal" href="reference-hears.html#brian.hears.Bufferable" title="brian.hears.Bufferable"><tt class="xref py py-class docutils literal"><span class="pre">Bufferable</span></tt></a> (see section <a class="reference internal" href="reference-hears.html#brian-hears-class-diagram"><em>Options</em></a>).
+Each class
+has two methods, <tt class="docutils literal"><span class="pre">buffer_init()</span></tt> to initialise the buffer, and
+<tt class="docutils literal"><span class="pre">buffer_fetch(start,</span> <span class="pre">end)</span></tt> to fetch the portion of the buffer from samples
+with indices from <tt class="docutils literal"><span class="pre">start</span></tt> to <tt class="docutils literal"><span class="pre">end</span></tt> (not including <tt class="docutils literal"><span class="pre">end</span></tt> as standard for
+Python). The <tt class="docutils literal"><span class="pre">buffer_fetch(start,</span> <span class="pre">end)</span></tt> method should return a 2D array of
+shape <tt class="docutils literal"><span class="pre">(end-start,</span> <span class="pre">nchannels)</span></tt> with the buffered values.</p>
+<p>From the user point of view, all you need to do, having set up a chain of
+<a class="reference internal" href="reference-hears.html#brian.hears.Sound" title="brian.hears.Sound"><tt class="xref py py-class docutils literal"><span class="pre">Sound</span></tt></a> and <a class="reference internal" href="reference-hears.html#brian.hears.Filterbank" title="brian.hears.Filterbank"><tt class="xref py py-class docutils literal"><span class="pre">Filterbank</span></tt></a> objects, is to call <tt class="docutils literal"><span class="pre">buffer_fetch(start,</span> <span class="pre">end)</span></tt>
+repeatedly. If the output of a <a class="reference internal" href="reference-hears.html#brian.hears.Filterbank" title="brian.hears.Filterbank"><tt class="xref py py-class docutils literal"><span class="pre">Filterbank</span></tt></a> is being plugged into a
+<a class="reference internal" href="reference-hears.html#brian.hears.FilterbankGroup" title="brian.hears.FilterbankGroup"><tt class="xref py py-class docutils literal"><span class="pre">FilterbankGroup</span></tt></a> object, everything is handled automatically. For cases
+where the number of channels is small or the length of the input source is short,
+you can use the <tt class="xref py py-meth docutils literal"><span class="pre">Filterbank.fetch(duration)()</span></tt> method to automatically
+handle the initialisation and repeated application of <tt class="docutils literal"><span class="pre">buffer_fetch</span></tt>.</p>
+<p>To extend <a class="reference internal" href="reference-hears.html#brian.hears.Filterbank" title="brian.hears.Filterbank"><tt class="xref py py-class docutils literal"><span class="pre">Filterbank</span></tt></a>, it is often sufficient just to implement the
+<tt class="docutils literal"><span class="pre">buffer_apply(input)</span></tt> method. See the documentation for <a class="reference internal" href="reference-hears.html#brian.hears.Filterbank" title="brian.hears.Filterbank"><tt class="xref py py-class docutils literal"><span class="pre">Filterbank</span></tt></a>
+for more details.</p>
+</div>
+<div class="section" id="library">
+<h2>Library<a class="headerlink" href="#library" title="Permalink to this headline">¶</a></h2>
+<p>Brian hears comes with a package of predefined filter classes to be used as
+basic blocks by the user. All of them are implemented as filterbanks.</p>
+<p>First, a series of standard filters widely used in audio processing are available:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="20%" />
+<col width="55%" />
+<col width="25%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Class</th>
+<th class="head">Descripition</th>
+<th class="head">Example</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><a class="reference internal" href="reference-hears.html#brian.hears.IIRFilterbank" title="brian.hears.IIRFilterbank"><tt class="xref py py-class docutils literal"><span class="pre">IIRFilterbank</span></tt></a></td>
+<td>Bank of low, high, bandpass or bandstop filter of type Chebyshef, Elliptic, etc...</td>
+<td><a class="reference internal" href="examples-hears_IIRfilterbank.html#example-hears-iirfilterbank"><em>Example: IIRfilterbank (hears)</em></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="reference-hears.html#brian.hears.Butterworth" title="brian.hears.Butterworth"><tt class="xref py py-class docutils literal"><span class="pre">Butterworth</span></tt></a></td>
+<td>Bank of low, high, bandpass or bandstop Butterworth filters</td>
+<td><a class="reference internal" href="examples-hears_butterworth.html#example-hears-butterworth"><em>Example: butterworth (hears)</em></a></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="reference-hears.html#brian.hears.LowPass" title="brian.hears.LowPass"><tt class="xref py py-class docutils literal"><span class="pre">LowPass</span></tt></a></td>
+<td>Bank of lowpass filters of order 1</td>
+<td><a class="reference internal" href="examples-hears_cochleagram.html#example-hears-cochleagram"><em>Example: cochleagram (hears)</em></a></td>
+</tr>
+</tbody>
+</table>
+<p>Second, the library provides linear auditory filters developed to model the
+middle ear transfer function and the frequency analysis of the cochlea:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="18%" />
+<col width="51%" />
+<col width="31%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Class</th>
+<th class="head">Description</th>
+<th class="head">Example</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><a class="reference internal" href="reference-hears.html#brian.hears.MiddleEar" title="brian.hears.MiddleEar"><tt class="xref py py-class docutils literal"><span class="pre">MiddleEar</span></tt></a></td>
+<td>Linear bandpass filter, based on middle-ear frequency response properties</td>
+<td><a class="reference internal" href="examples-hears-tan_carney_2003_tan_carney_simple_test.html#example-hears-tan-carney-2003-tan-carney-simple-test"><em>Example: tan_carney_simple_test (hears/tan_carney_2003)</em></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="reference-hears.html#brian.hears.Gammatone" title="brian.hears.Gammatone"><tt class="xref py py-class docutils literal"><span class="pre">Gammatone</span></tt></a></td>
+<td>Bank of IIR gammatone filters  (based on Slaney implementation)</td>
+<td><a class="reference internal" href="examples-hears_gammatone.html#example-hears-gammatone"><em>Example: gammatone (hears)</em></a></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="reference-hears.html#brian.hears.ApproximateGammatone" title="brian.hears.ApproximateGammatone"><tt class="xref py py-class docutils literal"><span class="pre">ApproximateGammatone</span></tt></a></td>
+<td>Bank of IIR gammatone filters  (based on Hohmann implementation)</td>
+<td><a class="reference internal" href="examples-hears_approximate_gammatone.html#example-hears-approximate-gammatone"><em>Example: approximate_gammatone (hears)</em></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="reference-hears.html#brian.hears.LogGammachirp" title="brian.hears.LogGammachirp"><tt class="xref py py-class docutils literal"><span class="pre">LogGammachirp</span></tt></a></td>
+<td>Bank of IIR gammachirp filters with logarithmic sweep (based on Irino implementation)</td>
+<td><a class="reference internal" href="examples-hears_log_gammachirp.html#example-hears-log-gammachirp"><em>Example: log_gammachirp (hears)</em></a></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="reference-hears.html#brian.hears.LinearGammachirp" title="brian.hears.LinearGammachirp"><tt class="xref py py-class docutils literal"><span class="pre">LinearGammachirp</span></tt></a></td>
+<td>Bank of FIR chirp filters with linear sweep and gamma envelope</td>
+<td><a class="reference internal" href="examples-hears_linear_gammachirp.html#example-hears-linear-gammachirp"><em>Example: linear_gammachirp (hears)</em></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="reference-hears.html#brian.hears.LinearGaborchirp" title="brian.hears.LinearGaborchirp"><tt class="xref py py-class docutils literal"><span class="pre">LinearGaborchirp</span></tt></a></td>
+<td>Bank of FIR chirp filters with linear sweep and gaussian envelope</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<p>Finally, Brian hears comes with a series of complex nonlinear cochlear models
+developed to model nonlinear effects such as filter bandwith level dependency,
+two-tones suppression, peak position level dependency, etc.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="18%" />
+<col width="51%" />
+<col width="31%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Class</th>
+<th class="head">Description</th>
+<th class="head">Example</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><a class="reference internal" href="reference-hears.html#brian.hears.DRNL" title="brian.hears.DRNL"><tt class="xref py py-class docutils literal"><span class="pre">DRNL</span></tt></a></td>
+<td>Dual resonance nonlinear filter as described in Lopez-Paveda and Meddis, JASA 2001</td>
+<td><a class="reference internal" href="examples-hears_drnl.html#example-hears-drnl"><em>Example: drnl (hears)</em></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="reference-hears.html#brian.hears.DCGC" title="brian.hears.DCGC"><tt class="xref py py-class docutils literal"><span class="pre">DCGC</span></tt></a></td>
+<td>Compressive gammachirp auditory filter as described in  Irino and Patterson, JASA 2001</td>
+<td><a class="reference internal" href="examples-hears_dcgc.html#example-hears-dcgc"><em>Example: dcgc (hears)</em></a></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="reference-hears.html#brian.hears.TanCarney" title="brian.hears.TanCarney"><tt class="xref py py-class docutils literal"><span class="pre">TanCarney</span></tt></a></td>
+<td>Auditory phenomenological model as described in  Tan and Carney, JASA 2003</td>
+<td><a class="reference internal" href="examples-hears-tan_carney_2003_tan_carney_simple_test.html#example-hears-tan-carney-2003-tan-carney-simple-test"><em>Example: tan_carney_simple_test (hears/tan_carney_2003)</em></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="reference-hears.html#brian.hears.ZhangSynapse" title="brian.hears.ZhangSynapse"><tt class="xref py py-class docutils literal"><span class="pre">ZhangSynapse</span></tt></a></td>
+<td>Model of an inner hair cell &#8211; auditory nerve synapse (Zhang et al., JASA 2001)</td>
+<td><a class="reference internal" href="examples-hears-tan_carney_2003_tan_carney_simple_test.html#example-hears-tan-carney-2003-tan-carney-simple-test"><em>Example: tan_carney_simple_test (hears/tan_carney_2003)</em></a></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="head-related-transfer-functions">
+<span id="index-9"></span><h2>Head-related transfer functions<a class="headerlink" href="#head-related-transfer-functions" title="Permalink to this headline">¶</a></h2>
+<p>You can work with head-related transfer functions (HRTFs) using the three
+classes <a class="reference internal" href="reference-hears.html#brian.hears.HRTF" title="brian.hears.HRTF"><tt class="xref py py-class docutils literal"><span class="pre">HRTF</span></tt></a> (a single pair of left/right ear HRTFs),
+<a class="reference internal" href="reference-hears.html#brian.hears.HRTFSet" title="brian.hears.HRTFSet"><tt class="xref py py-class docutils literal"><span class="pre">HRTFSet</span></tt></a> (a set of HRTFs, typically for a single individual), and
+<a class="reference internal" href="reference-hears.html#brian.hears.HRTFDatabase" title="brian.hears.HRTFDatabase"><tt class="xref py py-class docutils literal"><span class="pre">HRTFDatabase</span></tt></a> (for working with databases of individuals). At the
+moment, we have included only one HRTF database, the <a class="reference internal" href="reference-hears.html#brian.hears.IRCAM_LISTEN" title="brian.hears.IRCAM_LISTEN"><tt class="xref py py-class docutils literal"><span class="pre">IRCAM_LISTEN</span></tt></a>
+public HRTF database. However, we will add support for the CIPIC and MIT-KEMAR
+databases in a subsequent release. There is also one artificial HRTF database,
+<a class="reference internal" href="reference-hears.html#brian.hears.HeadlessDatabase" title="brian.hears.HeadlessDatabase"><tt class="xref py py-class docutils literal"><span class="pre">HeadlessDatabase</span></tt></a> used for generating HRTFs of artifically introduced ITDs.</p>
+<p>An example of loading the IRCAM database, selecting a subject and plotting
+the pair of impulse responses for a particular direction:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">hrtfdb</span> <span class="o">=</span> <span class="n">IRCAM_LISTEN</span><span class="p">(</span><span class="s">r&#39;F:\HRTF\IRCAM&#39;</span><span class="p">)</span>
+<span class="n">hrtfset</span> <span class="o">=</span> <span class="n">hrtfdb</span><span class="o">.</span><span class="n">load_subject</span><span class="p">(</span><span class="mi">1002</span><span class="p">)</span>
+<span class="n">hrtf</span> <span class="o">=</span> <span class="n">hrtfset</span><span class="p">(</span><span class="n">azim</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">elev</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">hrtf</span><span class="o">.</span><span class="n">left</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">hrtf</span><span class="o">.</span><span class="n">right</span><span class="p">)</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="reference-hears.html#brian.hears.HRTFSet" title="brian.hears.HRTFSet"><tt class="xref py py-class docutils literal"><span class="pre">HRTFSet</span></tt></a> has a set of coordinates, which can be
+accessed via the <tt class="docutils literal"><span class="pre">coordinates</span></tt> attribute, e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">print</span> <span class="n">hrtfset</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="s">&#39;azim&#39;</span><span class="p">]</span>
+<span class="k">print</span> <span class="n">hrtfset</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="s">&#39;elev&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>You can also generated filterbanks associated either to an <a class="reference internal" href="reference-hears.html#brian.hears.HRTF" title="brian.hears.HRTF"><tt class="xref py py-class docutils literal"><span class="pre">HRTF</span></tt></a> or
+an entire <a class="reference internal" href="reference-hears.html#brian.hears.HRTFSet" title="brian.hears.HRTFSet"><tt class="xref py py-class docutils literal"><span class="pre">HRTFSet</span></tt></a>. Here is an example of doing this with the IRCAM
+database, and applying this filterbank to some white noise and plotting the
+response as an image:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Load database</span>
+<span class="n">hrtfdb</span> <span class="o">=</span> <span class="n">IRCAM_LISTEN</span><span class="p">(</span><span class="s">r&#39;D:\HRTF\IRCAM&#39;</span><span class="p">)</span>
+<span class="n">hrtfset</span> <span class="o">=</span> <span class="n">hrtfdb</span><span class="o">.</span><span class="n">load_subject</span><span class="p">(</span><span class="mi">1002</span><span class="p">)</span>
+<span class="c"># Select only the horizontal plane</span>
+<span class="n">hrtfset</span> <span class="o">=</span> <span class="n">hrtfset</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="k">lambda</span> <span class="n">elev</span><span class="p">:</span> <span class="n">elev</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span>
+<span class="c"># Set up a filterbank</span>
+<span class="n">sound</span> <span class="o">=</span> <span class="n">whitenoise</span><span class="p">(</span><span class="mi">10</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+<span class="n">fb</span> <span class="o">=</span> <span class="n">hrtfset</span><span class="o">.</span><span class="n">filterbank</span><span class="p">(</span><span class="n">sound</span><span class="p">)</span>
+<span class="c"># Extract the filtered response and plot</span>
+<span class="n">img</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">process</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+<span class="n">img_left</span> <span class="o">=</span> <span class="n">img</span><span class="p">[:</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span>
+<span class="n">img_right</span> <span class="o">=</span> <span class="n">img</span><span class="p">[</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span><span class="p">:,</span> <span class="p">:]</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">)</span>
+<span class="n">imshow</span><span class="p">(</span><span class="n">img_left</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s">&#39;lower left&#39;</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s">&#39;auto&#39;</span><span class="p">,</span>
+       <span class="n">extent</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">sound</span><span class="o">.</span><span class="n">duration</span><span class="o">/</span><span class="n">ms</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">360</span><span class="p">))</span>
+<span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;Time (ms)&#39;</span><span class="p">)</span>
+<span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;Azimuth&#39;</span><span class="p">)</span>
+<span class="n">title</span><span class="p">(</span><span class="s">&#39;Left ear&#39;</span><span class="p">)</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">)</span>
+<span class="n">imshow</span><span class="p">(</span><span class="n">img_right</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s">&#39;lower left&#39;</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s">&#39;auto&#39;</span><span class="p">,</span>
+       <span class="n">extent</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">sound</span><span class="o">.</span><span class="n">duration</span><span class="o">/</span><span class="n">ms</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">360</span><span class="p">))</span>
+<span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;Time (ms)&#39;</span><span class="p">)</span>
+<span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;Azimuth&#39;</span><span class="p">)</span>
+<span class="n">title</span><span class="p">(</span><span class="s">&#39;Right ear&#39;</span><span class="p">)</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This generates the following output:</p>
+<img alt="_images/hrtfset_response_plot.png" src="_images/hrtfset_response_plot.png" />
+<p>For more details, see the reference documentation for <a class="reference internal" href="reference-hears.html#brian.hears.HRTF" title="brian.hears.HRTF"><tt class="xref py py-class docutils literal"><span class="pre">HRTF</span></tt></a>,
+<a class="reference internal" href="reference-hears.html#brian.hears.HRTFSet" title="brian.hears.HRTFSet"><tt class="xref py py-class docutils literal"><span class="pre">HRTFSet</span></tt></a>, <a class="reference internal" href="reference-hears.html#brian.hears.HRTFDatabase" title="brian.hears.HRTFDatabase"><tt class="xref py py-class docutils literal"><span class="pre">HRTFDatabase</span></tt></a>, <a class="reference internal" href="reference-hears.html#brian.hears.IRCAM_LISTEN" title="brian.hears.IRCAM_LISTEN"><tt class="xref py py-class docutils literal"><span class="pre">IRCAM_LISTEN</span></tt></a> and
+<a class="reference internal" href="reference-hears.html#brian.hears.HeadlessDatabase" title="brian.hears.HeadlessDatabase"><tt class="xref py py-class docutils literal"><span class="pre">HeadlessDatabase</span></tt></a>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Brian hears</a><ul>
+<li><a class="reference internal" href="#sounds">Sounds</a></li>
+<li><a class="reference internal" href="#filter-chains">Filter chains</a></li>
+<li><a class="reference internal" href="#connecting-with-brian">Connecting with Brian</a></li>
+<li><a class="reference internal" href="#plotting">Plotting</a></li>
+<li><a class="reference internal" href="#online-computation">Online computation</a></li>
+<li><a class="reference internal" href="#buffering-interface">Buffering interface</a></li>
+<li><a class="reference internal" href="#library">Library</a></li>
+<li><a class="reference internal" href="#head-related-transfer-functions">Head-related transfer functions</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="modelfitting.html"
+                        title="previous chapter">Model fitting</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="advanced.html"
+                        title="next chapter">Advanced concepts</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/hears.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="advanced.html" title="Advanced concepts"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="modelfitting.html" title="Model fitting"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="library.html" >The library</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

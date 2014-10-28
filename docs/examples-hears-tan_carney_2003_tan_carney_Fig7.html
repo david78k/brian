@@ -1,0 +1,212 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: tan_carney_Fig7 (hears/tan_carney_2003) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: tan_carney_simple_test (hears/tan_carney_2003)" href="examples-hears-tan_carney_2003_tan_carney_simple_test.html" />
+    <link rel="prev" title="Example: tan_carney_Fig11 (hears/tan_carney_2003)" href="examples-hears-tan_carney_2003_tan_carney_Fig11.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-hears-tan_carney_2003_tan_carney_simple_test.html" title="Example: tan_carney_simple_test (hears/tan_carney_2003)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-hears-tan_carney_2003_tan_carney_Fig11.html" title="Example: tan_carney_Fig11 (hears/tan_carney_2003)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-tan-carney-fig7-hears-tan-carney-2003">
+<span id="example-hears-tan-carney-2003-tan-carney-fig7"></span><span id="index-0"></span><h1>Example: tan_carney_Fig7 (hears/tan_carney_2003)<a class="headerlink" href="#example-tan-carney-fig7-hears-tan-carney-2003" title="Permalink to this headline">¶</a></h1>
+<p>CF-dependence of compressive nonlinearity in the Tan&amp;Carney model.
+Reproduces Fig. 7 from:</p>
+<dl class="docutils">
+<dt>Tan, Q., and L. H. Carney.</dt>
+<dd>&#8220;A Phenomenological Model for the Responses of Auditory-nerve Fibers.
+II. Nonlinear Tuning with a Frequency Glide&#8221;.
+The Journal of the Acoustical Society of America 114 (2003): 2007.</dd>
+</dl>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">itertools</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
+
+<span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="c">#set_global_preferences(useweave=True)</span>
+<span class="kn">from</span> <span class="nn">brian.hears</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">brian.hears.filtering.tan_carney</span> <span class="kn">import</span> <span class="n">TanCarneySignal</span><span class="p">,</span> <span class="n">MiddleEar</span>
+
+<span class="n">samplerate</span> <span class="o">=</span> <span class="mi">50</span><span class="o">*</span><span class="n">kHz</span>
+<span class="n">set_default_samplerate</span><span class="p">(</span><span class="n">samplerate</span><span class="p">)</span>
+<span class="n">duration</span> <span class="o">=</span> <span class="mi">50</span><span class="o">*</span><span class="n">ms</span>
+
+<span class="k">def</span> <span class="nf">gen_tone</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Little helper function to generate a pure tone at frequency `freq` with</span>
+<span class="sd">    the given `level`. The tone has a duration of 50ms and is ramped with</span>
+<span class="sd">    two ramps of 2.5ms.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">freq</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span> <span class="o">*</span> <span class="n">Hz</span>
+    <span class="n">level</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">level</span><span class="p">)</span> <span class="o">*</span> <span class="n">dB</span>
+    <span class="k">return</span> <span class="n">tone</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">duration</span><span class="p">)</span><span class="o">.</span><span class="n">ramp</span><span class="p">(</span><span class="n">when</span><span class="o">=</span><span class="s">&#39;both&#39;</span><span class="p">,</span>
+                                     <span class="n">duration</span><span class="o">=</span><span class="mf">2.5</span><span class="o">*</span><span class="n">ms</span><span class="p">,</span>
+                                     <span class="n">inplace</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span><span class="o">.</span><span class="n">atlevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+
+<span class="n">freqs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">500</span><span class="p">,</span> <span class="mi">1100</span><span class="p">,</span> <span class="mi">2000</span><span class="p">,</span> <span class="mi">4000</span><span class="p">]</span>
+<span class="n">levels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mf">100.1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="n">cf_level</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span> <span class="n">levels</span><span class="p">))</span>
+
+<span class="c"># steady-state</span>
+<span class="n">start</span> <span class="o">=</span> <span class="mi">10</span><span class="o">*</span><span class="n">ms</span><span class="o">*</span><span class="n">samplerate</span>
+<span class="n">end</span> <span class="o">=</span> <span class="mi">45</span><span class="o">*</span><span class="n">ms</span><span class="o">*</span><span class="n">samplerate</span>
+
+<span class="c"># For Figure 7 we have manually adjusts the gain for different CFs -- otherwise</span>
+<span class="c"># the RMS values wouldn&#39;t be identical for low CFs. Therefore, try to estimate</span>
+<span class="c"># suitable gain values first using the lowest CF as a reference</span>
+<span class="n">ref_tone</span> <span class="o">=</span> <span class="n">gen_tone</span><span class="p">(</span><span class="n">freqs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">levels</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">F_out_reference</span> <span class="o">=</span> <span class="n">TanCarneySignal</span><span class="p">(</span><span class="n">MiddleEar</span><span class="p">(</span><span class="n">ref_tone</span><span class="p">,</span> <span class="n">gain</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">freqs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                  <span class="n">update_interval</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">process</span><span class="p">()</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+<span class="n">ref_rms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">F_out_reference</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span> <span class="o">-</span>
+                           <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">F_out_reference</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]))</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+
+<span class="n">gains</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span> <span class="c"># for higher CFs we need lower gains</span>
+<span class="n">cf_gains</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">freqs</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">gains</span><span class="p">))</span>
+<span class="n">tones</span> <span class="o">=</span> <span class="n">Sound</span><span class="p">([</span><span class="n">gen_tone</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">levels</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">freq</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">cf_gains</span><span class="p">])</span>
+<span class="n">F_out_test</span> <span class="o">=</span> <span class="n">TanCarneySignal</span><span class="p">(</span><span class="n">MiddleEar</span><span class="p">(</span><span class="n">tones</span><span class="p">,</span> <span class="n">gain</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">g</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">cf_gains</span><span class="p">])),</span>
+                             <span class="p">[</span><span class="n">cf</span> <span class="k">for</span> <span class="n">cf</span><span class="p">,</span><span class="n">_</span>  <span class="ow">in</span> <span class="n">cf_gains</span><span class="p">],</span> <span class="n">update_interval</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">process</span><span class="p">()</span>
+
+<span class="n">reshaped_Fout</span> <span class="o">=</span> <span class="n">F_out_test</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">freqs</span><span class="p">[</span><span class="mi">1</span><span class="p">:]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">gains</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">rms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">reshaped_Fout</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span><span class="o">.</span><span class="n">T</span> <span class="o">-</span>
+                       <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">reshaped_Fout</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span>
+                       <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+
+<span class="c"># get the best gain for each CF using simple linear interpolation</span>
+<span class="n">gain_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">freqs</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="mf">1.</span><span class="p">}</span> <span class="c"># reference gain</span>
+<span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">freq</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">freqs</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+    <span class="n">gain_dict</span><span class="p">[</span><span class="n">freq</span><span class="p">]</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">rms</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="p">:],</span> <span class="n">gains</span><span class="p">)(</span><span class="n">ref_rms</span><span class="p">)</span>
+
+<span class="c"># now do the real test: tones at different levels for different CFs</span>
+<span class="n">tones</span> <span class="o">=</span> <span class="n">Sound</span><span class="p">([</span><span class="n">gen_tone</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span> <span class="k">for</span> <span class="n">freq</span><span class="p">,</span> <span class="n">level</span> <span class="ow">in</span> <span class="n">cf_level</span><span class="p">])</span>
+<span class="n">F_out</span> <span class="o">=</span> <span class="n">TanCarneySignal</span><span class="p">(</span><span class="n">MiddleEar</span><span class="p">(</span><span class="n">tones</span><span class="p">,</span>
+                                  <span class="n">gain</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">gain_dict</span><span class="p">[</span><span class="n">cf</span><span class="p">]</span> <span class="k">for</span> <span class="n">cf</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">cf_level</span><span class="p">])),</span>
+                        <span class="p">[</span><span class="n">cf</span> <span class="k">for</span> <span class="n">cf</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">cf_level</span><span class="p">],</span>
+                        <span class="n">update_interval</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">process</span><span class="p">()</span>
+
+<span class="n">reshaped_Fout</span> <span class="o">=</span> <span class="n">F_out</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">freqs</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">levels</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+
+<span class="n">rms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">reshaped_Fout</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span><span class="o">.</span><span class="n">T</span> <span class="o">-</span>
+                      <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">reshaped_Fout</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span>
+                      <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+
+<span class="c"># This should more or less reproduce Fig. 7</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">levels</span><span class="p">,</span> <span class="n">rms</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s">&#39;</span><span class="si">%.0f</span><span class="s"> Hz&#39;</span> <span class="o">%</span> <span class="n">cf</span> <span class="k">for</span> <span class="n">cf</span> <span class="ow">in</span> <span class="n">freqs</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="o">-</span><span class="mi">20</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">yscale</span><span class="p">(</span><span class="s">&#39;log&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;input signal SPL (dB)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;rms of AC component of Fout&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-hears-tan_carney_2003_tan_carney_Fig11.html"
+                        title="previous chapter">Example: tan_carney_Fig11 (hears/tan_carney_2003)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-hears-tan_carney_2003_tan_carney_simple_test.html"
+                        title="next chapter">Example: tan_carney_simple_test (hears/tan_carney_2003)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-hears-tan_carney_2003_tan_carney_Fig7.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-hears-tan_carney_2003_tan_carney_simple_test.html" title="Example: tan_carney_simple_test (hears/tan_carney_2003)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-hears-tan_carney_2003_tan_carney_Fig11.html" title="Example: tan_carney_Fig11 (hears/tan_carney_2003)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

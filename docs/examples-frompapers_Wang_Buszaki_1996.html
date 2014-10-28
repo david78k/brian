@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: Wang_Buszaki_1996 (frompapers) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: Vogels_et_al_2011 (frompapers)" href="examples-frompapers_Vogels_et_al_2011.html" />
+    <link rel="prev" title="Example: Rossant_et_al_2011 (frompapers)" href="examples-frompapers_Rossant_et_al_2011.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers_Vogels_et_al_2011.html" title="Example: Vogels_et_al_2011 (frompapers)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers_Rossant_et_al_2011.html" title="Example: Rossant_et_al_2011 (frompapers)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-wang-buszaki-1996-frompapers">
+<span id="example-frompapers-wang-buszaki-1996"></span><span id="index-0"></span><h1>Example: Wang_Buszaki_1996 (frompapers)<a class="headerlink" href="#example-wang-buszaki-1996-frompapers" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="wang-buszaki-model">
+<h2>Wang-Buszaki model<a class="headerlink" href="#wang-buszaki-model" title="Permalink to this headline">¶</a></h2>
+<p>J Neurosci. 1996 Oct 15;16(20):6402-13.
+Gamma oscillation by synaptic inhibition in a hippocampal interneuronal network model.
+Wang XJ, Buzsaki G.</p>
+<p>Note that implicit integration (exponential Euler) cannot be used, and therefore
+simulation is rather slow.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">defaultclock</span><span class="o">.</span><span class="n">dt</span><span class="o">=</span><span class="mf">0.01</span><span class="o">*</span><span class="n">ms</span>
+
+<span class="n">Cm</span><span class="o">=</span><span class="mi">1</span><span class="o">*</span><span class="n">uF</span> <span class="c"># /cm**2</span>
+<span class="n">Iapp</span><span class="o">=</span><span class="mi">2</span><span class="o">*</span><span class="n">uA</span>
+<span class="n">gL</span><span class="o">=</span><span class="mf">0.1</span><span class="o">*</span><span class="n">msiemens</span>
+<span class="n">EL</span><span class="o">=-</span><span class="mi">65</span><span class="o">*</span><span class="n">mV</span>
+<span class="n">ENa</span><span class="o">=</span><span class="mi">55</span><span class="o">*</span><span class="n">mV</span>
+<span class="n">EK</span><span class="o">=-</span><span class="mi">90</span><span class="o">*</span><span class="n">mV</span>
+<span class="n">gNa</span><span class="o">=</span><span class="mi">35</span><span class="o">*</span><span class="n">msiemens</span>
+<span class="n">gK</span><span class="o">=</span><span class="mi">9</span><span class="o">*</span><span class="n">msiemens</span>
+
+<span class="n">eqs</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">dv/dt=(-gNa*m**3*h*(v-ENa)-gK*n**4*(v-EK)-gL*(v-EL)+Iapp)/Cm : volt</span>
+<span class="s">m=alpham/(alpham+betam) : 1</span>
+<span class="s">alpham=-0.1/mV*(v+35*mV)/(exp(-0.1/mV*(v+35*mV))-1)/ms : Hz</span>
+<span class="s">betam=4*exp(-(v+60*mV)/(18*mV))/ms : Hz</span>
+<span class="s">dh/dt=5*(alphah*(1-h)-betah*h) : 1</span>
+<span class="s">alphah=0.07*exp(-(v+58*mV)/(20*mV))/ms : Hz</span>
+<span class="s">betah=1./(exp(-0.1/mV*(v+28*mV))+1)/ms : Hz</span>
+<span class="s">dn/dt=5*(alphan*(1-n)-betan*n) : 1</span>
+<span class="s">alphan=-0.01/mV*(v+34*mV)/(exp(-0.1/mV*(v+34*mV))-1)/ms : Hz</span>
+<span class="s">betan=0.125*exp(-(v+44*mV)/(80*mV))/ms : Hz</span>
+<span class="s">&#39;&#39;&#39;</span>
+
+<span class="n">neuron</span><span class="o">=</span><span class="n">NeuronGroup</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">eqs</span><span class="p">)</span>
+<span class="n">neuron</span><span class="o">.</span><span class="n">v</span><span class="o">=-</span><span class="mi">70</span><span class="o">*</span><span class="n">mV</span>
+<span class="n">neuron</span><span class="o">.</span><span class="n">h</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">M</span><span class="o">=</span><span class="n">StateMonitor</span><span class="p">(</span><span class="n">neuron</span><span class="p">,</span><span class="s">&#39;v&#39;</span><span class="p">,</span><span class="n">record</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">run</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">ms</span><span class="p">,</span><span class="n">report</span><span class="o">=</span><span class="s">&#39;text&#39;</span><span class="p">)</span>
+
+<span class="n">plot</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">times</span><span class="o">/</span><span class="n">ms</span><span class="p">,</span><span class="n">M</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">mV</span><span class="p">)</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Example: Wang_Buszaki_1996 (frompapers)</a><ul>
+<li><a class="reference internal" href="#wang-buszaki-model">Wang-Buszaki model</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-frompapers_Rossant_et_al_2011.html"
+                        title="previous chapter">Example: Rossant_et_al_2011 (frompapers)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-frompapers_Vogels_et_al_2011.html"
+                        title="next chapter">Example: Vogels_et_al_2011 (frompapers)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-frompapers_Wang_Buszaki_1996.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers_Vogels_et_al_2011.html" title="Example: Vogels_et_al_2011 (frompapers)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers_Rossant_et_al_2011.html" title="Example: Rossant_et_al_2011 (frompapers)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

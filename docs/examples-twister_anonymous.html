@@ -1,0 +1,247 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: anonymous (twister) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: MicheleGiugliano (twister)" href="examples-twister_MicheleGiugliano.html" />
+    <link rel="prev" title="Example: PierreYger (twister)" href="examples-twister_PierreYger.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-twister_MicheleGiugliano.html" title="Example: MicheleGiugliano (twister)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-twister_PierreYger.html" title="Example: PierreYger (twister)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-anonymous-twister">
+<span id="example-twister-anonymous"></span><span id="index-0"></span><h1>Example: anonymous (twister)<a class="headerlink" href="#example-anonymous-twister" title="Permalink to this headline">¶</a></h1>
+<p>Anonymous entry for the 2012 Brian twister.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">My contribution to the brian twister!</span>
+
+<span class="sd">I meant to give it more thought, but I forgot about the deadline!</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">brian.hears</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">pygame</span>
+
+<span class="n">_mixer_status</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="k">class</span> <span class="nc">SoundMonitor</span><span class="p">(</span><span class="n">SpikeMonitor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Listen to you networks!</span>
+
+<span class="sd">    Plays pure tones whenever a neuron spikes, frequency is set according to the neuron number.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">delay</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                 <span class="n">frange</span> <span class="o">=</span> <span class="p">(</span><span class="mf">100.</span><span class="o">*</span><span class="n">Hz</span><span class="p">,</span> <span class="mf">5000.</span><span class="o">*</span><span class="n">Hz</span><span class="p">),</span>
+                 <span class="n">duration</span> <span class="o">=</span> <span class="mi">50</span><span class="o">*</span><span class="n">ms</span><span class="p">,</span>
+                 <span class="n">samplerate</span> <span class="o">=</span> <span class="mi">44100</span><span class="o">*</span><span class="n">Hz</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SoundMonitor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">record</span> <span class="o">=</span> <span class="n">record</span><span class="p">,</span> <span class="n">delay</span> <span class="o">=</span> <span class="n">delay</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">samplerate</span> <span class="o">=</span> <span class="n">samplerate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nsamples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rint</span><span class="p">(</span><span class="n">duration</span> <span class="o">*</span> <span class="n">samplerate</span><span class="p">)</span>
+
+        <span class="n">p</span> <span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">source</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">source</span><span class="p">)))</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nsamples</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">freqs</span> <span class="o">=</span> <span class="n">frange</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">p</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">p</span><span class="p">)</span> <span class="o">*</span> <span class="n">frange</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">p</span>
+
+        <span class="n">times</span> <span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="o">*</span><span class="n">ms</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsamples</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nsamples</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">source</span><span class="p">)))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sounds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">freqs</span> <span class="o">*</span> <span class="n">times</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_mixer</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">propagate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spikes</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spikes</span><span class="p">):</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sounds</span><span class="p">[:,</span><span class="n">spikes</span><span class="p">],</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">array</span><span class="p">((</span><span class="mi">2</span> <span class="o">**</span> <span class="mi">15</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">clip</span><span class="p">(</span><span class="n">data</span><span class="o">/</span><span class="n">amax</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">int16</span><span class="p">)</span>
+            <span class="n">x</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span>
+            <span class="c"># Make sure pygame receives an array in C-order</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">sndarray</span><span class="o">.</span><span class="n">make_sound</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+            <span class="n">x</span><span class="o">.</span><span class="n">play</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_init_mixer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">global</span> <span class="n">_mixer_status</span>
+        <span class="k">if</span> <span class="n">_mixer_status</span><span class="o">==</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">or</span> <span class="n">_mixer_status</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">!=</span><span class="mi">1</span> <span class="ow">or</span> <span class="n">_mixer_status</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">samplerate</span><span class="p">:</span>
+            <span class="n">pygame</span><span class="o">.</span><span class="n">mixer</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
+            <span class="n">pygame</span><span class="o">.</span><span class="n">mixer</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">samplerate</span><span class="p">),</span> <span class="o">-</span><span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">_mixer_status</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">samplerate</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">test_cuba</span><span class="p">():</span>
+    <span class="c"># The CUBA example with sound!</span>
+    <span class="n">taum</span> <span class="o">=</span> <span class="mi">20</span> <span class="o">*</span> <span class="n">ms</span>
+    <span class="n">taue</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">ms</span>
+    <span class="n">taui</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">ms</span>
+    <span class="n">Vt</span> <span class="o">=</span> <span class="o">-</span><span class="mi">50</span> <span class="o">*</span> <span class="n">mV</span>
+    <span class="n">Vr</span> <span class="o">=</span> <span class="o">-</span><span class="mi">60</span> <span class="o">*</span> <span class="n">mV</span>
+    <span class="n">El</span> <span class="o">=</span> <span class="o">-</span><span class="mi">49</span> <span class="o">*</span> <span class="n">mV</span>
+
+    <span class="n">eqs</span> <span class="o">=</span> <span class="n">Equations</span><span class="p">(</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">    dv/dt  = (ge+gi-(v-El))/taum : volt</span>
+<span class="s">    dge/dt = -ge/taue : volt</span>
+<span class="s">    dgi/dt = -gi/taui : volt</span>
+<span class="s">    &#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">P</span> <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="mi">4000</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">eqs</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">Vt</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="n">Vr</span><span class="p">,</span> <span class="n">refractory</span><span class="o">=</span><span class="mi">5</span> <span class="o">*</span> <span class="n">ms</span><span class="p">)</span>
+    <span class="n">P</span><span class="o">.</span><span class="n">v</span> <span class="o">=</span> <span class="n">Vr</span>
+    <span class="n">P</span><span class="o">.</span><span class="n">ge</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">mV</span>
+    <span class="n">P</span><span class="o">.</span><span class="n">gi</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">mV</span>
+
+    <span class="n">Pe</span> <span class="o">=</span> <span class="n">P</span><span class="o">.</span><span class="n">subgroup</span><span class="p">(</span><span class="mi">3200</span><span class="p">)</span>
+    <span class="n">Pi</span> <span class="o">=</span> <span class="n">P</span><span class="o">.</span><span class="n">subgroup</span><span class="p">(</span><span class="mi">800</span><span class="p">)</span>
+    <span class="n">we</span> <span class="o">=</span> <span class="p">(</span><span class="mi">60</span> <span class="o">*</span> <span class="mf">0.27</span> <span class="o">/</span> <span class="mi">10</span><span class="p">)</span> <span class="o">*</span> <span class="n">mV</span> <span class="c"># excitatory synaptic weight (voltage)</span>
+    <span class="n">wi</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">20</span> <span class="o">*</span> <span class="mf">4.5</span> <span class="o">/</span> <span class="mi">10</span><span class="p">)</span> <span class="o">*</span> <span class="n">mV</span> <span class="c"># inhibitory synaptic weight</span>
+    <span class="n">Ce</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">Pe</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="s">&#39;ge&#39;</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">we</span><span class="p">,</span> <span class="n">sparseness</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">Ci</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">Pi</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="s">&#39;gi&#39;</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">wi</span><span class="p">,</span> <span class="n">sparseness</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">P</span><span class="o">.</span><span class="n">v</span> <span class="o">=</span> <span class="n">Vr</span> <span class="o">+</span> <span class="n">rand</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">P</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">Vt</span> <span class="o">-</span> <span class="n">Vr</span><span class="p">)</span>
+
+    <span class="c"># Record the number of spikes</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">SoundMonitor</span><span class="p">(</span><span class="n">P</span><span class="p">)</span>
+    <span class="n">run</span><span class="p">(</span><span class="mi">10</span> <span class="o">*</span> <span class="n">second</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">test_synfire</span><span class="p">():</span>
+    <span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+    <span class="c"># Neuron model parameters</span>
+    <span class="n">Vr</span> <span class="o">=</span> <span class="o">-</span><span class="mi">70</span> <span class="o">*</span> <span class="n">mV</span>
+    <span class="n">Vt</span> <span class="o">=</span> <span class="o">-</span><span class="mi">55</span> <span class="o">*</span> <span class="n">mV</span>
+    <span class="n">taum</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">ms</span>
+    <span class="n">taupsp</span> <span class="o">=</span> <span class="mf">0.325</span> <span class="o">*</span> <span class="n">ms</span>
+    <span class="n">weight</span> <span class="o">=</span> <span class="mf">4.86</span> <span class="o">*</span> <span class="n">mV</span>
+    <span class="c"># Neuron model</span>
+    <span class="n">eqs</span> <span class="o">=</span> <span class="n">Equations</span><span class="p">(</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">    dV/dt=(-(V-Vr)+x)*(1./taum) : volt</span>
+<span class="s">    dx/dt=(-x+y)*(1./taupsp) : volt</span>
+<span class="s">    dy/dt=-y*(1./taupsp)+25.27*mV/ms+</span><span class="se">\</span>
+<span class="s">        (39.24*mV/ms**0.5)*xi : volt</span>
+<span class="s">    &#39;&#39;&#39;</span><span class="p">)</span>
+    <span class="c"># Neuron groups</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">eqs</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="o">=</span><span class="n">Vt</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="n">Vr</span><span class="p">,</span> <span class="n">refractory</span><span class="o">=</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ms</span><span class="p">)</span>
+    <span class="n">Pinput</span> <span class="o">=</span> <span class="n">PulsePacket</span><span class="p">(</span><span class="n">t</span><span class="o">=</span><span class="mi">50</span> <span class="o">*</span> <span class="n">ms</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">85</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ms</span><span class="p">)</span>
+    <span class="c"># The network structure</span>
+    <span class="n">Pgp</span> <span class="o">=</span> <span class="p">[</span> <span class="n">P</span><span class="o">.</span><span class="n">subgroup</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="s">&#39;y&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">):</span>
+        <span class="n">C</span><span class="o">.</span><span class="n">connect_full</span><span class="p">(</span><span class="n">Pgp</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">Pgp</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">weight</span><span class="p">)</span>
+    <span class="n">Cinput</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">Pinput</span><span class="p">,</span> <span class="n">Pgp</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s">&#39;y&#39;</span><span class="p">)</span>
+    <span class="n">Cinput</span><span class="o">.</span><span class="n">connect_full</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">)</span>
+
+    <span class="n">monitor</span> <span class="o">=</span> <span class="n">SoundMonitor</span><span class="p">(</span><span class="n">P</span><span class="p">)</span>
+
+    <span class="c"># Setup the network, and run it</span>
+    <span class="n">P</span><span class="o">.</span><span class="n">V</span> <span class="o">=</span> <span class="n">Vr</span> <span class="o">+</span> <span class="n">rand</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">P</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">Vt</span> <span class="o">-</span> <span class="n">Vr</span><span class="p">)</span>
+    <span class="n">run</span><span class="p">(</span><span class="mi">1</span><span class="o">*</span><span class="n">second</span><span class="p">)</span>
+    <span class="c"># Plot result</span>
+
+    <span class="n">show</span><span class="p">()</span>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">test_synfire</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-twister_PierreYger.html"
+                        title="previous chapter">Example: PierreYger (twister)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-twister_MicheleGiugliano.html"
+                        title="next chapter">Example: MicheleGiugliano (twister)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-twister_anonymous.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-twister_MicheleGiugliano.html" title="Example: MicheleGiugliano (twister)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-twister_PierreYger.html" title="Example: PierreYger (twister)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

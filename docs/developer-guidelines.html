@@ -1,0 +1,213 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Guidelines &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Developer’s guide" href="developer.html" />
+    <link rel="next" title="Simulation principles" href="developer-simulationprinciples.html" />
+    <link rel="prev" title="Developer’s guide" href="developer.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="developer-simulationprinciples.html" title="Simulation principles"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="developer.html" title="Developer’s guide"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="developer.html" accesskey="U">Developer&#8217;s guide</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="guidelines">
+<h1>Guidelines<a class="headerlink" href="#guidelines" title="Permalink to this headline">¶</a></h1>
+<p>The basic principles of developing Brian are:</p>
+<ol class="arabic simple">
+<li>For the user, the emphasis is on making the package flexible, readable and
+easy to use. See the paper &#8220;The Brian simulator&#8221; in Frontiers in Neuroscience
+for more details.</li>
+<li>For the developer, the emphasis is on keeping the package maintainable by
+a small number of people. To this end, we use stable, well maintained,
+existing open source packages whenever possible, rather than writing our
+own code.</li>
+</ol>
+<p><em>Coding conventions.</em>
+We use the <a class="reference external" href="http://www.python.org/dev/peps/pep-0008/">PEP-8 coding conventions</a>
+for our code. Syntax is chosen as much as possible from the user point of view,
+to reflect the concepts as directly as possible. Ideally, a Brian script
+should be readable by someone who doesn&#8217;t know Python or Brian, although this
+isn&#8217;t always possible. Function and class names should be explicit rather
+than abbreviated.</p>
+<p><em>Documentation.</em>
+It is very important to maintain documentation. We use the
+<a class="reference external" href="http://sphinx.pocoo.org/">Sphinx documentation generator</a> tools. The
+documentation is all hand written. Sphinx source files are stored in the
+<tt class="docutils literal"><span class="pre">docs_sphinx</span></tt> folder in the repository, and compiled HTML files are stored in
+the <tt class="docutils literal"><span class="pre">docs</span></tt> folder. Most of the documentation is stored directly in the Sphinx
+source text files, but reference documentation for important Brian classes and
+functions are kept in the documentation strings of those classes themselves.
+This is automatically pulled from these classes for the reference manual
+section of the documentation. The idea is to keep the definitive reference
+documentation near the code that it documents, serving as both a comment for
+the code itself, and to keep the documentation up to date with the code.</p>
+<p>In the code, every class or function should start with an explanation of what it does,
+unless it is trivial. A good idea is to use explicit names rather than abbreviations,
+so that you instantly understand what it is about. Inside a function, important chunks
+should also be commented.</p>
+<p><em>Testing.</em>
+Brian uses the <a class="reference external" href="http://somethingaboutorange.com/mrl/projects/nose/0.11.1/">nose package</a>
+for its testing framework. Tests are stored in the <tt class="docutils literal"><span class="pre">brian/tests</span></tt> directory.
+Tests associated to a Brian module are stored in <tt class="docutils literal"><span class="pre">brian/tests/testinterface</span></tt>
+and tests of the mathematical correctness of Brian&#8217;s algorithms are stored in
+<tt class="docutils literal"><span class="pre">brian/tests/testcorrectness</span></tt>.</p>
+<p><em>Errors.</em>
+It is a good idea to start an important function (e.g. object initialisation)
+with a check of the arguments, and possibly issue errors. This way errors are
+more understandable by the user.</p>
+<p><em>Enhancements.</em>
+Brian uses a system parallel to the
+<a class="reference external" href="http://www.python.org/dev/peps/">Python Enhancement Proposals (PEPs)</a> system
+for Python, called <em>Brian Enhancement Proposals</em> (BEPs). These are stored in
+<tt class="docutils literal"><span class="pre">dev/BEPs</span></tt>. Ideas for new functionality for Brian are put in here for comment
+and discussion. A BEP typically includes:</p>
+<ul class="simple">
+<li>How the feature will look from user point of view, with example scripts.</li>
+<li>Detailed implementation ideas and options.</li>
+</ul>
+<p>We also use the <a class="reference external" href="http://groups.google.fr/group/brian-development">Brian development</a>
+mailing list.</p>
+<div class="section" id="contributing-code">
+<h2>Contributing code<a class="headerlink" href="#contributing-code" title="Permalink to this headline">¶</a></h2>
+<p>First of all, you should register to the
+<a class="reference external" href="http://groups.google.fr/group/brian-development">developers mailing list</a>.
+If you want to modify existing modules, you should make sure that you
+work on the latest SVN version. We use the Eclipse IDE because it has a nice Python
+plugin (Pydev) and SVN plugin, but of course you can use your preferred IDE.
+The next step is to carefully read the guidelines in this guide.</p>
+<p>Now that you wrote your code:</p>
+<ul class="simple">
+<li>Write a test for it in <tt class="docutils literal"><span class="pre">brian/tests/testinterface</span></tt>. If it is a new module,
+create a new file <tt class="docutils literal"><span class="pre">test_mymodule.py</span></tt>;</li>
+<li>Write documentation, both in the file (see how it&#8217;s done in existing modules)
+and, if appropriate, in the relevant file in <tt class="docutils literal"><span class="pre">docs_sphinx</span></tt>. We use the
+<a class="reference external" href="http://sphinx.pocoo.org/">Sphinx documentation generator</a> tools. If you want
+to see how it looks, generate the html docs by executing <tt class="docutils literal"><span class="pre">dev/tools/docs/build_html.py</span></tt>.
+The html files will then be in <tt class="docutils literal"><span class="pre">docs</span></tt>.</li>
+<li>If it is a significant feature, write an example script in <tt class="docutils literal"><span class="pre">examples</span></tt> and insert a
+line in <tt class="docutils literal"><span class="pre">examples/examples_guide.txt</span></tt>.</li>
+<li>Create a patch file. For example with Eclipse, right-click on the Brian project,
+then Team &gt; Create Patch &gt; Save in filesystem, then Next &gt; Project.</li>
+<li>Send your patch as an attachment to the
+<a class="reference external" href="http://groups.google.fr/group/brian-development">developers mailing list</a>
+and make sure the subject of your message starts with [PATCH]. Then describe your
+patch in your message.</li>
+</ul>
+<p>From that point, your patch will either be directly included in the svn or
+(more likely) will be first discussed in the mailing list.</p>
+<p><em>New modules.</em>
+New Brian modules typically start in the <tt class="docutils literal"><span class="pre">dev/ideas</span></tt> folder, then go to <tt class="docutils literal"><span class="pre">brian/experimental</span></tt>
+when they starting looking like modules. They move to the main folder when they are
+stable (especially the user syntax).</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Guidelines</a><ul>
+<li><a class="reference internal" href="#contributing-code">Contributing code</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="developer.html"
+                        title="previous chapter">Developer&#8217;s guide</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="developer-simulationprinciples.html"
+                        title="next chapter">Simulation principles</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/developer-guidelines.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="developer-simulationprinciples.html" title="Simulation principles"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="developer.html" title="Developer’s guide"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="developer.html" >Developer&#8217;s guide</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

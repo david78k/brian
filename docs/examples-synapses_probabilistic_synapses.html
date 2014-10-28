@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: probabilistic_synapses (synapses) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: CUBA (synapses)" href="examples-synapses_CUBA.html" />
+    <link rel="prev" title="Example: licklider (synapses)" href="examples-synapses_licklider.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-synapses_CUBA.html" title="Example: CUBA (synapses)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-synapses_licklider.html" title="Example: licklider (synapses)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-probabilistic-synapses-synapses">
+<span id="example-synapses-probabilistic-synapses"></span><span id="index-0"></span><h1>Example: probabilistic_synapses (synapses)<a class="headerlink" href="#example-probabilistic-synapses-synapses" title="Permalink to this headline">¶</a></h1>
+<p>Probabilistic synapses</p>
+<p>Seems to work.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">N</span><span class="o">=</span><span class="mi">20</span>
+<span class="n">tau</span><span class="o">=</span><span class="mi">5</span><span class="o">*</span><span class="n">ms</span>
+<span class="nb">input</span><span class="o">=</span><span class="n">PoissonGroup</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">rates</span><span class="o">=</span><span class="mi">20</span><span class="o">*</span><span class="n">Hz</span><span class="p">)</span>
+<span class="n">neurons</span><span class="o">=</span><span class="n">NeuronGroup</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="s">&#39;dv/dt=-v/tau : 1&#39;</span><span class="p">)</span>
+
+<span class="n">S</span><span class="o">=</span><span class="n">Synapses</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span><span class="n">neurons</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="s">&quot;&quot;&quot;w : 1</span>
+<span class="s">                                  p : 1 # transmission probability&quot;&quot;&quot;</span><span class="p">,</span>
+                         <span class="n">pre</span><span class="o">=</span><span class="s">&quot;v+=w*(rand()&lt;p)&quot;</span><span class="p">)</span>
+<span class="c"># Transmission probabilities</span>
+<span class="n">S</span><span class="p">[:,:]</span><span class="o">=</span><span class="bp">True</span>
+<span class="n">S</span><span class="o">.</span><span class="n">w</span><span class="o">=</span><span class="mf">0.5</span>
+<span class="n">S</span><span class="o">.</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span><span class="o">=</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">N</span><span class="p">)</span> <span class="c"># transmission probability between 0 and 1</span>
+<span class="n">S</span><span class="o">.</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">,:]</span><span class="o">=</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">N</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="c"># reverse order for the second input</span>
+
+<span class="n">M</span><span class="o">=</span><span class="n">StateMonitor</span><span class="p">(</span><span class="n">neurons</span><span class="p">,</span><span class="s">&#39;v&#39;</span><span class="p">,</span><span class="n">record</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="n">run</span><span class="p">(</span><span class="mi">500</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+    <span class="n">plot</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">times</span><span class="o">/</span><span class="n">ms</span><span class="p">,</span><span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="n">i</span><span class="p">,</span><span class="s">&#39;k&#39;</span><span class="p">)</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-synapses_licklider.html"
+                        title="previous chapter">Example: licklider (synapses)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-synapses_CUBA.html"
+                        title="next chapter">Example: CUBA (synapses)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-synapses_probabilistic_synapses.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-synapses_CUBA.html" title="Example: CUBA (synapses)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-synapses_licklider.html" title="Example: licklider (synapses)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

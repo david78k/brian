@@ -1,0 +1,300 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: multiple_runs_with_gui (multiprocessing) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: multiple_runs_simple (multiprocessing)" href="examples-multiprocessing_multiple_runs_simple.html" />
+    <link rel="prev" title="Example: filterbank (audition)" href="examples-audition_filterbank.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-multiprocessing_multiple_runs_simple.html" title="Example: multiple_runs_simple (multiprocessing)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-audition_filterbank.html" title="Example: filterbank (audition)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-multiple-runs-with-gui-multiprocessing">
+<span id="example-multiprocessing-multiple-runs-with-gui"></span><h1>Example: multiple_runs_with_gui (multiprocessing)<a class="headerlink" href="#example-multiple-runs-with-gui-multiprocessing" title="Permalink to this headline">¶</a></h1>
+<p>A complicated example of using multiprocessing for multiple runs of a simulation
+with different parameters, using a GUI to monitor and control the runs.</p>
+<p>This example features:</p>
+<ul class="simple">
+<li>An indefinite number of runs, with a set of parameters for each run generated
+at random for each run.</li>
+<li>A plot of the output of all the runs updated as soon as each run is completed.</li>
+<li>A GUI showing how long each process has been running for and how long until
+it completes, and with a button allowing you to terminate the runs.</li>
+</ul>
+<p>A simpler example is in <tt class="docutils literal"><span class="pre">examples/multiprocessing/multiple_runs_simple.py</span></tt>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># We use Tk as the backend for the GUI and matplotlib so as to avoid any</span>
+<span class="c"># threading conflicts</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s">&#39;TkAgg&#39;</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">Tkinter</span><span class="o">,</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">multiprocessing</span><span class="o">,</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">brian.utils.progressreporting</span> <span class="kn">import</span> <span class="n">make_text_report</span>
+<span class="kn">from</span> <span class="nn">Queue</span> <span class="kn">import</span> <span class="n">Empty</span> <span class="k">as</span> <span class="n">QueueEmpty</span>
+
+
+<span class="k">class</span> <span class="nc">SimulationController</span><span class="p">(</span><span class="n">Tkinter</span><span class="o">.</span><span class="n">Tk</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    GUI, uses Tkinter and features a progress bar for each process, and a callback</span>
+<span class="sd">    function for when the terminate button is clicked.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">processes</span><span class="p">,</span> <span class="n">terminator</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">600</span><span class="p">):</span>
+        <span class="n">Tkinter</span><span class="o">.</span><span class="n">Tk</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+        <span class="n">button</span> <span class="o">=</span> <span class="n">Tkinter</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s">&#39;Terminate simulation&#39;</span><span class="p">,</span>
+                                <span class="n">command</span><span class="o">=</span><span class="n">terminator</span><span class="p">)</span>
+        <span class="n">button</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pb_width</span> <span class="o">=</span> <span class="n">width</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">progressbars</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">processes</span><span class="p">):</span>
+            <span class="n">can</span> <span class="o">=</span> <span class="n">Tkinter</span><span class="o">.</span><span class="n">Canvas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+            <span class="n">can</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">row</span><span class="o">=</span><span class="mi">1</span> <span class="o">+</span> <span class="n">i</span><span class="p">)</span>
+            <span class="n">can</span><span class="o">.</span><span class="n">create_rectangle</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="s">&#39;#aaaaaa&#39;</span><span class="p">)</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">can</span><span class="o">.</span><span class="n">create_rectangle</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="s">&#39;#ffaaaa&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">can</span><span class="o">.</span><span class="n">create_text</span><span class="p">(</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">progressbars</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">can</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">t</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results_text</span> <span class="o">=</span> <span class="n">Tkinter</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s">&#39;Computed 0 results, time taken: 0s&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results_text</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">row</span><span class="o">=</span><span class="n">processes</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">&#39;Simulation control&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">update_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elapsed</span><span class="p">,</span> <span class="n">complete</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Method to update the total number of results computed and the amount of time taken.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results_text</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s">&#39;Computed &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">complete</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;, time taken: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">elapsed</span><span class="p">))</span> <span class="o">+</span> <span class="s">&#39;s&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">update_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">elapsed</span><span class="p">,</span> <span class="n">complete</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Method to update the status of a given process.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">can</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">progressbars</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">can</span><span class="o">.</span><span class="n">itemconfigure</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s">&#39;Process &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;: &#39;</span> <span class="o">+</span> <span class="n">make_text_report</span><span class="p">(</span><span class="n">elapsed</span><span class="p">,</span> <span class="n">complete</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;: &#39;</span> <span class="o">+</span> <span class="n">msg</span><span class="p">)</span>
+        <span class="n">can</span><span class="o">.</span><span class="n">coords</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pb_width</span> <span class="o">*</span> <span class="n">complete</span><span class="p">),</span> <span class="mi">30</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">sim_mainloop</span><span class="p">(</span><span class="n">pool</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="n">message_queue</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Monitors results of a simulation as they arrive</span>
+
+<span class="sd">    pool is the multiprocessing.Pool that the processes are running in,</span>
+<span class="sd">    results is the AsyncResult object returned by Pool.imap_unordered which</span>
+<span class="sd">    returns simulation results asynchronously as and when they are ready,</span>
+<span class="sd">    and message_queue is a multiprocessing.Queue used to communicate between</span>
+<span class="sd">    child processes and the server process. In this case, we use this Queue to</span>
+<span class="sd">    send messages about the percent complete and time elapsed for each run.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c"># We use this to enumerate the processes, mapping their process IDs to an int</span>
+    <span class="c"># in the range 0:num_processes.</span>
+    <span class="n">pid_to_id</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">pid</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">pid</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pool</span><span class="o">.</span><span class="n">_pool</span><span class="p">]))</span>
+    <span class="n">num_processes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pid_to_id</span><span class="p">)</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">stoprunningsim</span> <span class="o">=</span> <span class="p">[</span><span class="bp">False</span><span class="p">]</span>
+    <span class="c"># This function terminates all the pool&#39;s child processes, it is used as</span>
+    <span class="c"># the callback function called when the terminate button on the GUI is clicked.</span>
+    <span class="k">def</span> <span class="nf">terminate_sim</span><span class="p">():</span>
+        <span class="n">pool</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+        <span class="n">stoprunningsim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">controller</span> <span class="o">=</span> <span class="n">SimulationController</span><span class="p">(</span><span class="n">num_processes</span><span class="p">,</span> <span class="n">terminate_sim</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_processes</span><span class="p">):</span>
+        <span class="n">controller</span><span class="o">.</span><span class="n">update_process</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;no info yet&#39;</span><span class="p">)</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># If there is a new result (the 0.1 means wait 0.1 seconds for a</span>
+            <span class="c"># result before giving up) then this try clause will execute, otherwise</span>
+            <span class="c"># a TimeoutError will occur and the except clause afterwards will</span>
+            <span class="c"># execute.</span>
+            <span class="n">weight</span><span class="p">,</span> <span class="n">numspikes</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+            <span class="c"># if we reach here, we have a result to plot, so we plot it and</span>
+            <span class="c"># update the GUI</span>
+            <span class="n">plot_result</span><span class="p">(</span><span class="n">weight</span><span class="p">,</span> <span class="n">numspikes</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">controller</span><span class="o">.</span><span class="n">update_results</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">TimeoutError</span><span class="p">:</span>
+            <span class="c"># if we&#39;re still waiting for a new result, we can process events in</span>
+            <span class="c"># the message_queue and update the GUI if there are any.</span>
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">message_queue</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c"># messages here are of the form: (pid, elapsed, complete)</span>
+                    <span class="c"># where pid is the process ID of the child process, elapsed</span>
+                    <span class="c"># is the amount of time elapsed, and complete is the</span>
+                    <span class="c"># fraction of the run completed. See function how_many_spikes</span>
+                    <span class="c"># to see where these messages come from.</span>
+                    <span class="n">pid</span><span class="p">,</span> <span class="n">elapsed</span><span class="p">,</span> <span class="n">complete</span> <span class="o">=</span> <span class="n">message_queue</span><span class="o">.</span><span class="n">get_nowait</span><span class="p">()</span>
+                    <span class="n">controller</span><span class="o">.</span><span class="n">update_process</span><span class="p">(</span><span class="n">pid_to_id</span><span class="p">[</span><span class="n">pid</span><span class="p">],</span> <span class="n">elapsed</span><span class="p">,</span> <span class="n">complete</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">QueueEmpty</span><span class="p">:</span>
+                    <span class="k">break</span>
+            <span class="n">controller</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">stoprunningsim</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="k">print</span> <span class="s">&#39;Terminated simulation processes&#39;</span>
+                <span class="k">break</span>
+    <span class="n">controller</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">plot_result</span><span class="p">(</span><span class="n">weight</span><span class="p">,</span> <span class="n">numspikes</span><span class="p">):</span>
+    <span class="n">plot</span><span class="p">([</span><span class="n">weight</span><span class="p">],</span> <span class="p">[</span><span class="n">numspikes</span><span class="p">],</span> <span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span>
+    <span class="n">axis</span><span class="p">(</span><span class="s">&#39;tight&#39;</span><span class="p">)</span>
+    <span class="n">draw</span><span class="p">()</span> <span class="c"># this forces matplotlib to redraw</span>
+
+<span class="c"># Note that how_many_spikes only takes one argument, which is a tuple of</span>
+<span class="c"># its actual arguments. The reason for this is that Pool.imap_unordered can only</span>
+<span class="c"># pass a single argument to the function its applied to, but that argument can</span>
+<span class="c"># be a tuple...</span>
+<span class="k">def</span> <span class="nf">how_many_spikes</span><span class="p">((</span><span class="n">excitatory_weight</span><span class="p">,</span> <span class="n">message_queue</span><span class="p">)):</span>
+    <span class="n">reinit_default_clock</span><span class="p">()</span>
+    <span class="n">clear</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="n">eqs</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">    dv/dt = (ge+gi-(v+49*mV))/(20*ms) : volt</span>
+<span class="s">    dge/dt = -ge/(5*ms) : volt</span>
+<span class="s">    dgi/dt = -gi/(10*ms) : volt</span>
+<span class="s">    &#39;&#39;&#39;</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="mi">4000</span><span class="p">,</span> <span class="n">eqs</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span> <span class="o">-</span><span class="mi">50</span> <span class="o">*</span> <span class="n">mV</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span> <span class="o">-</span><span class="mi">60</span> <span class="o">*</span> <span class="n">mV</span><span class="p">)</span>
+    <span class="n">P</span><span class="o">.</span><span class="n">v</span> <span class="o">=</span> <span class="o">-</span><span class="mi">60</span> <span class="o">*</span> <span class="n">mV</span> <span class="o">+</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">mV</span> <span class="o">*</span> <span class="n">rand</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">P</span><span class="p">))</span>
+    <span class="n">Pe</span> <span class="o">=</span> <span class="n">P</span><span class="o">.</span><span class="n">subgroup</span><span class="p">(</span><span class="mi">3200</span><span class="p">)</span>
+    <span class="n">Pi</span> <span class="o">=</span> <span class="n">P</span><span class="o">.</span><span class="n">subgroup</span><span class="p">(</span><span class="mi">800</span><span class="p">)</span>
+    <span class="n">Ce</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">Pe</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="s">&#39;ge&#39;</span><span class="p">)</span>
+    <span class="n">Ci</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">Pi</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="s">&#39;gi&#39;</span><span class="p">)</span>
+    <span class="n">Ce</span><span class="o">.</span><span class="n">connect_random</span><span class="p">(</span><span class="n">Pe</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">excitatory_weight</span><span class="p">)</span>
+    <span class="n">Ci</span><span class="o">.</span><span class="n">connect_random</span><span class="p">(</span><span class="n">Pi</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span> <span class="o">-</span><span class="mi">9</span> <span class="o">*</span> <span class="n">mV</span><span class="p">)</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">SpikeMonitor</span><span class="p">(</span><span class="n">P</span><span class="p">)</span>
+
+    <span class="c"># This reporter function is called every second, and it sends a message to</span>
+    <span class="c"># the server process updating the status of the current run.</span>
+    <span class="k">def</span> <span class="nf">reporter</span><span class="p">(</span><span class="n">elapsed</span><span class="p">,</span> <span class="n">complete</span><span class="p">):</span>
+        <span class="n">message_queue</span><span class="o">.</span><span class="n">put</span><span class="p">((</span><span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">(),</span> <span class="n">elapsed</span><span class="p">,</span> <span class="n">complete</span><span class="p">))</span>
+
+    <span class="n">run</span><span class="p">(</span><span class="mi">4000</span> <span class="o">*</span> <span class="n">ms</span><span class="p">,</span> <span class="n">report</span><span class="o">=</span><span class="n">reporter</span><span class="p">,</span> <span class="n">report_period</span><span class="o">=</span><span class="mi">1</span> <span class="o">*</span> <span class="n">second</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">excitatory_weight</span><span class="p">,</span> <span class="n">M</span><span class="o">.</span><span class="n">nspikes</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">numprocesses</span> <span class="o">=</span> <span class="bp">None</span> <span class="c"># number of processes to use, set to None to have one per CPU</span>
+    <span class="c"># We have to use a Queue from the Manager to send messages from client</span>
+    <span class="c"># processes to the server process</span>
+    <span class="n">manager</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Manager</span><span class="p">()</span>
+    <span class="n">message_queue</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+    <span class="n">pool</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">numprocesses</span><span class="p">)</span>
+    <span class="c"># This generator function repeatedly generates random sets of parameters</span>
+    <span class="c"># to pass to the how_many_spikes function</span>
+    <span class="k">def</span> <span class="nf">args</span><span class="p">():</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">weight</span> <span class="o">=</span> <span class="n">rand</span><span class="p">()</span><span class="o">*</span><span class="mf">3.5</span> <span class="o">*</span> <span class="n">mV</span>
+            <span class="k">yield</span> <span class="p">(</span><span class="n">weight</span><span class="p">,</span> <span class="n">message_queue</span><span class="p">)</span>
+    <span class="c"># imap_unordered returns an AsyncResult object which returns results as</span>
+    <span class="c"># and when they are ready, we pass this results object which is returned</span>
+    <span class="c"># immediately to the sim_mainloop function which monitors this, updates the</span>
+    <span class="c"># GUI and plots the results as they come in.</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">imap_unordered</span><span class="p">(</span><span class="n">how_many_spikes</span><span class="p">,</span> <span class="n">args</span><span class="p">())</span>
+    <span class="n">ion</span><span class="p">()</span> <span class="c"># this puts matplotlib into interactive mode to plot as we go</span>
+    <span class="n">sim_mainloop</span><span class="p">(</span><span class="n">pool</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="n">message_queue</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-audition_filterbank.html"
+                        title="previous chapter">Example: filterbank (audition)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-multiprocessing_multiple_runs_simple.html"
+                        title="next chapter">Example: multiple_runs_simple (multiprocessing)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-multiprocessing_multiple_runs_with_gui.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-multiprocessing_multiple_runs_simple.html" title="Example: multiple_runs_simple (multiprocessing)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-audition_filterbank.html" title="Example: filterbank (audition)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

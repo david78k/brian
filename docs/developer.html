@@ -1,0 +1,155 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Developer’s guide &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="next" title="Guidelines" href="developer-guidelines.html" />
+    <link rel="prev" title="Automatic Model Documentation" href="experimental-modeldocumentation.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="developer-guidelines.html" title="Guidelines"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="experimental-modeldocumentation.html" title="Automatic Model Documentation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="developer-s-guide">
+<h1>Developer&#8217;s guide<a class="headerlink" href="#developer-s-guide" title="Permalink to this headline">¶</a></h1>
+<p>This section is intended as a guide to how Brian functions internally for
+people developing Brian itself, or extensions to Brian. It may also be of some
+interest to others wishing to better understand how Brian works internally.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="developer-guidelines.html">Guidelines</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="developer-guidelines.html#contributing-code">Contributing code</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="developer-simulationprinciples.html">Simulation principles</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="developer-simulationprinciples.html#sample-script">Sample script</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="developer-codestructure.html">Main code structure</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="developer-codestructure.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer-codestructure.html#details-of-network-construction">Details of network construction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer-codestructure.html#details-of-network-running">Details of network running</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="developer-equations.html">Equations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="developer-equations.html#namespace-construction">Namespace construction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer-equations.html#attributes-after-initialisation">Attributes after initialisation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer-equations.html#finalisation-prepare">Finalisation (prepare())</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer-equations.html#freezing">Freezing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer-equations.html#adding-equation-objects">Adding Equation objects</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="developer-codegen.html">Code generation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="developer-codegen.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer-codegen.html#resolution-process">Resolution process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer-codegen.html#code-generation-in-brian">Code generation in Brian</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer-codegen.html#gpu">GPU</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer-codegen.html#extending-code-generation">Extending code generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer-codegen.html#inheritance-diagrams">Inheritance diagrams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer-codegen.html#reference">Reference</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="developer-packagestructure.html">Brian package structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer-repositorystructure.html">Repository structure</a></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="experimental-modeldocumentation.html"
+                        title="previous chapter">Automatic Model Documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="developer-guidelines.html"
+                        title="next chapter">Guidelines</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/developer.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="developer-guidelines.html" title="Guidelines"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="experimental-modeldocumentation.html" title="Automatic Model Documentation"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

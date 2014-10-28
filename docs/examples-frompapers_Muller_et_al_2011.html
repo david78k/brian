@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: Muller_et_al_2011 (frompapers) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: Rossant_et_al_2011bis (frompapers)" href="examples-frompapers_Rossant_et_al_2011bis.html" />
+    <link rel="prev" title="Example: Brette_Guigon_2003 (frompapers)" href="examples-frompapers_Brette_Guigon_2003.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers_Rossant_et_al_2011bis.html" title="Example: Rossant_et_al_2011bis (frompapers)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers_Brette_Guigon_2003.html" title="Example: Brette_Guigon_2003 (frompapers)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-muller-et-al-2011-frompapers">
+<span id="example-frompapers-muller-et-al-2011"></span><span id="index-0"></span><h1>Example: Muller_et_al_2011 (frompapers)<a class="headerlink" href="#example-muller-et-al-2011-frompapers" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="interplay-of-stdp-and-input-oscillations">
+<h2>Interplay of STDP and input oscillations<a class="headerlink" href="#interplay-of-stdp-and-input-oscillations" title="Permalink to this headline">¶</a></h2>
+<p>Figure 4 from:
+Muller L, Brette R and Gutkin B (2011) Spike-timing dependent plasticity and
+feed-forward input oscillations produce precise and invariant spike phase-locking. Front.
+Comput. Neurosci. 5:45. doi: 10.3389/fncom.2011.00045</p>
+<p>Description:
+In this simulation, a group of IF neurons is given a tonic DC input and a tonic AC input.
+The DC input is mediated by current injection (neurons.I, line 62), and the AC input is
+mediated by Poisson processes whose rate parameters are oscillating in time. Each neuron in
+the group is given a different DC input, ensuring a unique initial phase. After two seconds
+of simulation (to integrate out any initial transients), the STDP rule is turned on
+(ExponentialSTDP, line 68), and the population of neurons converges to the theoretically
+predicted fixed point. As there is some noise in the phase due to the random inputs, the
+simulation is averaged over trials (50 in Figure 4, though 10 trials should be fine for
+testing).</p>
+<p>The trials run in parallel on all available processors (10 trials take about
+2 minutes on a modern PC).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c">### IMPORTS</span>
+<span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
+
+<span class="c">### PARAMETERS</span>
+<span class="n">N</span><span class="o">=</span><span class="mi">5000</span>
+<span class="n">M</span><span class="o">=</span><span class="mi">10</span>
+<span class="n">taum</span><span class="o">=</span><span class="mi">33</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">tau_pre</span><span class="o">=</span><span class="mi">20</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">tau_post</span><span class="o">=</span><span class="n">tau_pre</span>
+<span class="n">Ee</span><span class="o">=</span><span class="mi">0</span><span class="o">*</span><span class="n">mV</span>
+<span class="n">vt</span><span class="o">=-</span><span class="mi">54</span><span class="o">*</span><span class="n">mV</span>
+<span class="n">vr</span><span class="o">=-</span><span class="mi">70</span><span class="o">*</span><span class="n">mV</span>
+<span class="n">El</span><span class="o">=-</span><span class="mi">70</span><span class="o">*</span><span class="n">mV</span>
+<span class="n">taue</span><span class="o">=</span><span class="mi">5</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">f</span><span class="o">=</span><span class="mi">20</span><span class="o">*</span><span class="n">Hz</span>
+<span class="n">theta_period</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">f</span>
+<span class="n">Rm</span><span class="o">=</span><span class="mi">200</span><span class="o">*</span><span class="n">Mohm</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="mi">51</span><span class="p">,</span><span class="mi">65</span><span class="p">,</span><span class="n">num</span><span class="o">=</span><span class="n">M</span><span class="p">)</span>
+<span class="n">weights</span> <span class="o">=</span> <span class="o">.</span><span class="mo">001</span>
+<span class="n">ratio</span><span class="o">=</span><span class="mf">1.50</span>
+<span class="n">dA_pre</span><span class="o">=.</span><span class="mo">01</span>
+<span class="n">dA_post</span><span class="o">=.</span><span class="mo">01</span><span class="o">*</span><span class="n">ratio</span>
+<span class="n">trials</span><span class="o">=</span><span class="mi">10</span>
+
+<span class="c">### SIMULATION LOOP</span>
+<span class="k">def</span> <span class="nf">trial</span><span class="p">(</span><span class="n">n</span><span class="p">):</span> <span class="c"># n is the trial number</span>
+    <span class="n">reinit_default_clock</span><span class="p">()</span>
+    <span class="n">clear</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="n">eqs_neurons</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">    dv/dt=((ge*(Ee-vr))+Rm*I+(El-v))/taum : volt</span>
+<span class="s">    dge/dt=-ge/taue : 1</span>
+<span class="s">    I : amp</span>
+<span class="s">    &#39;&#39;&#39;</span>
+
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">PoissonGroup</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">rates</span><span class="o">=</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:((</span><span class="o">.</span><span class="mi">5</span><span class="o">-.</span><span class="mi">5</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">f</span><span class="o">*</span><span class="n">t</span><span class="p">)))</span><span class="o">*</span><span class="mi">10</span><span class="o">*</span><span class="n">Hz</span><span class="p">)</span>
+    <span class="n">neurons</span><span class="o">=</span><span class="n">NeuronGroup</span><span class="p">(</span><span class="n">M</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="n">eqs_neurons</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="n">vt</span><span class="p">,</span><span class="n">reset</span><span class="o">=</span><span class="n">vr</span><span class="p">)</span>
+    <span class="n">neurons</span><span class="o">.</span><span class="n">I</span> <span class="o">=</span> <span class="n">a</span><span class="o">*</span><span class="n">pA</span>
+    <span class="n">synapses</span><span class="o">=</span><span class="n">Connection</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span><span class="n">neurons</span><span class="p">,</span><span class="s">&#39;ge&#39;</span><span class="p">,</span><span class="n">weight</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
+    <span class="n">neurons</span><span class="o">.</span><span class="n">v</span><span class="o">=</span><span class="n">vr</span>
+
+    <span class="n">S</span> <span class="o">=</span> <span class="n">SpikeMonitor</span><span class="p">(</span><span class="n">neurons</span><span class="p">)</span>
+    <span class="n">run</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">second</span><span class="p">)</span>
+    <span class="n">stdp</span><span class="o">=</span><span class="n">ExponentialSTDP</span><span class="p">(</span><span class="n">synapses</span><span class="p">,</span><span class="n">tau_pre</span><span class="p">,</span><span class="n">tau_post</span><span class="p">,</span><span class="n">dA_pre</span><span class="p">,</span><span class="o">-</span><span class="n">dA_post</span><span class="p">,</span><span class="n">wmax</span><span class="o">=</span><span class="mi">10</span><span class="o">*</span><span class="n">weights</span><span class="p">,</span><span class="n">interactions</span><span class="o">=</span><span class="s">&#39;all&#39;</span><span class="p">,</span><span class="n">update</span><span class="o">=</span><span class="s">&#39;additive&#39;</span><span class="p">)</span>
+    <span class="n">run</span><span class="p">(</span><span class="mi">5</span><span class="o">*</span><span class="n">second</span><span class="p">)</span>
+
+    <span class="n">phase</span><span class="o">=</span><span class="n">zeros</span><span class="p">((</span><span class="n">M</span><span class="p">,</span><span class="mi">200</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">M</span><span class="p">):</span>
+        <span class="n">tmp_phase</span><span class="o">=</span><span class="p">(</span><span class="n">S</span><span class="p">[</span><span class="n">b</span><span class="p">]</span><span class="o">%</span><span class="n">theta_period</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">360</span><span class="o">/</span><span class="n">theta_period</span><span class="p">)</span>
+        <span class="n">phase</span><span class="p">[</span><span class="n">b</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">tmp_phase</span><span class="p">))]</span> <span class="o">=</span> <span class="n">tmp_phase</span>
+
+    <span class="k">return</span> <span class="n">phase</span>
+
+<span class="k">if</span> <span class="n">__name__</span><span class="o">==</span><span class="s">&#39;__main__&#39;</span><span class="p">:</span> <span class="c"># This is very important on Windows, otherwise the machine crashes!</span>
+    <span class="n">phase</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">M</span><span class="p">,</span><span class="mi">200</span><span class="p">,</span><span class="n">trials</span><span class="p">))</span>
+
+    <span class="k">print</span> <span class="s">&quot;This will take approximately 2 minutes.&quot;</span>
+    <span class="n">pool</span><span class="o">=</span><span class="n">multiprocessing</span><span class="o">.</span><span class="n">Pool</span><span class="p">()</span> <span class="c"># uses all available processors b</span>
+    <span class="n">results</span><span class="o">=</span><span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">trial</span><span class="p">,</span><span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
+        <span class="n">phase</span><span class="p">[:,:,</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="c">### PLOTTING</span>
+    <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">M</span><span class="p">):</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">mean</span><span class="p">(</span><span class="n">phase</span><span class="p">[</span><span class="n">b</span><span class="p">,:,:],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="n">std</span><span class="p">(</span><span class="n">phase</span><span class="p">[</span><span class="n">b</span><span class="p">,:,:],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">sqrt</span><span class="p">(</span><span class="n">trials</span><span class="p">)</span>
+        <span class="n">errorbar</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">135</span><span class="p">),</span> <span class="n">m</span><span class="p">[</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">135</span><span class="p">)],</span> <span class="n">yerr</span><span class="o">=</span><span class="n">st</span><span class="p">[</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">135</span><span class="p">)],</span> <span class="n">xerr</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+             <span class="n">fmt</span><span class="o">=</span><span class="s">&#39;-&#39;</span><span class="p">,</span> <span class="n">ecolor</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">elinewidth</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">capsize</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+             <span class="n">barsabove</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">lolims</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">uplims</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+             <span class="n">xlolims</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">xuplims</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="n">title</span><span class="p">(</span><span class="s">&#39;STDP + Oscillations Simulation&#39;</span><span class="p">)</span>
+    <span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;Spike Number&#39;</span><span class="p">)</span>
+    <span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;Spike Phase (deg)&#39;</span><span class="p">)</span>
+    <span class="n">xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">135</span><span class="p">])</span>
+    <span class="n">ylim</span><span class="p">([</span><span class="mi">140</span><span class="p">,</span> <span class="mi">280</span><span class="p">])</span>
+
+    <span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Example: Muller_et_al_2011 (frompapers)</a><ul>
+<li><a class="reference internal" href="#interplay-of-stdp-and-input-oscillations">Interplay of STDP and input oscillations</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-frompapers_Brette_Guigon_2003.html"
+                        title="previous chapter">Example: Brette_Guigon_2003 (frompapers)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-frompapers_Rossant_et_al_2011bis.html"
+                        title="next chapter">Example: Rossant_et_al_2011bis (frompapers)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-frompapers_Muller_et_al_2011.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers_Rossant_et_al_2011bis.html" title="Example: Rossant_et_al_2011bis (frompapers)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers_Brette_Guigon_2003.html" title="Example: Brette_Guigon_2003 (frompapers)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

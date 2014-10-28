@@ -1,0 +1,224 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: Fig5E_precision_reliability (frompapers/computing with neural synchrony/coincidence detection and synchrony) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: Fig5D_reproducibility (frompapers/computing with neural synchrony/coincidence detection and synchrony)" href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig5D_reproducibility.html" />
+    <link rel="prev" title="Example: Fig6_shared_variability (frompapers/computing with neural synchrony/coincidence detection and synchrony)" href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig6_shared_variability.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig5D_reproducibility.html" title="Example: Fig5D_reproducibility (frompapers/computing with neural synchrony/coincidence detection and synchrony)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig6_shared_variability.html" title="Example: Fig6_shared_variability (frompapers/computing with neural synchrony/coincidence detection and synchrony)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-fig5e-precision-reliability-frompapers-computing-with-neural-synchrony-coincidence-detection-and-synchrony">
+<span id="example-frompapers-computing-with-neural-synchrony-coincidence-detection-and-synchrony-fig5e-precision-reliability"></span><h1>Example: Fig5E_precision_reliability (frompapers/computing with neural synchrony/coincidence detection and synchrony)<a class="headerlink" href="#example-fig5e-precision-reliability-frompapers-computing-with-neural-synchrony-coincidence-detection-and-synchrony" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="brette-r-2012-computing-with-neural-synchrony-plos-comp-biol-8-6-e1002561-doi-10-1371-journal-pcbi-1002561">
+<h2>Brette R (2012). Computing with neural synchrony. PLoS Comp Biol. 8(6): e1002561. doi:10.1371/journal.pcbi.1002561<a class="headerlink" href="#brette-r-2012-computing-with-neural-synchrony-plos-comp-biol-8-6-e1002561-doi-10-1371-journal-pcbi-1002561" title="Permalink to this headline">¶</a></h2>
+<p>Figure 5E. (very long simulation)</p>
+<p>Caption (Fig 5E). Precision and reliability of spike timing as a function of SNR.</p>
+<p>Simulations are run in parallel on all cores but one.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
+
+<span class="k">def</span> <span class="nf">autocor</span><span class="p">(</span><span class="n">PSTH</span><span class="p">,</span><span class="n">N</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">T</span><span class="o">=</span><span class="mi">20</span><span class="o">*</span><span class="n">ms</span><span class="p">,</span><span class="nb">bin</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Autocorrelogram of PSTH, to calculate a shuffled autocorrelogram</span>
+
+<span class="sd">    N = number of spike trains</span>
+<span class="sd">    T = temporal window</span>
+<span class="sd">    bin = PSTH bin</span>
+<span class="sd">    The baseline is not subtracted.</span>
+
+<span class="sd">    Returns times,SAC</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="nb">bin</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="nb">bin</span><span class="o">=</span><span class="n">defaultclock</span><span class="o">.</span><span class="n">dt</span>
+    <span class="n">n</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">PSTH</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">T</span><span class="o">/</span><span class="nb">bin</span><span class="p">)</span>
+    <span class="n">SAC</span><span class="o">=</span><span class="n">zeros</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">N</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">SAC</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">mean</span><span class="p">(</span><span class="n">PSTH</span><span class="o">*</span><span class="n">PSTH</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span> <span class="c"># correction to exclude self-coincidences</span>
+        <span class="n">PSTHnoself</span><span class="o">=</span><span class="n">clip</span><span class="p">(</span><span class="n">PSTH</span><span class="o">-</span><span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="nb">bin</span><span class="o">*</span><span class="n">N</span><span class="p">),</span><span class="mi">0</span><span class="p">,</span><span class="n">Inf</span><span class="p">)</span>
+        <span class="n">SAC</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">mean</span><span class="p">(</span><span class="n">PSTH</span><span class="o">*</span><span class="n">PSTHnoself</span><span class="p">)</span><span class="o">*</span><span class="n">N</span><span class="o">/</span><span class="p">(</span><span class="n">N</span><span class="o">-</span><span class="mf">1.</span><span class="p">)</span>
+    <span class="n">SAC</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">=</span><span class="p">[</span><span class="n">mean</span><span class="p">(</span><span class="n">PSTH</span><span class="p">[:</span><span class="o">-</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">PSTH</span><span class="p">[</span><span class="n">i</span><span class="p">:])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">p</span><span class="p">)]</span>
+    <span class="n">SAC</span><span class="o">=</span><span class="n">hstack</span><span class="p">((</span><span class="n">SAC</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">SAC</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">SAC</span><span class="p">))</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">SAC</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="nb">bin</span><span class="p">,</span><span class="n">SAC</span>
+
+<span class="k">def</span> <span class="nf">halfwidth</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Returns half-width of function given by x in bin numbers.</span>
+<span class="sd">    This is used to calculate the precision (left panel).</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">M</span><span class="p">,</span><span class="n">n</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="n">x</span><span class="p">),</span><span class="n">argmax</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">find</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">n</span><span class="p">:]</span><span class="o">&lt;</span><span class="n">M</span><span class="o">/</span><span class="mi">2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">n</span><span class="o">-</span><span class="n">find</span><span class="p">(</span><span class="n">x</span><span class="p">[:</span><span class="n">n</span><span class="p">]</span><span class="o">&lt;</span><span class="n">M</span><span class="o">/</span><span class="mi">2</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">reproducibility</span><span class="p">(</span><span class="n">SNR</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Calculates the precision (timescale) and reliability (strength) for a given</span>
+<span class="sd">    signal-to-noise ratio.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;SNR:&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">SNR</span><span class="p">)</span><span class="o">+</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span> <span class="c"># we use this instead of print because of multiprocessing</span>
+    <span class="n">reinit_default_clock</span><span class="p">()</span> <span class="c"># important because we do multiple simulations</span>
+    <span class="c"># The common noisy input</span>
+    <span class="n">N</span><span class="o">=</span><span class="mi">5000</span>                 <span class="c"># number of neurons simultaneously simulated</span>
+    <span class="n">duration</span><span class="o">=</span><span class="mi">30</span><span class="o">*</span><span class="n">second</span>     <span class="c"># duration of one simulation, 200 seconds in the paper</span>
+    <span class="n">tau_noise</span><span class="o">=</span><span class="mi">5</span><span class="o">*</span><span class="n">ms</span>
+    <span class="nb">input</span><span class="o">=</span><span class="n">NeuronGroup</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="s">&#39;dx/dt=-x/tau_noise+(2./tau_noise)**.5*xi:1&#39;</span><span class="p">)</span>
+
+    <span class="c"># The noisy neurons receiving the same input</span>
+    <span class="n">tau</span><span class="o">=</span><span class="mi">10</span><span class="o">*</span><span class="n">ms</span>
+    <span class="n">sigma</span><span class="o">=.</span><span class="mi">5</span> <span class="c"># input amplitude</span>
+    <span class="n">Z</span><span class="o">=</span><span class="n">sigma</span><span class="o">*</span><span class="n">sqrt</span><span class="p">((</span><span class="n">tau_noise</span><span class="o">+</span><span class="n">tau</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">tau_noise</span><span class="o">*</span><span class="p">(</span><span class="n">SNR</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">)))</span> <span class="c"># normalizing factor</span>
+    <span class="n">eqs_neurons</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">    dx/dt=(Z*(SNR*I+u)-x)/tau:1</span>
+<span class="s">    du/dt=-u/tau_noise+(2./tau_noise)**.5*xi:1</span>
+<span class="s">    I : 1</span>
+<span class="s">    &#39;&#39;&#39;</span>
+    <span class="n">neurons</span><span class="o">=</span><span class="n">NeuronGroup</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="n">eqs_neurons</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">reset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">refractory</span><span class="o">=</span><span class="mi">5</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+    <span class="n">neurons</span><span class="o">.</span><span class="n">x</span><span class="o">=</span><span class="n">rand</span><span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="c"># random initial conditions</span>
+    <span class="n">neurons</span><span class="o">.</span><span class="n">I</span><span class="o">=</span><span class="n">linked_var</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span><span class="s">&#39;x&#39;</span><span class="p">)</span>
+    <span class="n">rate</span><span class="o">=</span><span class="n">PopulationRateMonitor</span><span class="p">(</span><span class="n">neurons</span><span class="p">)</span> <span class="c"># PSTH</span>
+
+    <span class="n">run</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span>
+
+    <span class="n">t</span><span class="p">,</span><span class="n">SAC</span><span class="o">=</span><span class="n">autocor</span><span class="p">(</span><span class="n">rate</span><span class="o">.</span><span class="n">rate</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">T</span><span class="o">=</span><span class="mi">30</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+    <span class="n">timescale</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">halfwidth</span><span class="p">(</span><span class="n">SAC</span><span class="o">-</span><span class="n">mean</span><span class="p">(</span><span class="n">rate</span><span class="o">.</span><span class="n">rate</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span><span class="o">*</span><span class="n">defaultclock</span><span class="o">.</span><span class="n">dt</span> <span class="c"># precision</span>
+    <span class="n">strength</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">SAC</span><span class="o">-</span><span class="n">mean</span><span class="p">(</span><span class="n">rate</span><span class="o">.</span><span class="n">rate</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="nb">float</span><span class="p">(</span><span class="n">defaultclock</span><span class="o">.</span><span class="n">dt</span><span class="p">)</span><span class="o">/</span><span class="n">mean</span><span class="p">(</span><span class="n">rate</span><span class="o">.</span><span class="n">rate</span><span class="p">)</span> <span class="c"># reliability</span>
+
+    <span class="k">return</span> <span class="n">timescale</span><span class="p">,</span><span class="n">strength</span>
+
+<span class="k">if</span> <span class="n">__name__</span><span class="o">==</span><span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">pool</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="c"># all cores but one</span>
+    <span class="n">SNRdB</span><span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">15</span><span class="p">,</span><span class="mi">20</span><span class="p">)</span> <span class="c"># 100 points in the paper</span>
+    <span class="n">SNR</span> <span class="o">=</span> <span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="n">SNRdB</span><span class="o">/</span><span class="mf">10.</span><span class="p">)</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">reproducibility</span><span class="p">,</span> <span class="n">SNR</span><span class="p">)</span> <span class="c"># launches multiple processes</span>
+    <span class="n">timescale</span><span class="p">,</span><span class="n">strength</span><span class="o">=</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">results</span><span class="p">)</span>
+
+    <span class="c"># Figure</span>
+    <span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+    <span class="n">plot</span><span class="p">(</span><span class="n">SNRdB</span><span class="p">,</span><span class="n">timescale</span><span class="o">*</span><span class="mi">1000</span><span class="p">)</span>
+    <span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;SNR (dB)&#39;</span><span class="p">)</span>
+    <span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;Precision (ms)&#39;</span><span class="p">)</span>
+    <span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">)</span>
+    <span class="n">plot</span><span class="p">(</span><span class="n">SNRdB</span><span class="p">,</span><span class="n">strength</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;SNR (dB)&#39;</span><span class="p">)</span>
+    <span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;Reliability (%)&#39;</span><span class="p">)</span>
+    <span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Example: Fig5E_precision_reliability (frompapers/computing with neural synchrony/coincidence detection and synchrony)</a><ul>
+<li><a class="reference internal" href="#brette-r-2012-computing-with-neural-synchrony-plos-comp-biol-8-6-e1002561-doi-10-1371-journal-pcbi-1002561">Brette R (2012). Computing with neural synchrony. PLoS Comp Biol. 8(6): e1002561. doi:10.1371/journal.pcbi.1002561</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig6_shared_variability.html"
+                        title="previous chapter">Example: Fig6_shared_variability (frompapers/computing with neural synchrony/coincidence detection and synchrony)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig5D_reproducibility.html"
+                        title="next chapter">Example: Fig5D_reproducibility (frompapers/computing with neural synchrony/coincidence detection and synchrony)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig5E_precision_reliability.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig5D_reproducibility.html" title="Example: Fig5D_reproducibility (frompapers/computing with neural synchrony/coincidence detection and synchrony)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig6_shared_variability.html" title="Example: Fig6_shared_variability (frompapers/computing with neural synchrony/coincidence detection and synchrony)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

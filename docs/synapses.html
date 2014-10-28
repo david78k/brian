@@ -1,0 +1,368 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Synapses &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="User manual" href="usermanual.html" />
+    <link rel="next" title="Recording" href="recording.html" />
+    <link rel="prev" title="Short-term plasticity" href="stp.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="recording.html" title="Recording"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="stp.html" title="Short-term plasticity"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="usermanual.html" accesskey="U">User manual</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="synapses">
+<span id="usermanual-synapses"></span><h1>Synapses<a class="headerlink" href="#synapses" title="Permalink to this headline">¶</a></h1>
+<p>Starting from Brian 1.4, there is a new class, <a class="reference internal" href="reference-synapses.html#brian.Synapses" title="brian.Synapses"><tt class="xref py py-class docutils literal"><span class="pre">Synapses</span></tt></a>, in which everything synaptic can be defined.
+The <a class="reference internal" href="reference-synapses.html#brian.Synapses" title="brian.Synapses"><tt class="xref py py-class docutils literal"><span class="pre">Synapses</span></tt></a> is similar to the <a class="reference internal" href="reference-connections.html#brian.Connection" title="brian.Connection"><tt class="xref py py-class docutils literal"><span class="pre">Connection</span></tt></a> class, but it is more general and flexible. In particular,
+synaptic plasticity can be defined in the same object.</p>
+<div class="section" id="defining-synaptic-models">
+<h2>Defining synaptic models<a class="headerlink" href="#defining-synaptic-models" title="Permalink to this headline">¶</a></h2>
+<p>The basic syntax is as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">S</span><span class="o">=</span><span class="n">Synapses</span><span class="p">(</span><span class="n">P</span><span class="p">,</span><span class="n">Q</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="s">&#39;w:1&#39;</span><span class="p">,</span><span class="n">pre</span><span class="o">=</span><span class="s">&#39;v+=w&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This defines a set of synapses between <a class="reference internal" href="reference-models-and-groups.html#brian.NeuronGroup" title="brian.NeuronGroup"><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></a> P and <a class="reference internal" href="reference-models-and-groups.html#brian.NeuronGroup" title="brian.NeuronGroup"><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></a> Q.
+If the target group is not specified, it is identical to the source group by default.
+The <tt class="docutils literal"><span class="pre">model</span></tt> keyword
+is similar as in <a class="reference internal" href="reference-models-and-groups.html#brian.NeuronGroup" title="brian.NeuronGroup"><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></a>: it defines synaptic variables and possibly their dynamics
+(with differential equations, as in <a class="reference internal" href="reference-models-and-groups.html#brian.NeuronGroup" title="brian.NeuronGroup"><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></a>). Here, synaptic variable <tt class="docutils literal"><span class="pre">w</span></tt> is created: there is
+one value for each synapse. The <tt class="docutils literal"><span class="pre">pre</span></tt> keyword defines what happens when a presynaptic spike arrives at
+a synapse. In this case, variable <tt class="docutils literal"><span class="pre">w</span></tt> is added to variable <tt class="docutils literal"><span class="pre">v</span></tt>. Because <tt class="docutils literal"><span class="pre">v</span></tt> is not defined as a synaptic
+variable, it is assumed by default that it is a postsynaptic variable, defined in the target <a class="reference internal" href="reference-models-and-groups.html#brian.NeuronGroup" title="brian.NeuronGroup"><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></a> Q.
+Note that this does not does create synapses (see next section), only the synaptic models.</p>
+<p>The more general syntax is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">S</span><span class="o">=</span><span class="n">Synapses</span><span class="p">(</span><span class="n">P</span><span class="p">,</span><span class="n">Q</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="n">model_string</span><span class="p">,</span><span class="n">pre</span><span class="o">=</span><span class="n">pre_code</span><span class="p">,</span><span class="n">post</span><span class="o">=</span><span class="n">post_code</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="model-syntax">
+<h3>Model syntax<a class="headerlink" href="#model-syntax" title="Permalink to this headline">¶</a></h3>
+<p>The model follows exactly the same syntax as for <a class="reference internal" href="reference-models-and-groups.html#brian.NeuronGroup" title="brian.NeuronGroup"><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></a>. There can be parameters
+(e.g. synaptic variable <tt class="docutils literal"><span class="pre">w</span></tt> above), but there can also be static equations and differential equations,
+describing the dynamics of synaptic variables. In all cases, synaptic variables are created, one value per synapse.
+Internally, these are stored as arrays. There are a few specificities:</p>
+<ul class="simple">
+<li>A variable with the <tt class="docutils literal"><span class="pre">_post</span></tt> suffix is looked up in the postsynaptic (target) neuron. That is,
+<tt class="docutils literal"><span class="pre">v_post</span></tt> means variable <tt class="docutils literal"><span class="pre">v</span></tt> in the postsynaptic neuron.</li>
+<li>A variable with the <tt class="docutils literal"><span class="pre">_pre</span></tt> suffix is looked up in the presynaptic (source) neuron.</li>
+<li>A variable not defined as a synaptic variable is considered to be postsynaptic.</li>
+<li>A variable not defined as a synaptic variable and not defined in the postsynaptic neuron is considered
+external.</li>
+</ul>
+<p>For the integration of differential equations, one can use the same keywords as for <a class="reference internal" href="reference-models-and-groups.html#brian.NeuronGroup" title="brian.NeuronGroup"><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></a>.</p>
+</div>
+<div class="section" id="event-driven-updates">
+<h3>Event-driven updates<a class="headerlink" href="#event-driven-updates" title="Permalink to this headline">¶</a></h3>
+<p>By default, differential equations are integrated in a clock-driven fashion, as for a
+<a class="reference internal" href="reference-models-and-groups.html#brian.NeuronGroup" title="brian.NeuronGroup"><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></a>. This is potentially very time consuming, because all synapses are updated at every
+timestep. It is possible to ask Brian to simulate differential equations in an event-driven fashion,
+for one-dimensional linear equations, using the keyword <tt class="docutils literal"><span class="pre">(event-driven)</span></tt>. A typical example is
+pre and postsynaptic traces in STDP:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model</span><span class="o">=</span><span class="s">&#39;&#39;&#39;w:1</span>
+<span class="s">         dApre/dt=-Apre/taupre : 1 (event-driven)</span>
+<span class="s">         dApost/dt=-Apost/taupost : 1 (event-driven)&#39;&#39;&#39;</span>
+</pre></div>
+</div>
+<p>Here, Brian updates the value of <tt class="docutils literal"><span class="pre">Apre</span></tt> for a given synapse only when this synapse receives a spike,
+whether it is presynaptic or postsynaptic. More precisely, the variables are updated every time either
+the <tt class="docutils literal"><span class="pre">pre</span></tt> or <tt class="docutils literal"><span class="pre">post</span></tt> code is called for the synapse, so that the values are always up to date when
+these codes are executed.</p>
+<p>Automatic event-driven updates are only possible for one-dimensional linear equations. These equations
+must also be independent of the other ones, that is, a differential equation that is not event-driven cannot
+depend on an event-driven equation (since the values are not continuously updated).
+In other cases, the user can write event-driven code explicitly in the update codes (see below).</p>
+</div>
+<div class="section" id="pre-and-post-codes">
+<h3>Pre and post codes<a class="headerlink" href="#pre-and-post-codes" title="Permalink to this headline">¶</a></h3>
+<p>The <tt class="docutils literal"><span class="pre">pre</span></tt> (<tt class="docutils literal"><span class="pre">post</span></tt>) code is executed at each synapse receiving a presynaptic spike. For example:</p>
+<blockquote>
+<div>pre=&#8217;v+=w&#8217;</div></blockquote>
+<p>adds the value of synaptic variable <tt class="docutils literal"><span class="pre">w</span></tt> to postsynaptic variable <tt class="docutils literal"><span class="pre">v</span></tt>. As for the model equations,
+the <tt class="docutils literal"><span class="pre">_post</span></tt> (<tt class="docutils literal"><span class="pre">_pre</span></tt>) suffix indicates a postsynaptic (presynaptic) variable, and variables not found
+in the synaptic variables are considered postsynaptic by default.
+Internally, the execution of the code is vectorized (simultaneously executed) for all synapses receiving
+presynaptic spikes during the current timestep. Therefore, the code should be understood as acting on
+arrays rather than single values. Any sort of code can be executed. For example, the following code defines
+stochastic synapses, with a synaptic weight <tt class="docutils literal"><span class="pre">w</span></tt> and transmission probability <tt class="docutils literal"><span class="pre">p</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">S</span><span class="o">=</span><span class="n">Synapses</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span><span class="n">neurons</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="s">&quot;&quot;&quot;w : 1</span>
+<span class="s">                              p : 1&quot;&quot;&quot;</span><span class="p">,</span>
+                         <span class="n">pre</span><span class="o">=</span><span class="s">&quot;v+=w*(rand()&lt;p)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The code means that <tt class="docutils literal"><span class="pre">w</span></tt> is added to <tt class="docutils literal"><span class="pre">v</span></tt> with probability <tt class="docutils literal"><span class="pre">p</span></tt> (note that, internally, <tt class="docutils literal"><span class="pre">rand()</span></tt>
+is transformed to a instruction that outputs an array of random numbers).
+The code may also include multiple lines.</p>
+<p>As mentioned above, it is possible to write event-driven update code for the synaptic variables.
+For this, two special variables are provided: <tt class="docutils literal"><span class="pre">t</span></tt> is the current time when the code is executed,
+and <tt class="docutils literal"><span class="pre">lastupdate</span></tt> is the last time when the synapse was updated (either through <tt class="docutils literal"><span class="pre">pre</span></tt> or <tt class="docutils literal"><span class="pre">post</span></tt>
+code). An example is short-term plasticity (in fact this could be done automatically with the use
+of the <tt class="docutils literal"><span class="pre">(event-driven)</span></tt> keyword mentioned above):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">S</span><span class="o">=</span><span class="n">Synapses</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span><span class="n">neuron</span><span class="p">,</span>
+           <span class="n">model</span><span class="o">=</span><span class="s">&#39;&#39;&#39;x : 1</span>
+<span class="s">                    u : 1</span>
+<span class="s">                    w : 1&#39;&#39;&#39;</span><span class="p">,</span>
+           <span class="n">pre</span><span class="o">=</span><span class="s">&#39;&#39;&#39;u=U+(u-U)*exp(-(t-lastupdate)/tauf)</span>
+<span class="s">                  x=1+(x-1)*exp(-(t-lastupdate)/taud)</span>
+<span class="s">                  i+=w*u*x</span>
+<span class="s">                  x*=(1-u)</span>
+<span class="s">                  u+=U*(1-u)&#39;&#39;&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="lumped-variables">
+<h3>Lumped variables<a class="headerlink" href="#lumped-variables" title="Permalink to this headline">¶</a></h3>
+<p>In many cases, the postsynaptic neuron has a variable that represents a sum of variables over all
+its synapses. This is called a &#8220;lumped variable&#8221;. An example is nonlinear synapses (e.g. NMDA):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">neurons</span> <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s">&quot;&quot;&quot;dv/dt=(gtot-v)/(10*ms) : 1</span>
+<span class="s">                                  gtot : 1&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="n">S</span><span class="o">=</span><span class="n">Synapses</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span><span class="n">neurons</span><span class="p">,</span>
+           <span class="n">model</span><span class="o">=</span><span class="s">&#39;&#39;&#39;dg/dt=-a*g+b*x*(1-g) : 1</span>
+<span class="s">                    dx/dt=-c*x : 1</span>
+<span class="s">                    w : 1 # synaptic weight</span>
+<span class="s">                 &#39;&#39;&#39;</span><span class="p">,</span>
+           <span class="n">pre</span><span class="o">=</span><span class="s">&#39;x+=w&#39;</span><span class="p">)</span>
+<span class="n">neurons</span><span class="o">.</span><span class="n">gtot</span><span class="o">=</span><span class="n">S</span><span class="o">.</span><span class="n">g</span>
+</pre></div>
+</div>
+<p>Here, each synapse has a conductance <tt class="docutils literal"><span class="pre">g</span></tt> with nonlinear dynamics. The neuron&#8217;s total conductance
+is <tt class="docutils literal"><span class="pre">gtot</span></tt>. The link between the two is specified by the last statement. What happens during the
+simulation is that at each time step, presynaptic conductances are summed for each neuron and the
+result is copied to the variable <tt class="docutils literal"><span class="pre">gtot</span></tt>. Another example is gap junctions:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">neurons</span> <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s">&#39;&#39;&#39;dv/dt=(v0-v+Igap)/tau : 1</span>
+<span class="s">                                                                  Igap : 1&#39;&#39;&#39;</span><span class="p">)</span>
+<span class="n">S</span><span class="o">=</span><span class="n">Synapses</span><span class="p">(</span><span class="n">neurons</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="s">&#39;&#39;&#39;w:1 # gap junction conductance</span>
+<span class="s">                        Igap=w*(v_pre-v_post): 1&#39;&#39;&#39;</span><span class="p">)</span>
+<span class="n">neurons</span><span class="o">.</span><span class="n">Igap</span><span class="o">=</span><span class="n">S</span><span class="o">.</span><span class="n">Igap</span>
+</pre></div>
+</div>
+<p>Here, <tt class="docutils literal"><span class="pre">Igap</span></tt> is the total gap junction current received by the postsynaptic neuron.</p>
+</div>
+</div>
+<div class="section" id="creating-synapses">
+<h2>Creating synapses<a class="headerlink" href="#creating-synapses" title="Permalink to this headline">¶</a></h2>
+<p>Creating a <a class="reference internal" href="reference-synapses.html#brian.Synapses" title="brian.Synapses"><tt class="xref py py-class docutils literal"><span class="pre">Synapses</span></tt></a> instance does not create synapses, it only specifies their dynamics.
+The following command creates a synapse between neuron i in the source group and j in the target group:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">S</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">=</span><span class="bp">True</span>
+</pre></div>
+</div>
+<p>It is possible to create several synapses for a given pair of neurons:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">S</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">=</span><span class="mi">3</span>
+</pre></div>
+</div>
+<p>This is useful for example if one wants to have multiple synapses with different delays.
+Multiple synapses can be created in a single statement:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">S</span><span class="p">[:,:]</span><span class="o">=</span><span class="bp">True</span>
+<span class="n">S</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="bp">True</span>
+<span class="n">S</span><span class="p">[</span><span class="n">Pe</span><span class="p">,</span><span class="n">Pi</span><span class="p">]</span><span class="o">=</span><span class="bp">True</span>
+</pre></div>
+</div>
+<p>The first statement creates synapses between all pairs of neurons.
+The second statement creates synapses between all neurons in the source group and neuron 1
+in the target group.
+The third statement connects all pairs of neurons in the subgroups <tt class="docutils literal"><span class="pre">Pe</span></tt> and <tt class="docutils literal"><span class="pre">Pi</span></tt>.</p>
+<p>One can also create synapses using code:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">S</span><span class="p">[:,:]</span><span class="o">=</span><span class="s">&#39;i==j&#39;</span>
+<span class="n">S</span><span class="p">[:,:]</span><span class="o">=</span><span class="s">&#39;j==((i+1)%N)&#39;</span>
+</pre></div>
+</div>
+<p>The code is a boolean statement that should return True when a synapse must be created,
+where <tt class="docutils literal"><span class="pre">i</span></tt> is the presynaptic neuron index and <tt class="docutils literal"><span class="pre">j</span></tt> is the postsynaptic neuron index
+(special variables).
+Here the first statement creates one-to-one connections, the second statement creates connections
+with a ring structure (<tt class="docutils literal"><span class="pre">N</span></tt> is the number of neurons, assumed to defined elsewhere by the user).
+This way of creating synapses is generally much faster than using loops, because it is internally
+vectorised.</p>
+<p>Two high level construction methods are implemented:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">S</span><span class="o">.</span><span class="n">connect_random</span><span class="p">(</span><span class="n">group1</span><span class="p">,</span><span class="n">group2</span><span class="p">,</span><span class="n">sparseness</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="n">S</span><span class="o">.</span><span class="n">connect_one_to_one</span><span class="p">(</span><span class="n">group1</span><span class="p">,</span><span class="n">group2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The first one randomly connects pairs of neurons with probability given by the <tt class="docutils literal"><span class="pre">sparseness</span></tt> argument.
+The second one is equivalent to the instruction <tt class="docutils literal"><span class="pre">S[group1,group2]='i==j'</span></tt>. The <tt class="docutils literal"><span class="pre">group1</span></tt> and
+<tt class="docutils literal"><span class="pre">group2</span></tt> arguments are subgroups of the source and target groups.</p>
+</div>
+<div class="section" id="accessing-synaptic-variables">
+<h2>Accessing synaptic variables<a class="headerlink" href="#accessing-synaptic-variables" title="Permalink to this headline">¶</a></h2>
+<p>Synaptic variables can be accessed in a similar way as <a class="reference internal" href="reference-models-and-groups.html#brian.NeuronGroup" title="brian.NeuronGroup"><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></a> variables. They can indexed
+with two indexes, corresponding to the indexes of pre and postsynaptic neurons, and optionally with a third
+index in the case of multiple synapses.
+Here are a few examples, which follows essentially the same syntax as for creating synapses:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">S</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span><span class="o">*</span><span class="n">nS</span>
+<span class="n">S</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">,:]</span><span class="o">=</span><span class="mi">2</span><span class="o">*</span><span class="n">nS</span>
+<span class="n">S</span><span class="o">.</span><span class="n">w</span><span class="o">=</span><span class="mi">1</span><span class="o">*</span><span class="n">nS</span> <span class="c"># all synapses assigned</span>
+<span class="n">w0</span><span class="o">=</span><span class="n">S</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="c"># second synapse for connection 2-&gt;3</span>
+<span class="n">S</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="o">*</span><span class="n">nS</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">nS</span><span class="p">)</span>
+<span class="n">S</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="n">group1</span><span class="p">,</span><span class="n">group2</span><span class="p">]</span><span class="o">=</span><span class="s">&quot;(1+cos(i-j))*2*nS&quot;</span>
+<span class="n">S</span><span class="o">.</span><span class="n">w</span><span class="p">[:,:]</span><span class="o">=</span><span class="s">&#39;rand()*nS&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="delays">
+<h2>Delays<a class="headerlink" href="#delays" title="Permalink to this headline">¶</a></h2>
+<p>There is a special synaptic variable that is automatically created: <tt class="docutils literal"><span class="pre">delay</span></tt>. It is the propagation delay
+from the presynaptic neuron to the synapse, i.e., the presynaptic delay. An alias is <tt class="docutils literal"><span class="pre">delay_pre</span></tt>. When there
+is a postsynaptic code (keyword <tt class="docutils literal"><span class="pre">post</span></tt>), the variable <tt class="docutils literal"><span class="pre">delay_post</span></tt> is created. These can be accessed and modified
+in the same way as other synaptic variables.</p>
+<p>If delays can change during the simulation, one should specify the maximum allowed delay with the keyword
+<tt class="docutils literal"><span class="pre">max_delay</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">synapses</span> <span class="o">=</span> <span class="n">Synapses</span><span class="p">(</span><span class="n">P</span><span class="p">,</span><span class="n">Q</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="s">&#39;w:1&#39;</span><span class="p">,</span><span class="n">pre</span><span class="o">=</span><span class="s">&#39;v+=w&#39;</span><span class="p">,</span><span class="n">max_delay</span><span class="o">=</span><span class="mi">1</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Otherwise, this maximum delay is automatically calculated the first time the model is run.</p>
+</div>
+<div class="section" id="multiple-pathways">
+<h2>Multiple pathways<a class="headerlink" href="#multiple-pathways" title="Permalink to this headline">¶</a></h2>
+<p>It is possible to have multiple pathways with different update codes from the same presynaptic neuron group.
+This may be interesting in cases when different operations must be applied at different times for the same
+presynaptic spike. To do this, simply specify a tuple or list of <tt class="docutils literal"><span class="pre">pre</span></tt> codes:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pre</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;ge+=w&#39;</span><span class="p">,</span>
+     <span class="sd">&#39;&#39;&#39;w=clip(w+Apost,0,inf)</span>
+<span class="sd">        Apre+=dApre&#39;&#39;&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This creates two sets of delay variables, one for each pathway. They can be accessed by first indexing with
+the pathway number. The following statement, for example, sets the delay of the synapse between the first neurons
+of the source and target groups, in the second pathway:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">S</span><span class="o">.</span><span class="n">delay</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mi">3</span><span class="o">*</span><span class="n">ms</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="monitoring-synaptic-variables">
+<h2>Monitoring synaptic variables<a class="headerlink" href="#monitoring-synaptic-variables" title="Permalink to this headline">¶</a></h2>
+<p>A <a class="reference internal" href="reference-monitors.html#brian.StateMonitor" title="brian.StateMonitor"><tt class="xref py py-class docutils literal"><span class="pre">StateMonitor</span></tt></a> object can be used to monitor synaptic variables. For example, the following statement
+creates a monitor for variable <tt class="docutils literal"><span class="pre">w</span></tt> for the synapses 0 and 1:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">M</span> <span class="o">=</span> <span class="n">StateMonitor</span><span class="p">(</span><span class="n">S</span><span class="p">,</span><span class="s">&#39;w&#39;</span><span class="p">,</span><span class="n">record</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Note that these are synapse indexes, not neuron indexes.
+These can be obtained with the <a class="reference internal" href="reference-synapses.html#brian.Synapses.synapse_index" title="brian.Synapses.synapse_index"><tt class="xref py py-meth docutils literal"><span class="pre">synapse_index()</span></tt></a> method:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">s</span><span class="o">=</span><span class="n">S</span><span class="o">.</span><span class="n">synapse_index</span><span class="p">((</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>where <tt class="docutils literal"><span class="pre">i</span></tt> and <tt class="docutils literal"><span class="pre">j</span></tt> may be integers, arrays or slices. A third index can also be given.</p>
+<p>The recorded traces can then be accessed in the usual way, for example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">plot</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">times</span><span class="p">,</span><span class="n">M</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Synapses</a><ul>
+<li><a class="reference internal" href="#defining-synaptic-models">Defining synaptic models</a><ul>
+<li><a class="reference internal" href="#model-syntax">Model syntax</a></li>
+<li><a class="reference internal" href="#event-driven-updates">Event-driven updates</a></li>
+<li><a class="reference internal" href="#pre-and-post-codes">Pre and post codes</a></li>
+<li><a class="reference internal" href="#lumped-variables">Lumped variables</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#creating-synapses">Creating synapses</a></li>
+<li><a class="reference internal" href="#accessing-synaptic-variables">Accessing synaptic variables</a></li>
+<li><a class="reference internal" href="#delays">Delays</a></li>
+<li><a class="reference internal" href="#multiple-pathways">Multiple pathways</a></li>
+<li><a class="reference internal" href="#monitoring-synaptic-variables">Monitoring synaptic variables</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="stp.html"
+                        title="previous chapter">Short-term plasticity</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="recording.html"
+                        title="next chapter">Recording</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/synapses.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="recording.html" title="Recording"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="stp.html" title="Short-term plasticity"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="usermanual.html" >User manual</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

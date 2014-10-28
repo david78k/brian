@@ -1,0 +1,279 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Plasticity &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Reference" href="reference.html" />
+    <link rel="next" title="Synapses" href="reference-synapses.html" />
+    <link rel="prev" title="Connections" href="reference-connections.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="reference-synapses.html" title="Synapses"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="reference-connections.html" title="Connections"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="reference.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="plasticity">
+<h1>Plasticity<a class="headerlink" href="#plasticity" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="spike-timing-dependent-plasticity-stdp">
+<h2>Spike timing dependent plasticity (STDP)<a class="headerlink" href="#spike-timing-dependent-plasticity-stdp" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="brian.STDP">
+<em class="property">class </em><tt class="descclassname">brian.</tt><tt class="descname">STDP</tt><big>(</big><em>C</em>, <em>eqs</em>, <em>pre</em>, <em>post</em>, <em>wmin=0</em>, <em>wmax=inf</em>, <em>level=0</em>, <em>clock=None</em>, <em>delay_pre=None</em>, <em>delay_post=None</em><big>)</big><a class="headerlink" href="#brian.STDP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Spike-timing-dependent plasticity</p>
+<p>Initialised with arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">C</span></tt></dt>
+<dd>Connection object to apply STDP to.</dd>
+<dt><tt class="docutils literal"><span class="pre">eqs</span></tt></dt>
+<dd>Differential equations (with units)</dd>
+<dt><tt class="docutils literal"><span class="pre">pre</span></tt></dt>
+<dd>Python code for presynaptic spikes, use the reserved symbol <tt class="docutils literal"><span class="pre">w</span></tt> to
+refer to the synaptic weight.</dd>
+<dt><tt class="docutils literal"><span class="pre">post</span></tt></dt>
+<dd>Python code for postsynaptic spikes, use the reserved symbol <tt class="docutils literal"><span class="pre">w</span></tt> to
+refer to the synaptic weight.</dd>
+<dt><tt class="docutils literal"><span class="pre">wmin</span></tt></dt>
+<dd>Minimum weight (default 0), weights are restricted to be within this
+value and wmax.</dd>
+<dt><tt class="docutils literal"><span class="pre">wmax</span></tt></dt>
+<dd>Maximum weight (default unlimited), weights are restricted to be within
+wmin and this value.</dd>
+<dt><tt class="docutils literal"><span class="pre">delay_pre</span></tt></dt>
+<dd>Presynaptic delay</dd>
+<dt><tt class="docutils literal"><span class="pre">delay_post</span></tt></dt>
+<dd>Postsynaptic delay (backward propagating spike)</dd>
+</dl>
+<p>The STDP object works by specifying a set of differential equations
+associated to each synapse (<tt class="docutils literal"><span class="pre">eqs</span></tt>) and two rules to specify what should
+happen when a presynaptic neuron fires (<tt class="docutils literal"><span class="pre">pre</span></tt>) and when a postsynaptic
+neuron fires (<tt class="docutils literal"><span class="pre">post</span></tt>). The equations should be standard set of equations
+in the usual string format. The <tt class="docutils literal"><span class="pre">pre</span></tt> and <tt class="docutils literal"><span class="pre">post</span></tt> rules should be a
+sequence of statements to be executed triggered on pre- and post-synaptic
+spikes. The sequence of statements can be separated by a <tt class="docutils literal"><span class="pre">;</span></tt> or by
+using a multiline string. The reserved symbol <tt class="docutils literal"><span class="pre">w</span></tt> can be used to refer
+to the synaptic weight of the associated synapse.</p>
+<p>This framework allows you to implement most STDP rules. Specifying
+differential equations and pre- and post-synaptic event code allows for a
+much more efficient implementation than specifying, for example, the
+spike pair weight modification function, but does unfortunately require
+transforming the definition into this form.</p>
+<p>There is one restriction on the equations that can be implemented in this
+system, they need to be separable into independent pre- and post-synaptic
+systems (this is done automatically). In this way, synaptic variables and
+updates can be stored per neuron rather than per synapse.</p>
+<p><strong>Example</strong></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">eqs_stdp</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">dA_pre/dt  = -A_pre/tau_pre   : 1</span>
+<span class="s">dA_post/dt = -A_post/tau_post : 1</span>
+<span class="s">&quot;&quot;&quot;</span>
+<span class="n">stdp</span> <span class="o">=</span> <span class="n">STDP</span><span class="p">(</span><span class="n">synapses</span><span class="p">,</span> <span class="n">eqs</span><span class="o">=</span><span class="n">eqs_stdp</span><span class="p">,</span> <span class="n">pre</span><span class="o">=</span><span class="s">&#39;A_pre+=delta_A_pre; w+=A_post&#39;</span><span class="p">,</span>
+            <span class="n">post</span><span class="o">=</span><span class="s">&#39;A_post+=delta_A_post; w+=A_pre&#39;</span><span class="p">,</span> <span class="n">wmax</span><span class="o">=</span><span class="n">gmax</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>STDP variables</strong></p>
+<p>You can access the pre- and post-synaptic variables as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">stdp</span> <span class="o">=</span> <span class="n">STDP</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">stdp</span><span class="o">.</span><span class="n">A_pre</span>
+</pre></div>
+</div>
+<p>Alternatively, you can access the group of pre/post-synaptic variables
+as:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">stdp</span><span class="o">.</span><span class="n">pre_group</span>
+<span class="n">stdp</span><span class="o">.</span><span class="n">post_group</span>
+</pre></div>
+</div>
+<p>These latter attributes can be passed to a <a class="reference internal" href="reference-monitors.html#brian.StateMonitor" title="brian.StateMonitor"><tt class="xref py py-class docutils literal"><span class="pre">StateMonitor</span></tt></a> to
+record their activity, for example. However, note that in the case of
+STDP acting on a connection with heterogeneous delays, the recent values
+of these variables are automatically monitored and these can be
+accesses as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">stdp</span><span class="o">.</span><span class="n">G_pre_monitors</span><span class="p">[</span><span class="s">&#39;A_pre&#39;</span><span class="p">]</span>
+<span class="n">stdp</span><span class="o">.</span><span class="n">G_post_monitors</span><span class="p">[</span><span class="s">&#39;A_post&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p><strong>Technical details</strong></p>
+<p>The equations are split into two groups, pre and post. Two groups are created
+to carry these variables and to update them (these are implemented as
+<a class="reference internal" href="reference-models-and-groups.html#brian.NeuronGroup" title="brian.NeuronGroup"><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></a> objects). As well as propagating spikes from the source
+and target of <tt class="docutils literal"><span class="pre">C</span></tt> via <tt class="docutils literal"><span class="pre">C</span></tt>, spikes are also propagated to the respective
+groups created. At spike propagation time the weight values are updated.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.ExponentialSTDP">
+<em class="property">class </em><tt class="descclassname">brian.</tt><tt class="descname">ExponentialSTDP</tt><big>(</big><em>C</em>, <em>taup</em>, <em>taum</em>, <em>Ap</em>, <em>Am</em>, <em>interactions='all'</em>, <em>wmin=0</em>, <em>wmax=None</em>, <em>update='additive'</em>, <em>delay_pre=None</em>, <em>delay_post=None</em>, <em>clock=None</em><big>)</big><a class="headerlink" href="#brian.ExponentialSTDP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exponential STDP.</p>
+<p>Initialised with the following arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">taup</span></tt>, <tt class="docutils literal"><span class="pre">taum</span></tt>, <tt class="docutils literal"><span class="pre">Ap</span></tt>, <tt class="docutils literal"><span class="pre">Am</span></tt></dt>
+<dd><p class="first">Synaptic weight change (relative to the maximum weight wmax):</p>
+<div class="last highlight-python"><pre>f(s) = Ap*exp(-s/taup) if s &gt;0
+f(s) = Am*exp(s/taum) if s &lt;0</pre>
+</div>
+</dd>
+<dt><tt class="docutils literal"><span class="pre">interactions</span></tt></dt>
+<dd><ul class="first last simple">
+<li>&#8216;all&#8217;: contributions from all pre-post pairs are added</li>
+<li>&#8216;nearest&#8217;: only nearest-neighbour pairs are considered</li>
+<li>&#8216;nearest_pre&#8217;: nearest presynaptic spike, all postsynaptic spikes</li>
+<li>&#8216;nearest_post&#8217;: nearest postsynaptic spike, all presynaptic spikes</li>
+</ul>
+</dd>
+<dt><tt class="docutils literal"><span class="pre">wmin=0</span></tt></dt>
+<dd>minimum synaptic weight</dd>
+<dt><tt class="docutils literal"><span class="pre">wmax</span></tt></dt>
+<dd>maximum synaptic weight</dd>
+<dt><tt class="docutils literal"><span class="pre">update</span></tt></dt>
+<dd><ul class="first last simple">
+<li>&#8216;additive&#8217;: modifications are additive (independent of synaptic weight)
+(or &#8220;hard bounds&#8221;)</li>
+<li>&#8216;multiplicative&#8217;: modifications are multiplicative (proportional to w)
+(or &#8220;soft bounds&#8221;)</li>
+<li>&#8216;mixed&#8217;: depression is multiplicative, potentiation is additive</li>
+</ul>
+</dd>
+</dl>
+<p>See documentation for <a class="reference internal" href="#brian.STDP" title="brian.STDP"><tt class="xref py py-class docutils literal"><span class="pre">STDP</span></tt></a> for more details.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="short-term-plasticity-stp">
+<h2>Short term plasticity (STP)<a class="headerlink" href="#short-term-plasticity-stp" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="brian.STP">
+<em class="property">class </em><tt class="descclassname">brian.</tt><tt class="descname">STP</tt><big>(</big><em>C</em>, <em>taud</em>, <em>tauf</em>, <em>U</em><big>)</big><a class="headerlink" href="#brian.STP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Short-term synaptic plasticity, following the Tsodyks-Markram model.</p>
+<p>Implements the short-term plasticity model described in Markram et al (1998).
+Differential signaling via the same axon of
+neocortical pyramidal neurons, PNAS.
+Synaptic dynamics is described by two variables x and u, which follow
+the following differential equations:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">dx</span><span class="o">/</span><span class="n">dt</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="n">taud</span>  <span class="p">(</span><span class="n">depression</span><span class="p">)</span>
+<span class="n">du</span><span class="o">/</span><span class="n">dt</span><span class="o">=</span><span class="p">(</span><span class="n">U</span><span class="o">-</span><span class="n">u</span><span class="p">)</span><span class="o">/</span><span class="n">tauf</span>  <span class="p">(</span><span class="n">facilitation</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where taud, tauf are time constants and U is a parameter in 0..1. Each presynaptic
+spike triggers modifications of the variables:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">u</span><span class="o">&lt;-</span><span class="n">u</span><span class="o">+</span><span class="n">U</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">u</span><span class="p">)</span>
+<span class="n">x</span><span class="o">&lt;-</span><span class="n">x</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">u</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Synaptic weights are modulated by the product <tt class="docutils literal"><span class="pre">u*x</span></tt> (in 0..1) (before update).</p>
+<p>Reference:</p>
+<ul class="simple">
+<li>Markram et al (1998). &#8220;Differential signaling via the same axon of
+neocortical pyramidal neurons&#8221;, PNAS.</li>
+</ul>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Plasticity</a><ul>
+<li><a class="reference internal" href="#spike-timing-dependent-plasticity-stdp">Spike timing dependent plasticity (STDP)</a></li>
+<li><a class="reference internal" href="#short-term-plasticity-stp">Short term plasticity (STP)</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="reference-connections.html"
+                        title="previous chapter">Connections</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="reference-synapses.html"
+                        title="next chapter">Synapses</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/reference-plasticity.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="reference-synapses.html" title="Synapses"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="reference-connections.html" title="Connections"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="reference.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

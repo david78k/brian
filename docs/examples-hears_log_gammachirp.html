@@ -1,0 +1,148 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: log_gammachirp (hears) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: drnl (hears)" href="examples-hears_drnl.html" />
+    <link rel="prev" title="Example: online_computation (hears)" href="examples-hears_online_computation.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-hears_drnl.html" title="Example: drnl (hears)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-hears_online_computation.html" title="Example: online_computation (hears)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-log-gammachirp-hears">
+<span id="example-hears-log-gammachirp"></span><span id="index-0"></span><h1>Example: log_gammachirp (hears)<a class="headerlink" href="#example-log-gammachirp-hears" title="Permalink to this headline">¶</a></h1>
+<p>Example of the use of the class <a class="reference internal" href="reference-hears.html#brian.hears.LogGammachirp" title="brian.hears.LogGammachirp"><tt class="xref py py-class docutils literal"><span class="pre">LogGammachirp</span></tt></a> available in
+the library. It implements a filterbank of IIR gammachirp filters as
+Unoki et al. 2001, &#8220;Improvement of an IIR asymmetric compensation gammachirp
+filter&#8221;. In this example, a white noise is filtered by a linear gammachirp
+filterbank and the resulting cochleogram is plotted. The different impulse
+responses are also plotted.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">brian.hears</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">sound</span> <span class="o">=</span> <span class="n">whitenoise</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span><span class="o">.</span><span class="n">ramp</span><span class="p">()</span>
+<span class="n">sound</span><span class="o">.</span><span class="n">level</span> <span class="o">=</span> <span class="mi">50</span><span class="o">*</span><span class="n">dB</span>
+
+<span class="n">nbr_center_frequencies</span> <span class="o">=</span> <span class="mi">50</span>  <span class="c">#number of frequency channels in the filterbank</span>
+
+<span class="n">c1</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.96</span> <span class="c">#glide slope</span>
+<span class="n">b1</span> <span class="o">=</span> <span class="mf">1.81</span>  <span class="c">#factor determining the time constant of the filters</span>
+
+<span class="c">#center frequencies with a spacing following an ERB scale</span>
+<span class="n">cf</span> <span class="o">=</span> <span class="n">erbspace</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">Hz</span><span class="p">,</span> <span class="mi">1000</span><span class="o">*</span><span class="n">Hz</span><span class="p">,</span> <span class="n">nbr_center_frequencies</span><span class="p">)</span>
+
+<span class="n">gamma_chirp</span> <span class="o">=</span> <span class="n">LogGammachirp</span><span class="p">(</span><span class="n">sound</span><span class="p">,</span> <span class="n">cf</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">c1</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">b1</span><span class="p">)</span>
+
+<span class="n">gamma_chirp_mon</span> <span class="o">=</span> <span class="n">gamma_chirp</span><span class="o">.</span><span class="n">process</span><span class="p">()</span>
+
+<span class="n">figure</span><span class="p">()</span>
+<span class="n">imshow</span><span class="p">(</span><span class="n">flipud</span><span class="p">(</span><span class="n">gamma_chirp_mon</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">aspect</span><span class="o">=</span><span class="s">&#39;auto&#39;</span><span class="p">)</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-hears_online_computation.html"
+                        title="previous chapter">Example: online_computation (hears)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-hears_drnl.html"
+                        title="next chapter">Example: drnl (hears)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-hears_log_gammachirp.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-hears_drnl.html" title="Example: drnl (hears)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-hears_online_computation.html" title="Example: online_computation (hears)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Managing simulation runs and data &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="User manual" href="usermanual.html" />
+    <link rel="next" title="The library" href="library.html" />
+    <link rel="prev" title="File management" href="files.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="library.html" title="The library"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="files.html" title="File management"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="usermanual.html" accesskey="U">User manual</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="managing-simulation-runs-and-data">
+<h1>Managing simulation runs and data<a class="headerlink" href="#managing-simulation-runs-and-data" title="Permalink to this headline">¶</a></h1>
+<p>Often, you want to run a simulation multiple times with different parameters
+to generate data for a plot. There are many different ways to manage this,
+and Brian has a few tools to make it easier.</p>
+<div class="section" id="saving-data-by-hand">
+<h2>Saving data by hand<a class="headerlink" href="#saving-data-by-hand" title="Permalink to this headline">¶</a></h2>
+<p>The simplest strategy is to run your simulation, and then save the data with
+a unique filename using either
+<a class="reference external" href="http://docs.python.org/library/pickle.html">pickle</a>, writing text or binary
+data to a file
+<a class="reference external" href="http://docs.python.org/tutorial/inputoutput.html">with Python</a>, or with
+<a class="reference external" href="http://docs.scipy.org/doc/numpy/user/basics.io.html">Numpy</a> and
+<a class="reference external" href="http://docs.scipy.org/doc/scipy/reference/tutorial/io.html">Scipy</a>.</p>
+</div>
+<div class="section" id="structured-data-formats">
+<h2>Structured data formats<a class="headerlink" href="#structured-data-formats" title="Permalink to this headline">¶</a></h2>
+<p>Another option is to use a more structured file type, for example, you could
+use the high performance <a class="reference external" href="http://www.hdfgroup.org/HDF5/">HDF5</a> scientific
+data file format with <a class="reference external" href="http://www.pytables.org">PyTables</a>.</p>
+<p>Python also includes an object for storing data in a dictionary like database
+object with the <a class="reference external" href="http://docs.python.org/library/shelve.html">shelve module</a>.</p>
+<p>Brian includes a simple modification of Python&#8217;s shelves to make it easy to
+generate data in parallel on a single machine or across several machines. The
+problem with Python shelves and HDF5 is that they cannot be accessed by several
+processes on a single machine concurrently (if two processes attempt to write
+to the file at the same time it gets corrupted). In addition, if you want to
+run simulations on two computers at once and merge them you have to write a
+separate program to merge the databases produced. With the
+<a class="reference internal" href="reference-io.html#brian.tools.datamanager.DataManager" title="brian.tools.datamanager.DataManager"><tt class="xref py py-class docutils literal"><span class="pre">DataManager</span></tt></a> class, you generate a directory
+containing multiple files, and the data can be distributed amongst these files.
+To merge the results generated on two different computers just copy the
+contents of one directory into the other. The way it works is that to write
+data to a <a class="reference internal" href="reference-io.html#brian.tools.datamanager.DataManager" title="brian.tools.datamanager.DataManager"><tt class="xref py py-class docutils literal"><span class="pre">DataManager</span></tt></a>, you first generate a
+&#8216;&#8217;session&#8217;&#8217; object (which is essentially a Python shelf object) and then
+write data to that. However, when you want to read data, it will look in all
+the files in the directory and return merged data from them. Typically, a
+session file will have the form <tt class="docutils literal"><span class="pre">username.computername</span></tt> so that merging
+directories across multiple computers/users is straightforward (no name
+conflicts). You can also create a &#8216;&#8217;locking session&#8217;&#8216;. This object can be
+used in multiple processes concurrently without danger of losing data.</p>
+</div>
+<div class="section" id="multiple-runs-in-parallel">
+<h2>Multiple runs in parallel<a class="headerlink" href="#multiple-runs-in-parallel" title="Permalink to this headline">¶</a></h2>
+<p>The Python
+<a class="reference external" href="http://docs.python.org/library/multiprocessing.html">multiprocessing</a>
+module can be used for relatively simply distributing simulation runs over
+multiple CPUs. Alternatively, you could use
+<a class="reference external" href="http://code.google.com/p/playdoh/">Playdoh</a> (produced by our group) to
+distribute work over multiple CPUs and multiple machines. For other solutions,
+see the &#8220;Parallel and distributed programming&#8221; section of the
+<a class="reference external" href="http://www.scipy.org/Topical_Software">Scipy Topical Software</a> page.</p>
+<p>Brian provides a simple, single machine technique that works with the
+<a class="reference internal" href="reference-io.html#brian.tools.datamanager.DataManager" title="brian.tools.datamanager.DataManager"><tt class="xref py py-class docutils literal"><span class="pre">DataManager</span></tt></a> object,
+<a class="reference internal" href="reference-taskfarm.html#brian.tools.taskfarm.run_tasks" title="brian.tools.taskfarm.run_tasks"><tt class="xref py py-func docutils literal"><span class="pre">run_tasks()</span></tt></a>. With this, you provide a function and
+a sequence of arguments to that function, and the function calls will be
+evaluated across multiple CPUs, with the results being stored in the data
+manager. It also features a GUI which gives feedback on simulations as they
+run, and can be used to safely stop the processes without risking losing any
+data. A simple example of using this technique:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">brian.tools.datamanager</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">brian.tools.taskfarm</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="k">def</span> <span class="nf">find_rate</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">report</span><span class="p">):</span>
+    <span class="n">eqs</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">    dV/dt = (k-V)/(10*ms) : 1</span>
+<span class="s">    &#39;&#39;&#39;</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">eqs</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">SpikeCounter</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+    <span class="n">run</span><span class="p">(</span><span class="mi">30</span><span class="o">*</span><span class="n">second</span><span class="p">,</span> <span class="n">report</span><span class="o">=</span><span class="n">report</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">mean</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">count</span><span class="p">)</span><span class="o">/</span><span class="mi">30</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">__name__</span><span class="o">==</span><span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="mi">20</span>
+    <span class="n">dataman</span> <span class="o">=</span> <span class="n">DataManager</span><span class="p">(</span><span class="s">&#39;taskfarmexample&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dataman</span><span class="o">.</span><span class="n">itemcount</span><span class="p">()</span><span class="o">&lt;</span><span class="n">N</span><span class="p">:</span>
+        <span class="n">M</span> <span class="o">=</span> <span class="n">N</span><span class="o">-</span><span class="n">dataman</span><span class="o">.</span><span class="n">itemcount</span><span class="p">()</span>
+        <span class="n">run_tasks</span><span class="p">(</span><span class="n">dataman</span><span class="p">,</span> <span class="n">find_rate</span><span class="p">,</span> <span class="n">rand</span><span class="p">(</span><span class="n">M</span><span class="p">)</span><span class="o">*</span><span class="mi">19</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">dataman</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="n">plot</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="s">&#39;.&#39;</span><span class="p">)</span>
+    <span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;k&#39;</span><span class="p">)</span>
+    <span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;Firing rate (Hz)&#39;</span><span class="p">)</span>
+    <span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Finally, a more sophisticated solution for &#8220;managing and tracking projects,
+based on numerical simulation or analysis, with the aim of supporting
+reproducible research&#8221; is <a class="reference external" href="http://neuralensemble.org/trac/sumatra/">Sumatra</a>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Managing simulation runs and data</a><ul>
+<li><a class="reference internal" href="#saving-data-by-hand">Saving data by hand</a></li>
+<li><a class="reference internal" href="#structured-data-formats">Structured data formats</a></li>
+<li><a class="reference internal" href="#multiple-runs-in-parallel">Multiple runs in parallel</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="files.html"
+                        title="previous chapter">File management</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="library.html"
+                        title="next chapter">The library</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/managing_sims.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="library.html" title="The library"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="files.html" title="File management"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="usermanual.html" >User manual</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

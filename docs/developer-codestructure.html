@@ -1,0 +1,400 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Main code structure &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Developer’s guide" href="developer.html" />
+    <link rel="next" title="Equations" href="developer-equations.html" />
+    <link rel="prev" title="Simulation principles" href="developer-simulationprinciples.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="developer-equations.html" title="Equations"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="developer-simulationprinciples.html" title="Simulation principles"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="developer.html" accesskey="U">Developer&#8217;s guide</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="main-code-structure">
+<h1>Main code structure<a class="headerlink" href="#main-code-structure" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>Brian features can be broadly categorised into <em>construction</em> of the network,
+and <em>running</em> the network.</p>
+<div class="section" id="constructing-the-network">
+<h3>Constructing the network<a class="headerlink" href="#constructing-the-network" title="Permalink to this headline">¶</a></h3>
+<p>The following objects need to be specified by the user explicitly or implicitly:</p>
+<ul class="simple">
+<li><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></li>
+<li><tt class="xref py py-class docutils literal"><span class="pre">Connection</span></tt></li>
+<li>Monitors</li>
+<li><tt class="xref py py-class docutils literal"><span class="pre">Network</span></tt></li>
+</ul>
+<p>After that, the network needs to be <em>prepared</em>. Preparation of the network
+involves initialising objects&#8217; data structures appropriately, in particular
+compressing the <tt class="xref py py-class docutils literal"><span class="pre">Connection</span></tt> matrices. Connection matrices are initially
+stored as instances of a <tt class="xref py py-class docutils literal"><span class="pre">ConstructionMatrix</span></tt> class (sparse, dense, etc.),
+and then later <em>compressed</em> into an instance of a <tt class="xref py py-class docutils literal"><span class="pre">ConnectionMatrix</span></tt>
+class. Two levels are necessary, because at construction time, all matrices have
+to be editable, whereas at runtime, for efficiency reasons, some matrix types
+are read-only or partially read-only. Data structures appropriate to the
+construction of a matrix, particularly sparse matrices, are not the most
+efficient for runtime access.</p>
+<p>Constructing the <tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt> object is a rather complicated operation,
+involving the construction of many subsididary objects. The most complicated
+aspect is the creation, manipulation and analysis of an <tt class="xref py py-class docutils literal"><span class="pre">Equations</span></tt>
+object.</p>
+</div>
+<div class="section" id="running-the-network">
+<h3>Running the network<a class="headerlink" href="#running-the-network" title="Permalink to this headline">¶</a></h3>
+<p>The network is run by repeatedly evaluating the &#8216;update schedule&#8217; and updating
+the clock or clocks. The &#8216;update schedule&#8217; is user specifiable, but usually
+consists of the following sequence of operations (interspersed with optional
+user network operation calls):</p>
+<ul class="simple">
+<li>Update state variables of <tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></li>
+<li>Call thresholding function</li>
+<li>Push spikes into <tt class="xref py py-class docutils literal"><span class="pre">SpikeContainer</span></tt></li>
+<li>Propagate spikes (possibly with delays) via <tt class="xref py py-class docutils literal"><span class="pre">Connection</span></tt></li>
+<li>Update state variables of <tt class="xref py py-class docutils literal"><span class="pre">Synapses</span></tt> (possibly includes updating the
+state of targeted <tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt> objects</li>
+<li>Call reset function on neurons which have spiked</li>
+</ul>
+</div>
+</div>
+<div class="section" id="details-of-network-construction">
+<h2>Details of network construction<a class="headerlink" href="#details-of-network-construction" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="construction-of-neurongroup">
+<h3>Construction of <tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt><a class="headerlink" href="#construction-of-neurongroup" title="Permalink to this headline">¶</a></h3>
+<p>The <tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt> object is responsible for storing the state variables
+of each of its neurons, for updating them each time step, generating spikes
+via a thresholding mechanism, storing spikes so that they can be accessed with
+a delay, and resetting state variables after spiking. State variable update
+is done by a <tt class="docutils literal"><span class="pre">StateUpdater</span></tt> class defined in <tt class="docutils literal"><span class="pre">brian/stateupdater.py</span></tt>.
+Thresholding is done by a <tt class="xref py py-class docutils literal"><span class="pre">Threshold</span></tt> class defined in
+<tt class="docutils literal"><span class="pre">brian/threshold.py</span></tt> and resetting is done by a <tt class="xref py py-class docutils literal"><span class="pre">Reset</span></tt> class defined
+in <tt class="docutils literal"><span class="pre">brian/reset.py</span></tt>. The <tt class="docutils literal"><span class="pre">__init__</span></tt> method of <tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt> takes
+these objects as arguments, but it also has various additional keywords which
+can be used more intuitively. In this case, the appropriate object is selected
+automatically. For example, if you specify <tt class="docutils literal"><span class="pre">reset=0*mV</span></tt> in the keyword
+arguments, Brian generates a <tt class="docutils literal"><span class="pre">Reset(0*mV)</span></tt> object. The
+<tt class="xref py py-meth docutils literal"><span class="pre">NeuronGroup.__init__()</span></tt> method code is rather complicated and deals with
+many special cases.</p>
+<p>The most complicated aspect of this is the definition of the state variables and
+the update procedure. Typically, the user simply gives a list of differential
+equations, and Brian attempts to automatically extract the appropriate state
+variable definitions, and creates a differential equation solver appropriate to
+them (it needs some help in this at the moment, e.g. specifying the order or
+type of the solver). The main work in this is done by the
+<tt class="xref py py-func docutils literal"><span class="pre">magic_state_updater()</span></tt> function, which uses the
+<tt class="xref py py-class docutils literal"><span class="pre">Equations</span></tt> object (see next section).</p>
+<p>Once the state variables are defined, various internal objects are created.
+The state variables are stored in the <tt class="docutils literal"><span class="pre">_S</span></tt> attribute of a <tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt>.
+This is an MxN matrix where M is the number of variables and N is the number
+of neurons.</p>
+<p>The other major data structure generated is the <tt class="docutils literal"><span class="pre">LS</span></tt> attribute (last spikes).
+This is a <tt class="docutils literal"><span class="pre">SpikeContainer</span></tt> instance, a circular array used to contain spikes.
+See <tt class="docutils literal"><span class="pre">brian/utils/circular.py</span></tt>.</p>
+<p>Finally note that the construction of many of these objects requires a
+<tt class="xref py py-class docutils literal"><span class="pre">Clock</span></tt> object, which can either be specified explicitly, or is guessed
+by the <tt class="xref py py-func docutils literal"><span class="pre">guess_clock()</span></tt> function which searches for clocks using the magic
+module (see below). <tt class="xref py py-class docutils literal"><span class="pre">EventClock</span></tt> objects are excluded from this guessing.</p>
+</div>
+<div class="section" id="the-magic-state-updater-function-and-the-equations-object">
+<h3>The <tt class="xref py py-func docutils literal"><span class="pre">magic_state_updater()</span></tt> function and the <tt class="xref py py-class docutils literal"><span class="pre">Equations</span></tt> object<a class="headerlink" href="#the-magic-state-updater-function-and-the-equations-object" title="Permalink to this headline">¶</a></h3>
+<p>This function returns an appropriate <tt class="docutils literal"><span class="pre">StateUpdater</span></tt> object and a list of
+the dynamic variables of an <tt class="xref py py-class docutils literal"><span class="pre">Equations</span></tt> object. It uses methods of the
+<tt class="xref py py-class docutils literal"><span class="pre">Equations</span></tt> object to do this (such as <tt class="xref py py-meth docutils literal"><span class="pre">Equations.is_linear()</span></tt>).</p>
+<p>The <tt class="xref py py-class docutils literal"><span class="pre">Equations</span></tt> object can be constructed in various ways. It can be
+constructed from a multi-line string or by adding (concatenating) other
+<tt class="xref py py-class docutils literal"><span class="pre">Equations</span></tt> objects. Construction by multi-line string is done by
+pattern matching. The four forms are:</p>
+<ol class="arabic simple">
+<li><tt class="docutils literal"><span class="pre">dx/dt</span> <span class="pre">=</span> <span class="pre">f</span> <span class="pre">:</span> <span class="pre">unit</span></tt> (differential equation)</li>
+<li><tt class="docutils literal"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">f</span> <span class="pre">:</span> <span class="pre">unit</span></tt> (equation)</li>
+<li><tt class="docutils literal"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">y</span></tt> (alias)</li>
+<li><tt class="docutils literal"><span class="pre">x</span> <span class="pre">:</span> <span class="pre">unit</span></tt> (parameter)</li>
+</ol>
+<p>Differential equations and parameters are dynamic variables, equations and
+aliases are just computed and substituted when necessary. The <tt class="docutils literal"><span class="pre">f</span></tt> patterns in
+the forms above are stored for differential equations and parameters. For the
+solution of nonlinear equations, these <tt class="docutils literal"><span class="pre">f</span></tt> patterns are executed as Python
+code in the evaluation of the state update. For example, the equations
+<tt class="docutils literal"><span class="pre">dV/dt</span> <span class="pre">=</span> <span class="pre">-V*V/(10*ms)</span> <span class="pre">:</span> <span class="pre">1</span></tt> and <tt class="docutils literal"><span class="pre">dW/dt</span> <span class="pre">=</span> <span class="pre">cos(W)/(20*ms)</span> <span class="pre">:</span> <span class="pre">1</span></tt> are
+numerically evaluated with an Euler method
+as the following code (generated from the list of dynamic variables and their
+defining strings):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">V</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">P</span><span class="o">.</span><span class="n">_S</span>
+<span class="n">V__tmp</span><span class="p">,</span> <span class="n">W__tmp</span> <span class="o">=</span> <span class="n">P</span><span class="o">.</span><span class="n">_dS</span>
+<span class="n">V__tmp</span><span class="p">[:]</span> <span class="o">=</span> <span class="o">-</span><span class="n">V</span><span class="o">*</span><span class="n">V</span><span class="o">/</span><span class="p">(</span><span class="mi">10</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+<span class="n">W__tmp</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="n">W</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">20</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+<span class="n">P</span><span class="o">.</span><span class="n">_S</span> <span class="o">+=</span> <span class="n">dt</span><span class="o">*</span><span class="n">P</span><span class="o">.</span><span class="n">_dS</span>
+</pre></div>
+</div>
+<p>This code generation is done by the <tt class="xref py py-meth docutils literal"><span class="pre">Equations.forward_euler()</span></tt> family
+of methods.</p>
+<p>In the case where the equations are linear, they are solved by a matrix
+exponential using the code in <tt class="xref py py-func docutils literal"><span class="pre">get_linear_equations()</span></tt> defined in
+<tt class="docutils literal"><span class="pre">brian/stateupdater.py</span></tt>.</p>
+<p>Finally, note that equations strings can contain references to names of objects
+that are defined in the namespace of the string, and the <tt class="xref py py-class docutils literal"><span class="pre">Equations</span></tt>
+object can pick these out. It does this by inspecting the call stack, extracting
+the namespace for the appropriate level (which has to be kept track of), and
+plucking out the appropriate name. The <tt class="docutils literal"><span class="pre">level=...</span></tt> keywords you see dotted
+around Brian&#8217;s code are there to keep track of these levels for this reason.</p>
+</div>
+<div class="section" id="construction-of-connection">
+<h3>Construction of <tt class="xref py py-class docutils literal"><span class="pre">Connection</span></tt><a class="headerlink" href="#construction-of-connection" title="Permalink to this headline">¶</a></h3>
+<p><tt class="xref py py-class docutils literal"><span class="pre">Connection</span></tt> objects provide methods for storing weight matrices and
+propagating spikes. Spike propagation is done via the <tt class="xref py py-meth docutils literal"><span class="pre">Connection.do_propagate()</span></tt>
+and <tt class="xref py py-meth docutils literal"><span class="pre">Connection.propagate()</span></tt> methods. Weight matrices are stored in the <tt class="docutils literal"><span class="pre">W</span></tt>
+attribute. Initially, weight matrices are <tt class="xref py py-class docutils literal"><span class="pre">ConstructionMatrix</span></tt> objects
+and are converted by the <tt class="xref py py-meth docutils literal"><span class="pre">Connection.compress()</span></tt> method, via the matrices&#8217;
+<tt class="docutils literal"><span class="pre">connection_matrix()</span></tt> methods to <tt class="xref py py-class docutils literal"><span class="pre">ConnectionMatrix</span></tt> objects. The idea
+is to have two data structures, one appropriate to the construction of a matrix,
+supporting adding and removing new synapses, and one appropriate to runtime
+behaviour, focussing on fast row access above all else. There are three matrix
+structures, &#8216;dense&#8217;, &#8216;sparse&#8217; and &#8216;dynamic&#8217; (and &#8216;computed&#8217; may be added later).
+The &#8216;dense&#8217; matrix is just a full 2D array, and the matrix objects just reproduce
+the functionality of numpy arrays. The &#8216;sparse&#8217; and &#8216;dynamic&#8217; structures are
+sparse matrices. The first doesn&#8217;t allow you to add or remove elements at runtime
+and is very optimised, the second does allow you to and is less optimised. Both
+are more optimised than scipy&#8217;s sparse matrices, which are used as the basis for
+the construction phase.</p>
+<p><tt class="xref py py-class docutils literal"><span class="pre">Connection</span></tt> objects can handle homogeneous delays (all synapses with the
+same delay) by pulling spikes from <tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt>&#8216;s <tt class="docutils literal"><span class="pre">LS</span></tt> object with a
+delay. Heterogeneous delays (each synapse with a different delay) are done by
+the <tt class="xref py py-class docutils literal"><span class="pre">DelayConnection</span></tt> object, which stores a <tt class="docutils literal"><span class="pre">_delayvec</span></tt> attribute
+alongside the <tt class="docutils literal"><span class="pre">W</span></tt> attribute. The delay matrix is of the same type as the
+weight matrix and in the case of sparse matrices must have nonzero elements at
+the same places. The <tt class="xref py py-class docutils literal"><span class="pre">Connection</span></tt> object automatically turns itself into
+a <tt class="xref py py-class docutils literal"><span class="pre">DelayConnection</span></tt> object if heterogeneous delays are requested, so that
+the user doesn&#8217;t even need to know of the existence of <tt class="xref py py-class docutils literal"><span class="pre">DelayConnection</span></tt>.</p>
+<p>The <tt class="xref py py-class docutils literal"><span class="pre">Connection</span></tt> object also provides methods for initialising the weight
+matrices either fully, randomly, etc. (See the user docs.)</p>
+</div>
+<div class="section" id="construction-of-monitors">
+<h3>Construction of monitors<a class="headerlink" href="#construction-of-monitors" title="Permalink to this headline">¶</a></h3>
+<p>The <tt class="xref py py-class docutils literal"><span class="pre">SpikeMonitor</span></tt> class of monitors derive from <tt class="xref py py-class docutils literal"><span class="pre">Connection</span></tt>.
+Rather than propagating spikes to another group, they store them in a list. The
+work is done in the <tt class="xref py py-meth docutils literal"><span class="pre">SpikeMonitor.propagate()</span></tt> method.</p>
+<p>The <tt class="xref py py-class docutils literal"><span class="pre">StateMonitor</span></tt> class of monitors derive from <tt class="xref py py-class docutils literal"><span class="pre">NetworkOperation</span></tt>.
+Network operations are called once every time step and execute arbitrary Python
+code. The <tt class="xref py py-class docutils literal"><span class="pre">StateMonitor</span></tt> class of monitors record state variables each
+time step to a list.</p>
+</div>
+<div class="section" id="construction-of-network">
+<h3>Construction of <tt class="xref py py-class docutils literal"><span class="pre">Network</span></tt><a class="headerlink" href="#construction-of-network" title="Permalink to this headline">¶</a></h3>
+<p>When the user calls the function <tt class="xref py py-func docutils literal"><span class="pre">run()</span></tt>, a <tt class="xref py py-class docutils literal"><span class="pre">MagicNetwork</span></tt> object is
+created, and the <tt class="xref py py-meth docutils literal"><span class="pre">Network.run()</span></tt> method is called. <tt class="xref py py-class docutils literal"><span class="pre">MagicNetwork</span></tt>
+gathers, using the magic module, a list of all appropriate objects and runs them
+together. Alternatively, the user can specify their own list of objects using
+a <tt class="xref py py-class docutils literal"><span class="pre">Network</span></tt> object. Each time an object is added to a <tt class="xref py py-class docutils literal"><span class="pre">Network</span></tt>
+either via the initialiser or the <tt class="xref py py-meth docutils literal"><span class="pre">Network.add()</span></tt> method, it checks to see
+if it has an attribute <tt class="docutils literal"><span class="pre">contained_objects</span></tt>, and if so it adds all the objects
+in that to the network too. This allows, for example, the <tt class="xref py py-class docutils literal"><span class="pre">STDP</span></tt> object
+to contained <tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt> and <tt class="xref py py-class docutils literal"><span class="pre">Connection</span></tt> objects which the user
+doesn&#8217;t see, but are used to implement the STDP functionality.</p>
+<p>The <tt class="xref py py-meth docutils literal"><span class="pre">Network.run()</span></tt> method calls the <tt class="xref py py-meth docutils literal"><span class="pre">Connection.compress()</span></tt> method
+on every <tt class="xref py py-class docutils literal"><span class="pre">Connection</span></tt> object to convert construction matrices to
+connection matrices. It also builds an update schedule (see below).</p>
+</div>
+<div class="section" id="the-magic-module">
+<h3>The magic module<a class="headerlink" href="#the-magic-module" title="Permalink to this headline">¶</a></h3>
+<p>The magic module is used for tracking instances of objects. A class that derives
+from the <tt class="xref py py-class docutils literal"><span class="pre">magic.InstanceTracker</span></tt> class can be tracked in this way,
+including <tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt>, <tt class="xref py py-class docutils literal"><span class="pre">Connection</span></tt>, <tt class="xref py py-class docutils literal"><span class="pre">NetworkOperation</span></tt>
+and <tt class="xref py py-class docutils literal"><span class="pre">Clock</span></tt>. The <tt class="xref py py-func docutils literal"><span class="pre">find_instances()</span></tt> function can be used to search
+for instances. Note that <tt class="xref py py-func docutils literal"><span class="pre">find_instances()</span></tt> will only return instances which
+were instantiated in the same execution frame as the <tt class="xref py py-func docutils literal"><span class="pre">find_instances()</span></tt>
+calling frame, or (if the <tt class="docutils literal"><span class="pre">level</span></tt> keyword is used) one of the frames higher up
+in the call stack. The idea is that you may have modular code with objects
+defined in different places, but that you don&#8217;t want to use all objects that
+exist at all in the network. This system causes a bit of trouble, but seems
+unavoidable. See the user manual section
+<a class="reference internal" href="tasks_multiplefiles.html#projects-with-multiple-files"><em>Projects with multiple files or functions</em></a> for details on getting around this.</p>
+</div>
+</div>
+<div class="section" id="details-of-network-running">
+<h2>Details of network running<a class="headerlink" href="#details-of-network-running" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="update-schedules">
+<h3>Update schedules<a class="headerlink" href="#update-schedules" title="Permalink to this headline">¶</a></h3>
+<p>An update schedule gives the sequence of operations to be carried out each time
+step of the simulation. Typically this is: state update and threshold;
+propagation; reset, although an option is available for switching propagation
+and reset around. Network operations can be weaved in anywhere amongst these
+basic steps. See the reference documentation for the <tt class="xref py py-class docutils literal"><span class="pre">Network</span></tt> object
+for more details.</p>
+<p>Simulation proceeds by choosing the clock with the lowest current time,
+selecting all objects which have that clock as their clock, and performing the
+update schedule on those objects, before applying the <tt class="xref py py-meth docutils literal"><span class="pre">Clock.tick()</span></tt> method
+to increment the clock time by <tt class="docutils literal"><span class="pre">dt</span></tt>.</p>
+</div>
+<div class="section" id="network-operations">
+<h3>Network operations<a class="headerlink" href="#network-operations" title="Permalink to this headline">¶</a></h3>
+<p>A <tt class="xref py py-class docutils literal"><span class="pre">NetworkOperation</span></tt> object is called as if it were a function, i.e. the
+<tt class="docutils literal"><span class="pre">__call__()</span></tt> method is called with no arguments. The <tt class="xref py py-func docutils literal"><span class="pre">network_operation()</span></tt>
+decorator exists to convert a function into a suitable <tt class="xref py py-class docutils literal"><span class="pre">NetworkOperation</span></tt>
+object. This technique is used for the internal functioning of many of Brian&#8217;s
+features (such as <tt class="xref py py-class docutils literal"><span class="pre">StateMonitor</span></tt>).</p>
+</div>
+<div class="section" id="neurongroup-update">
+<h3><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt> update<a class="headerlink" href="#neurongroup-update" title="Permalink to this headline">¶</a></h3>
+<p>The <tt class="xref py py-meth docutils literal"><span class="pre">NeuronGroup.update()</span></tt> method does the following three things. First of
+all it calls the <tt class="docutils literal"><span class="pre">StateUpdater</span></tt> to update the state variables. Then it calls
+its <tt class="xref py py-class docutils literal"><span class="pre">Threshold</span></tt> object if one exists to extract the indices of the spiking
+neurons. Finally it pushes these into the <tt class="docutils literal"><span class="pre">LS</span></tt> attribute for extraction by
+any <tt class="xref py py-class docutils literal"><span class="pre">Connection</span></tt> objects.</p>
+</div>
+<div class="section" id="neurongroup-reset">
+<h3><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt> reset<a class="headerlink" href="#neurongroup-reset" title="Permalink to this headline">¶</a></h3>
+<p>The <tt class="xref py py-meth docutils literal"><span class="pre">Reset.__call__()</span></tt> method pulls spike from the <tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt>&#8216;s
+<tt class="docutils literal"><span class="pre">LS</span></tt> attribute and then resets the state variables for those.</p>
+</div>
+<div class="section" id="spike-propagation">
+<h3>Spike propagation<a class="headerlink" href="#spike-propagation" title="Permalink to this headline">¶</a></h3>
+<p>The <tt class="xref py py-meth docutils literal"><span class="pre">Connection.do_propagate()</span></tt> method does two things, it gets the spike
+indices to propagate (with homogeneous delays if chosen) from the <tt class="docutils literal"><span class="pre">LS</span></tt>
+attribute of the <tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt> and then passes these to its
+<tt class="xref py py-meth docutils literal"><span class="pre">Connection.propagate()</span></tt> method. This method extracts a list of connection
+matrix rows using the <tt class="xref py py-meth docutils literal"><span class="pre">ConnectionMatrix.get_rows()</span></tt> method. This method
+returns a list of <tt class="xref py py-class docutils literal"><span class="pre">ConnectionVector</span></tt> instances. There are two types of
+<tt class="xref py py-class docutils literal"><span class="pre">ConnectionVector</span></tt>, dense and sparse. Dense ones are simply numpy arrays,
+sparse ones consist of two numpy arrays, an array of values and an array of
+corresponding column indices. The <tt class="xref py py-class docutils literal"><span class="pre">SparseConnectionVector</span></tt> class has
+some methods which make this distinction seamless to the user in most instances,
+although developers need to be aware of it. Finally, the
+<tt class="xref py py-meth docutils literal"><span class="pre">Connection.propagate()</span></tt> method goes through this list applying the row
+vectors one by one. The pure Python version of this is straightforward, but
+there is also a <tt class="docutils literal"><span class="pre">C++</span></tt> accelerated version which uses the scipy Weave package
+if the user has a suitable compiler on their system. This version is much more
+efficient, but the code is rather dense and difficult to understand.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Main code structure</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a><ul>
+<li><a class="reference internal" href="#constructing-the-network">Constructing the network</a></li>
+<li><a class="reference internal" href="#running-the-network">Running the network</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#details-of-network-construction">Details of network construction</a><ul>
+<li><a class="reference internal" href="#construction-of-neurongroup">Construction of <tt class="docutils literal"><span class="pre">NeuronGroup</span></tt></a></li>
+<li><a class="reference internal" href="#the-magic-state-updater-function-and-the-equations-object">The <tt class="docutils literal"><span class="pre">magic_state_updater()</span></tt> function and the <tt class="docutils literal"><span class="pre">Equations</span></tt> object</a></li>
+<li><a class="reference internal" href="#construction-of-connection">Construction of <tt class="docutils literal"><span class="pre">Connection</span></tt></a></li>
+<li><a class="reference internal" href="#construction-of-monitors">Construction of monitors</a></li>
+<li><a class="reference internal" href="#construction-of-network">Construction of <tt class="docutils literal"><span class="pre">Network</span></tt></a></li>
+<li><a class="reference internal" href="#the-magic-module">The magic module</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#details-of-network-running">Details of network running</a><ul>
+<li><a class="reference internal" href="#update-schedules">Update schedules</a></li>
+<li><a class="reference internal" href="#network-operations">Network operations</a></li>
+<li><a class="reference internal" href="#neurongroup-update"><tt class="docutils literal"><span class="pre">NeuronGroup</span></tt> update</a></li>
+<li><a class="reference internal" href="#neurongroup-reset"><tt class="docutils literal"><span class="pre">NeuronGroup</span></tt> reset</a></li>
+<li><a class="reference internal" href="#spike-propagation">Spike propagation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="developer-simulationprinciples.html"
+                        title="previous chapter">Simulation principles</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="developer-equations.html"
+                        title="next chapter">Equations</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/developer-codestructure.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="developer-equations.html" title="Equations"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="developer-simulationprinciples.html" title="Simulation principles"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="developer.html" >Developer&#8217;s guide</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: dcgc (hears) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: artificial_vowels (hears)" href="examples-hears_artificial_vowels.html" />
+    <link rel="prev" title="Example: time_varying_filter1 (hears)" href="examples-hears_time_varying_filter1.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-hears_artificial_vowels.html" title="Example: artificial_vowels (hears)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-hears_time_varying_filter1.html" title="Example: time_varying_filter1 (hears)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-dcgc-hears">
+<span id="example-hears-dcgc"></span><span id="index-0"></span><h1>Example: dcgc (hears)<a class="headerlink" href="#example-dcgc-hears" title="Permalink to this headline">¶</a></h1>
+<p>Implementation example of the compressive gammachirp auditory filter as
+described in Irino, T. and Patterson R., &#8220;A compressive gammachirp auditory
+filter for both physiological and psychophysical data&#8221;, JASA 2001.</p>
+<p>A class called <a class="reference internal" href="reference-hears.html#brian.hears.DCGC" title="brian.hears.DCGC"><tt class="xref py py-class docutils literal"><span class="pre">DCGC</span></tt></a> implementing this model is available
+in the library.</p>
+<p>Technical implementation details and notation can be found in Irino, T. and
+Patterson R., &#8220;A Dynamic Compressive Gammachirp Auditory Filterbank&#8221;,
+IEEE Trans Audio Speech Lang Processing.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">brian.hears</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">simulation_duration</span> <span class="o">=</span> <span class="mi">50</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">samplerate</span> <span class="o">=</span> <span class="mi">50</span><span class="o">*</span><span class="n">kHz</span>
+<span class="n">level</span> <span class="o">=</span> <span class="mi">50</span><span class="o">*</span><span class="n">dB</span> <span class="c"># level of the input sound in rms dB SPL</span>
+<span class="n">sound</span> <span class="o">=</span> <span class="n">whitenoise</span><span class="p">(</span><span class="n">simulation_duration</span><span class="p">,</span> <span class="n">samplerate</span><span class="p">)</span><span class="o">.</span><span class="n">ramp</span><span class="p">()</span>
+<span class="n">sound</span> <span class="o">=</span> <span class="n">sound</span><span class="o">.</span><span class="n">atlevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+
+<span class="n">nbr_cf</span> <span class="o">=</span> <span class="mi">50</span> <span class="c"># number of centre frequencies</span>
+<span class="c"># center frequencies with a spacing following an ERB scale</span>
+<span class="n">cf</span> <span class="o">=</span> <span class="n">erbspace</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">Hz</span><span class="p">,</span> <span class="mi">1000</span><span class="o">*</span><span class="n">Hz</span><span class="p">,</span> <span class="n">nbr_cf</span><span class="p">)</span>
+
+<span class="n">c1</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.96</span> <span class="c">#glide slope of the first filterbank</span>
+<span class="n">b1</span> <span class="o">=</span> <span class="mf">1.81</span>  <span class="c">#factor determining the time constant of the first filterbank</span>
+<span class="n">c2</span> <span class="o">=</span> <span class="mf">2.2</span>   <span class="c">#glide slope of the second filterbank</span>
+<span class="n">b2</span> <span class="o">=</span> <span class="mf">2.17</span>  <span class="c">#factor determining the time constant of the second filterbank</span>
+
+<span class="n">order_ERB</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">ERBrate</span> <span class="o">=</span> <span class="mf">21.4</span><span class="o">*</span><span class="n">log10</span><span class="p">(</span><span class="mf">4.37</span><span class="o">*</span><span class="n">cf</span><span class="o">/</span><span class="mi">1000</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">ERBwidth</span> <span class="o">=</span> <span class="mf">24.7</span><span class="o">*</span><span class="p">(</span><span class="mf">4.37</span><span class="o">*</span><span class="n">cf</span><span class="o">/</span><span class="mi">1000</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">ERBspace</span> <span class="o">=</span> <span class="n">mean</span><span class="p">(</span><span class="n">diff</span><span class="p">(</span><span class="n">ERBrate</span><span class="p">))</span>
+
+<span class="c"># the filter coefficients are updated every update_interval (here in samples)</span>
+<span class="n">update_interval</span> <span class="o">=</span> <span class="mi">1</span>
+
+
+
+<span class="c">#bank of passive gammachirp filters. As the control path uses the same passive</span>
+<span class="c">#filterbank than the signal path (but shifted in frequency)</span>
+<span class="c">#this filterbank is used by both pathway.</span>
+<span class="n">pGc</span> <span class="o">=</span> <span class="n">LogGammachirp</span><span class="p">(</span><span class="n">sound</span><span class="p">,</span> <span class="n">cf</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">b1</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">c1</span><span class="p">)</span>
+
+<span class="n">fp1</span> <span class="o">=</span> <span class="n">cf</span> <span class="o">+</span> <span class="n">c1</span><span class="o">*</span><span class="n">ERBwidth</span><span class="o">*</span><span class="n">b1</span><span class="o">/</span><span class="n">order_ERB</span> <span class="c">#centre frequency of the signal path</span>
+
+<span class="c">#### Control Path ####</span>
+
+<span class="c">#the first filterbank in the control path consists of gammachirp filters</span>
+<span class="c">#value of the shift in ERB frequencies of the control path with respect to the signal path</span>
+<span class="n">lct_ERB</span> <span class="o">=</span> <span class="mf">1.5</span>
+<span class="n">n_ch_shift</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">lct_ERB</span><span class="o">/</span><span class="n">ERBspace</span><span class="p">)</span> <span class="c">#value of the shift in channels</span>
+<span class="c">#index of the channel of the control path taken from pGc</span>
+<span class="n">indch1_control</span> <span class="o">=</span> <span class="n">minimum</span><span class="p">(</span><span class="n">maximum</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nbr_cf</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="n">n_ch_shift</span><span class="p">),</span> <span class="n">nbr_cf</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
+<span class="n">fp1_control</span> <span class="o">=</span> <span class="n">fp1</span><span class="p">[</span><span class="n">indch1_control</span><span class="p">]</span>
+<span class="c">#the control path bank pass filter uses the channels of pGc indexed by indch1_control</span>
+<span class="n">pGc_control</span> <span class="o">=</span> <span class="n">RestructureFilterbank</span><span class="p">(</span><span class="n">pGc</span><span class="p">,</span> <span class="n">indexmapping</span><span class="o">=</span><span class="n">indch1_control</span><span class="p">)</span>
+
+<span class="c">#the second filterbank in the control path consists of fixed asymmetric compensation filters</span>
+<span class="n">frat_control</span> <span class="o">=</span> <span class="mf">1.08</span>
+<span class="n">fr2_control</span> <span class="o">=</span> <span class="n">frat_control</span><span class="o">*</span><span class="n">fp1_control</span>
+<span class="n">asym_comp_control</span> <span class="o">=</span> <span class="n">AsymmetricCompensation</span><span class="p">(</span><span class="n">pGc_control</span><span class="p">,</span> <span class="n">fr2_control</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">b2</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">c2</span><span class="p">)</span>
+
+<span class="c">#definition of the pole of the asymmetric comensation filters</span>
+<span class="n">p0</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">p1</span> <span class="o">=</span> <span class="mf">1.7818</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="mf">0.0791</span><span class="o">*</span><span class="n">b2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="mf">0.1655</span><span class="o">*</span><span class="nb">abs</span><span class="p">(</span><span class="n">c2</span><span class="p">))</span>
+<span class="n">p2</span> <span class="o">=</span> <span class="mf">0.5689</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="mf">0.1620</span><span class="o">*</span><span class="n">b2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="mf">0.0857</span><span class="o">*</span><span class="nb">abs</span><span class="p">(</span><span class="n">c2</span><span class="p">))</span>
+<span class="n">p3</span> <span class="o">=</span> <span class="mf">0.2523</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="mf">0.0244</span><span class="o">*</span><span class="n">b2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="mf">0.0574</span><span class="o">*</span><span class="nb">abs</span><span class="p">(</span><span class="n">c2</span><span class="p">))</span>
+<span class="n">p4</span> <span class="o">=</span> <span class="mf">1.0724</span>
+
+<span class="c">#definition of the parameters used in the control path output levels computation</span>
+<span class="c">#(see IEEE paper for details)</span>
+<span class="n">decay_tcst</span> <span class="o">=</span> <span class="o">.</span><span class="mi">5</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">order</span> <span class="o">=</span> <span class="mf">1.</span>
+<span class="n">lev_weight</span> <span class="o">=</span> <span class="o">.</span><span class="mi">5</span>
+<span class="n">level_ref</span> <span class="o">=</span> <span class="mf">50.</span>
+<span class="n">level_pwr1</span> <span class="o">=</span> <span class="mf">1.5</span>
+<span class="n">level_pwr2</span> <span class="o">=</span> <span class="o">.</span><span class="mi">5</span>
+<span class="n">RMStoSPL</span> <span class="o">=</span> <span class="mf">30.</span>
+<span class="n">frat0</span> <span class="o">=</span> <span class="o">.</span><span class="mi">2330</span>
+<span class="n">frat1</span> <span class="o">=</span> <span class="o">.</span><span class="mo">005</span>
+<span class="n">exp_deca_val</span> <span class="o">=</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">decay_tcst</span><span class="o">*</span><span class="n">samplerate</span><span class="p">)</span><span class="o">*</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">level_min</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="n">RMStoSPL</span><span class="o">/</span><span class="mi">20</span><span class="p">)</span>
+
+<span class="c">#definition of the controller class. What is does it take the outputs of the</span>
+<span class="c">#first and second fitlerbanks of the control filter as input, compute an overall</span>
+<span class="c">#intensity level for each frequency channel. It then uses those level to update</span>
+<span class="c">#the filter coefficient of its target, the asymmetric compensation filterbank of</span>
+<span class="c">#the signal path.</span>
+<span class="k">class</span> <span class="nc">CompensensationFilterUpdater</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">level1_prev</span> <span class="o">=</span> <span class="o">-</span><span class="mi">100</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">level2_prev</span> <span class="o">=</span> <span class="o">-</span><span class="mi">100</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="nb">input</span><span class="p">):</span>
+         <span class="n">value1</span> <span class="o">=</span> <span class="nb">input</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span>
+         <span class="n">value2</span> <span class="o">=</span> <span class="nb">input</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span>
+         <span class="c">#the current level value is chosen as the max between the current</span>
+         <span class="c">#output and the previous one decreased by a decay</span>
+         <span class="n">level1</span> <span class="o">=</span> <span class="n">maximum</span><span class="p">(</span><span class="n">maximum</span><span class="p">(</span><span class="n">value1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">level1_prev</span><span class="o">*</span><span class="n">exp_deca_val</span><span class="p">)</span>
+         <span class="n">level2</span> <span class="o">=</span> <span class="n">maximum</span><span class="p">(</span><span class="n">maximum</span><span class="p">(</span><span class="n">value2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">level2_prev</span><span class="o">*</span><span class="n">exp_deca_val</span><span class="p">)</span>
+
+         <span class="bp">self</span><span class="o">.</span><span class="n">level1_prev</span> <span class="o">=</span> <span class="n">level1</span> <span class="c">#the value is stored for the next iteration</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">level2_prev</span> <span class="o">=</span> <span class="n">level2</span>
+         <span class="c">#the overall intensity is computed between the two filterbank outputs</span>
+         <span class="n">level_total</span> <span class="o">=</span> <span class="n">lev_weight</span><span class="o">*</span><span class="n">level_ref</span><span class="o">*</span><span class="p">(</span><span class="n">level1</span><span class="o">/</span><span class="n">level_ref</span><span class="p">)</span><span class="o">**</span><span class="n">level_pwr1</span><span class="o">+</span>\
+                   <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">lev_weight</span><span class="p">)</span><span class="o">*</span><span class="n">level_ref</span><span class="o">*</span><span class="p">(</span><span class="n">level2</span><span class="o">/</span><span class="n">level_ref</span><span class="p">)</span><span class="o">**</span><span class="n">level_pwr2</span>
+         <span class="c">#then it is converted in dB</span>
+         <span class="n">level_dB</span> <span class="o">=</span> <span class="mi">20</span><span class="o">*</span><span class="n">log10</span><span class="p">(</span><span class="n">maximum</span><span class="p">(</span><span class="n">level_total</span><span class="p">,</span> <span class="n">level_min</span><span class="p">))</span><span class="o">+</span><span class="n">RMStoSPL</span>
+         <span class="c">#the frequency factor is calculated</span>
+         <span class="n">frat</span> <span class="o">=</span> <span class="n">frat0</span> <span class="o">+</span> <span class="n">frat1</span><span class="o">*</span><span class="n">level_dB</span>
+         <span class="c">#the centre frequency of the asymmetric compensation filters are updated</span>
+         <span class="n">fr2</span> <span class="o">=</span> <span class="n">fp1</span><span class="o">*</span><span class="n">frat</span>
+         <span class="n">coeffs</span> <span class="o">=</span> <span class="n">asymmetric_compensation_coeffs</span><span class="p">(</span><span class="n">samplerate</span><span class="p">,</span> <span class="n">fr2</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">filt_b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">filt_a</span><span class="p">,</span> <span class="n">b2</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span>
+                        <span class="n">p0</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">,</span> <span class="n">p4</span><span class="p">)</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">filt_b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">filt_a</span> <span class="o">=</span> <span class="n">coeffs</span>
+
+<span class="c">#### Signal Path ####</span>
+<span class="c">#the signal path consists of the passive gammachirp filterbank pGc previously</span>
+<span class="c">#defined followed by a asymmetric compensation filterbank</span>
+<span class="n">fr1</span> <span class="o">=</span> <span class="n">fp1</span><span class="o">*</span><span class="n">frat0</span>
+<span class="n">varyingfilter_signal_path</span> <span class="o">=</span> <span class="n">AsymmetricCompensation</span><span class="p">(</span><span class="n">pGc</span><span class="p">,</span> <span class="n">fr1</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">b2</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">c2</span><span class="p">)</span>
+<span class="n">updater</span> <span class="o">=</span> <span class="n">CompensensationFilterUpdater</span><span class="p">(</span><span class="n">varyingfilter_signal_path</span><span class="p">)</span>
+ <span class="c">#the controler which takes the two filterbanks of the control path as inputs</span>
+ <span class="c">#and the varying filter of the signal path as target is instantiated</span>
+<span class="n">control</span> <span class="o">=</span> <span class="n">ControlFilterbank</span><span class="p">(</span><span class="n">varyingfilter_signal_path</span><span class="p">,</span>
+                            <span class="p">[</span><span class="n">pGc_control</span><span class="p">,</span> <span class="n">asym_comp_control</span><span class="p">],</span>
+                            <span class="n">varyingfilter_signal_path</span><span class="p">,</span> <span class="n">updater</span><span class="p">,</span> <span class="n">update_interval</span><span class="p">)</span>
+
+<span class="c">#run the simulation</span>
+<span class="c">#Remember that the controler are at the end of the chain and the output of the</span>
+<span class="c">#whole path comes from them</span>
+<span class="n">signal</span> <span class="o">=</span> <span class="n">control</span><span class="o">.</span><span class="n">process</span><span class="p">()</span>
+
+<span class="n">figure</span><span class="p">()</span>
+<span class="n">imshow</span><span class="p">(</span><span class="n">flipud</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">aspect</span><span class="o">=</span><span class="s">&#39;auto&#39;</span><span class="p">)</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-hears_time_varying_filter1.html"
+                        title="previous chapter">Example: time_varying_filter1 (hears)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-hears_artificial_vowels.html"
+                        title="next chapter">Example: artificial_vowels (hears)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-hears_dcgc.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-hears_artificial_vowels.html" title="Example: artificial_vowels (hears)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-hears_time_varying_filter1.html" title="Example: time_varying_filter1 (hears)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

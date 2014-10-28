@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: Diesmann_et_al_1999 (synapses) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: barrelcortex (synapses)" href="examples-synapses_barrelcortex.html" />
+    <link rel="prev" title="Example: synapse_construction (synapses)" href="examples-synapses_synapse_construction.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-synapses_barrelcortex.html" title="Example: barrelcortex (synapses)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-synapses_synapse_construction.html" title="Example: synapse_construction (synapses)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-diesmann-et-al-1999-synapses">
+<span id="example-synapses-diesmann-et-al-1999"></span><span id="index-0"></span><h1>Example: Diesmann_et_al_1999 (synapses)<a class="headerlink" href="#example-diesmann-et-al-1999-synapses" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="synfire-chains">
+<h2>Synfire chains<a class="headerlink" href="#synfire-chains" title="Permalink to this headline">¶</a></h2>
+<p>M. Diesmann et al. (1999). Stable propagation of synchronous spiking in cortical
+neural networks. Nature 402, 529-533.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="c"># Neuron model parameters</span>
+<span class="n">Vr</span> <span class="o">=</span> <span class="o">-</span><span class="mi">70</span> <span class="o">*</span> <span class="n">mV</span>
+<span class="n">Vt</span> <span class="o">=</span> <span class="o">-</span><span class="mi">55</span> <span class="o">*</span> <span class="n">mV</span>
+<span class="n">taum</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">ms</span>
+<span class="n">taupsp</span> <span class="o">=</span> <span class="mf">0.325</span> <span class="o">*</span> <span class="n">ms</span>
+<span class="n">weight</span> <span class="o">=</span> <span class="mf">4.86</span> <span class="o">*</span> <span class="n">mV</span>
+<span class="c"># Neuron model</span>
+<span class="n">eqs</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">dV/dt=(-(V-Vr)+x)*(1./taum) : volt</span>
+<span class="s">dx/dt=(-x+y)*(1./taupsp) : volt</span>
+<span class="s">dy/dt=-y*(1./taupsp)+25.27*mV/ms+</span><span class="se">\</span>
+<span class="s">    (39.24*mV/ms**0.5)*xi : volt</span>
+<span class="s">&#39;&#39;&#39;</span>
+<span class="c"># Neuron groups</span>
+<span class="n">P</span> <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">eqs</span><span class="p">,</span>
+    <span class="n">threshold</span><span class="o">=</span><span class="n">Vt</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="n">Vr</span><span class="p">,</span> <span class="n">refractory</span><span class="o">=</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ms</span><span class="p">)</span>
+<span class="n">Pinput</span> <span class="o">=</span> <span class="n">PulsePacket</span><span class="p">(</span><span class="n">t</span><span class="o">=</span><span class="mi">50</span> <span class="o">*</span> <span class="n">ms</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">85</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ms</span><span class="p">)</span>
+<span class="c"># The network structure</span>
+<span class="n">Pgp</span> <span class="o">=</span> <span class="p">[</span> <span class="n">P</span><span class="o">.</span><span class="n">subgroup</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+<span class="n">C</span> <span class="o">=</span> <span class="n">Synapses</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s">&#39;w:volt&#39;</span><span class="p">,</span> <span class="n">pre</span><span class="o">=</span><span class="s">&#39;y+=w&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">):</span>
+    <span class="n">C</span><span class="p">[</span><span class="n">Pgp</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">Pgp</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]]</span><span class="o">=</span><span class="bp">True</span>
+    <span class="n">C</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="n">Pgp</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">Pgp</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]]</span><span class="o">=</span><span class="n">weight</span>
+<span class="n">Cinput</span> <span class="o">=</span> <span class="n">Synapses</span><span class="p">(</span><span class="n">Pinput</span><span class="p">,</span> <span class="n">Pgp</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">model</span><span class="o">=</span><span class="s">&#39;w:volt&#39;</span><span class="p">,</span> <span class="n">pre</span><span class="o">=</span><span class="s">&#39;y+=w&#39;</span><span class="p">)</span>
+<span class="n">Cinput</span><span class="p">[:,:]</span><span class="o">=</span><span class="bp">True</span>
+<span class="n">Cinput</span><span class="o">.</span><span class="n">w</span><span class="p">[:,:]</span><span class="o">=</span><span class="n">weight</span>
+<span class="c"># Record the spikes</span>
+<span class="n">Mgp</span> <span class="o">=</span> <span class="p">[</span><span class="n">SpikeMonitor</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">Pgp</span><span class="p">]</span>
+<span class="n">Minput</span> <span class="o">=</span> <span class="n">SpikeMonitor</span><span class="p">(</span><span class="n">Pinput</span><span class="p">)</span>
+<span class="n">monitors</span> <span class="o">=</span> <span class="p">[</span><span class="n">Minput</span><span class="p">]</span> <span class="o">+</span> <span class="n">Mgp</span>
+<span class="c"># Setup the network, and run it</span>
+<span class="n">P</span><span class="o">.</span><span class="n">V</span> <span class="o">=</span> <span class="n">Vr</span> <span class="o">+</span> <span class="n">rand</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">P</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">Vt</span> <span class="o">-</span> <span class="n">Vr</span><span class="p">)</span>
+<span class="n">run</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">ms</span><span class="p">)</span>
+<span class="c"># Plot result</span>
+<span class="n">raster_plot</span><span class="p">(</span><span class="n">showgrouplines</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">*</span><span class="n">monitors</span><span class="p">)</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Example: Diesmann_et_al_1999 (synapses)</a><ul>
+<li><a class="reference internal" href="#synfire-chains">Synfire chains</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-synapses_synapse_construction.html"
+                        title="previous chapter">Example: synapse_construction (synapses)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-synapses_barrelcortex.html"
+                        title="next chapter">Example: barrelcortex (synapses)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-synapses_Diesmann_et_al_1999.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-synapses_barrelcortex.html" title="Example: barrelcortex (synapses)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-synapses_synapse_construction.html" title="Example: synapse_construction (synapses)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

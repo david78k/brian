@@ -1,0 +1,177 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Integration &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Reference" href="reference.html" />
+    <link rel="next" title="Standard Groups" href="reference-standard-groups.html" />
+    <link rel="prev" title="Neuron models and groups" href="reference-models-and-groups.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="reference-standard-groups.html" title="Standard Groups"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="reference-models-and-groups.html" title="Neuron models and groups"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="reference.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="integration">
+<span id="index-0"></span><span id="id1"></span><h1>Integration<a class="headerlink" href="#integration" title="Permalink to this headline">¶</a></h1>
+<p>See <a class="reference internal" href="equations.html#numerical-integration"><em>Numerical integration</em></a> for an overview.</p>
+<div class="section" id="stateupdaters">
+<h2>StateUpdaters<a class="headerlink" href="#stateupdaters" title="Permalink to this headline">¶</a></h2>
+<p>Typically you don&#8217;t need to worry about <tt class="xref py py-class docutils literal"><span class="pre">StateUpdater</span></tt> objects
+because they are automatically created from the differential
+equations defining your model. TODO: more details about this.</p>
+<span class="target" id="index-1"></span><dl class="class">
+<dt id="brian.LinearStateUpdater">
+<em class="property">class </em><tt class="descclassname">brian.</tt><tt class="descname">LinearStateUpdater</tt><big>(</big><em>M</em>, <em>B=None</em>, <em>clock=None</em><big>)</big><a class="headerlink" href="#brian.LinearStateUpdater" title="Permalink to this definition">¶</a></dt>
+<dd><p>A linear model with dynamics dX/dt = M(X-B) or dX/dt = MX.</p>
+<p><strong>Initialised as:</strong></p>
+<div class="highlight-python"><pre>LinearStateUpdater(M[,B[,clock]])</pre>
+</div>
+<p>with arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">M</span></tt></dt>
+<dd>Matrix defining the differential equation.</dd>
+<dt><tt class="docutils literal"><span class="pre">B</span></tt></dt>
+<dd>Optional linear term in the differential equation.</dd>
+<dt><tt class="docutils literal"><span class="pre">clock</span></tt></dt>
+<dd>Optional clock.</dd>
+</dl>
+<p>Computes an update matrix A=exp(M dt) for the linear system,
+and performs the update step.</p>
+<p>TODO: more mathematical details?</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.LazyStateUpdater">
+<em class="property">class </em><tt class="descclassname">brian.</tt><tt class="descname">LazyStateUpdater</tt><big>(</big><em>numstatevariables=1</em>, <em>clock=None</em><big>)</big><a class="headerlink" href="#brian.LazyStateUpdater" title="Permalink to this definition">¶</a></dt>
+<dd><p>A StateUpdater that does nothing.</p>
+<p><strong>Initialised as:</strong></p>
+<div class="highlight-python"><pre>LazyStateUpdater([numstatevariables=1[,clock]])</pre>
+</div>
+<p>with arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">numstatevariables</span></tt></dt>
+<dd>The number of state variables to create.</dd>
+<dt><tt class="docutils literal"><span class="pre">clock</span></tt></dt>
+<dd>An optional clock to determine when it updates,
+although the update function does nothing so...</dd>
+</dl>
+</dd></dl>
+
+<p>TODO: write docs for these StateUpdaters:</p>
+<ul class="simple">
+<li>StateUpdater, LinearStateUpdater more details, NonlinearStateUpdater,
+NonlinearStateUpdater2, ExponentialEulerStateUpdater,
+NonlinearStateUpdaterRK2, NonlinearStateUpdaterBE,
+SynapticNoise</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Integration</a><ul>
+<li><a class="reference internal" href="#stateupdaters">StateUpdaters</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="reference-models-and-groups.html"
+                        title="previous chapter">Neuron models and groups</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="reference-standard-groups.html"
+                        title="next chapter">Standard Groups</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/reference-integration.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="reference-standard-groups.html" title="Standard Groups"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="reference-models-and-groups.html" title="Neuron models and groups"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="reference.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

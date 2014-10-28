@@ -1,0 +1,223 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: Fig1D_duration_selectivity (frompapers/computing with neural synchrony/duration selectivity) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: Fig11B_olfaction_stdp_testing (frompapers/computing with neural synchrony/olfaction)" href="examples-frompapers-computing with neural synchrony-olfaction_Fig11B_olfaction_stdp_testing.html" />
+    <link rel="prev" title="Example: params (frompapers/computing with neural synchrony/duration selectivity)" href="examples-frompapers-computing with neural synchrony-duration selectivity_params.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-olfaction_Fig11B_olfaction_stdp_testing.html" title="Example: Fig11B_olfaction_stdp_testing (frompapers/computing with neural synchrony/olfaction)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-duration selectivity_params.html" title="Example: params (frompapers/computing with neural synchrony/duration selectivity)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-fig1d-duration-selectivity-frompapers-computing-with-neural-synchrony-duration-selectivity">
+<span id="example-frompapers-computing-with-neural-synchrony-duration-selectivity-fig1d-duration-selectivity"></span><span id="index-0"></span><h1>Example: Fig1D_duration_selectivity (frompapers/computing with neural synchrony/duration selectivity)<a class="headerlink" href="#example-fig1d-duration-selectivity-frompapers-computing-with-neural-synchrony-duration-selectivity" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="brette-r-2012-computing-with-neural-synchrony-plos-comp-biol-8-6-e1002561-doi-10-1371-journal-pcbi-1002561">
+<h2>Brette R (2012). Computing with neural synchrony. PLoS Comp Biol. 8(6): e1002561. doi:10.1371/journal.pcbi.1002561<a class="headerlink" href="#brette-r-2012-computing-with-neural-synchrony-plos-comp-biol-8-6-e1002561-doi-10-1371-journal-pcbi-1002561" title="Permalink to this headline">¶</a></h2>
+<p>Figure 1C,D. Duration selectivity.
+(takes about 1 min)</p>
+<p>Caption (Fig. 1C,D).
+A postsynaptic neuron receives inputs from A and B. It is
+more likely to fire when the stimulus in the synchrony receptive field of
+A and B.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="c"># Parameters and equations of the rebound neurons</span>
+<span class="n">Vt</span><span class="o">=-</span><span class="mi">55</span><span class="o">*</span><span class="n">mV</span>
+<span class="n">Vr</span><span class="o">=-</span><span class="mi">70</span><span class="o">*</span><span class="n">mV</span>
+<span class="n">El</span><span class="o">=-</span><span class="mi">35</span><span class="o">*</span><span class="n">mV</span>
+<span class="n">EK</span><span class="o">=-</span><span class="mi">90</span><span class="o">*</span><span class="n">mV</span>
+<span class="n">Va</span><span class="o">=</span><span class="n">Vr</span>
+<span class="n">ka</span><span class="o">=</span><span class="mi">5</span><span class="o">*</span><span class="n">mV</span>
+<span class="n">gmax2</span><span class="o">=</span><span class="mi">2</span>
+<span class="n">tau</span><span class="o">=</span><span class="mi">20</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">ginh_max</span><span class="o">=</span><span class="mf">5.</span>
+<span class="n">tauK2</span><span class="o">=</span><span class="mi">100</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">N</span><span class="o">=</span><span class="mi">10000</span> <span class="c"># number of neurons (= different durations)</span>
+<span class="n">rest_time</span><span class="o">=</span><span class="mi">1</span><span class="o">*</span><span class="n">second</span> <span class="c"># initial time</span>
+<span class="n">tmin</span><span class="o">=</span><span class="n">rest_time</span><span class="o">-</span><span class="mi">20</span><span class="o">*</span><span class="n">ms</span> <span class="c">#for plots</span>
+<span class="n">tmax</span><span class="o">=</span><span class="n">rest_time</span><span class="o">+</span><span class="mi">600</span><span class="o">*</span><span class="n">ms</span>
+
+<span class="n">eqs</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">dv/dt=(El-v+(gmax*gK+gmax2*gK2+ginh)*(EK-v))/tau : volt</span>
+<span class="s">dgK/dt=(gKinf-gK)/tauK : 1 # IKLT</span>
+<span class="s">dgK2/dt=-gK2/tauK2 : 1 # Delayed rectifier</span>
+<span class="s">gKinf=1./(1+exp((Va-v)/ka)) : 1</span>
+<span class="s">duration : second</span>
+<span class="s">ginh = ginh_max*((t&gt;rest_time) &amp; (t&lt;(rest_time+duration))) : 1</span>
+<span class="s">tauK : ms</span>
+<span class="s">gmax : 1</span>
+<span class="s">theta : volt # threshold</span>
+<span class="s">&#39;&#39;&#39;</span>
+
+<span class="n">neurons</span><span class="o">=</span><span class="n">NeuronGroup</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">N</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="n">eqs</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="s">&#39;v&gt;theta&#39;</span><span class="p">,</span><span class="n">reset</span><span class="o">=</span><span class="s">&#39;v=Vr;gK2=1&#39;</span><span class="p">)</span>
+<span class="n">neurons</span><span class="o">.</span><span class="n">v</span><span class="o">=</span><span class="n">Vr</span>
+<span class="n">neurons</span><span class="o">.</span><span class="n">theta</span><span class="o">=</span><span class="n">Vt</span>
+<span class="n">neurons</span><span class="o">.</span><span class="n">gK</span><span class="o">=</span><span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">exp</span><span class="p">((</span><span class="n">Va</span><span class="o">-</span><span class="n">El</span><span class="p">)</span><span class="o">/</span><span class="n">ka</span><span class="p">))</span>
+<span class="c"># Neuron A, duplicated to simulate multiple input durations simultaneously</span>
+<span class="n">neuronsA</span><span class="o">=</span><span class="n">neurons</span><span class="p">[:</span><span class="n">N</span><span class="p">]</span>
+<span class="n">neuronsA</span><span class="o">.</span><span class="n">tauK</span><span class="o">=</span><span class="mi">400</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">neuronsA</span><span class="o">.</span><span class="n">gmax</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">neuronsA</span><span class="o">.</span><span class="n">theta</span><span class="o">=-</span><span class="mi">55</span><span class="o">*</span><span class="n">mV</span>
+<span class="n">neuronsA</span><span class="o">.</span><span class="n">duration</span><span class="o">=</span><span class="n">linspace</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">ms</span><span class="p">,</span><span class="mi">1</span><span class="o">*</span><span class="n">second</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
+<span class="c"># Neuron B, duplicated to simulate multiple input durations simultaneously</span>
+<span class="n">neuronsB</span><span class="o">=</span><span class="n">neurons</span><span class="p">[</span><span class="n">N</span><span class="p">:]</span>
+<span class="n">neuronsB</span><span class="o">.</span><span class="n">tauK</span><span class="o">=</span><span class="mi">100</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">neuronsB</span><span class="o">.</span><span class="n">gmax</span><span class="o">=</span><span class="mf">1.5</span>
+<span class="n">neuronsB</span><span class="o">.</span><span class="n">theta</span><span class="o">=-</span><span class="mi">54</span><span class="o">*</span><span class="n">mV</span>
+<span class="n">neuronsB</span><span class="o">.</span><span class="n">duration</span><span class="o">=</span><span class="n">linspace</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">ms</span><span class="p">,</span><span class="mi">1</span><span class="o">*</span><span class="n">second</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
+
+<span class="c"># Noisy coincidence detectors</span>
+<span class="n">tau_cd</span><span class="o">=</span><span class="mi">5</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">tau_n</span><span class="o">=</span><span class="n">tau_cd</span>
+<span class="n">sigma</span><span class="o">=</span><span class="mf">0.2</span> <span class="c"># noise s.d. in units of the threshold</span>
+<span class="n">eqs_post</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">dv/dt=(n-v)/tau_cd : 1</span>
+<span class="s">dn/dt=-n/tau_n+sigma*(2/tau_n)**.5*xi : 1</span>
+<span class="s">&#39;&#39;&#39;</span>
+<span class="n">postneurons</span><span class="o">=</span><span class="n">NeuronGroup</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="n">eqs_post</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">reset</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">CA</span><span class="o">=</span><span class="n">IdentityConnection</span><span class="p">(</span><span class="n">neuronsA</span><span class="p">,</span><span class="n">postneurons</span><span class="p">,</span><span class="s">&#39;v&#39;</span><span class="p">,</span><span class="n">weight</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">CB</span><span class="o">=</span><span class="n">IdentityConnection</span><span class="p">(</span><span class="n">neuronsB</span><span class="p">,</span><span class="n">postneurons</span><span class="p">,</span><span class="s">&#39;v&#39;</span><span class="p">,</span><span class="n">weight</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+<span class="n">spikes</span><span class="o">=</span><span class="n">SpikeCounter</span><span class="p">(</span><span class="n">postneurons</span><span class="p">)</span>
+<span class="n">M</span><span class="o">=</span><span class="n">StateMonitor</span><span class="p">(</span><span class="n">postneurons</span><span class="p">,</span><span class="s">&#39;v&#39;</span><span class="p">,</span><span class="n">record</span><span class="o">=</span><span class="n">N</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="n">run</span><span class="p">(</span><span class="n">rest_time</span><span class="o">+</span><span class="mf">1.1</span><span class="o">*</span><span class="n">second</span><span class="p">,</span><span class="n">report</span><span class="o">=</span><span class="s">&#39;text&#39;</span><span class="p">)</span>
+
+<span class="c"># Figure</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">)</span> <span class="c"># Fig. 1C, example trace</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">times</span><span class="o">/</span><span class="n">ms</span><span class="p">,</span><span class="n">M</span><span class="p">[</span><span class="n">N</span><span class="o">/</span><span class="mi">3</span><span class="p">],</span><span class="s">&#39;k&#39;</span><span class="p">)</span>
+<span class="n">xlim</span><span class="p">(</span><span class="mi">1350</span><span class="p">,</span><span class="mi">1500</span><span class="p">)</span>
+<span class="n">ylim</span><span class="p">(</span><span class="o">-.</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;Time (ms)&#39;</span><span class="p">)</span>
+<span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;V&#39;</span><span class="p">)</span>
+
+<span class="n">subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">)</span> <span class="c"># Fig. 1D, duration tuning curve</span>
+<span class="n">count</span><span class="o">=</span><span class="n">spikes</span><span class="o">.</span><span class="n">count</span>
+<span class="c"># Smooth the tuning curve</span>
+<span class="n">window</span><span class="o">=</span><span class="mi">200</span>
+<span class="n">rate</span><span class="o">=</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">count</span><span class="p">)</span><span class="o">-</span><span class="n">window</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">count</span><span class="p">)</span><span class="o">-</span><span class="n">window</span><span class="p">):</span>
+    <span class="n">rate</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">mean</span><span class="p">(</span><span class="n">count</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">window</span><span class="p">])</span>
+<span class="n">plot</span><span class="p">((</span><span class="n">neuronsA</span><span class="o">.</span><span class="n">duration</span><span class="p">[</span><span class="n">window</span><span class="o">/</span><span class="mi">2</span><span class="p">:</span><span class="o">-</span><span class="n">window</span><span class="o">/</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="n">ms</span><span class="p">)[::</span><span class="mi">10</span><span class="p">],</span><span class="n">rate</span><span class="p">[::</span><span class="mi">10</span><span class="p">],</span><span class="s">&#39;k&#39;</span><span class="p">)</span>
+<span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1000</span><span class="p">)</span>
+<span class="n">ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;Duration (ms)&#39;</span><span class="p">)</span>
+<span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;Spiking probability&#39;</span><span class="p">)</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Example: Fig1D_duration_selectivity (frompapers/computing with neural synchrony/duration selectivity)</a><ul>
+<li><a class="reference internal" href="#brette-r-2012-computing-with-neural-synchrony-plos-comp-biol-8-6-e1002561-doi-10-1371-journal-pcbi-1002561">Brette R (2012). Computing with neural synchrony. PLoS Comp Biol. 8(6): e1002561. doi:10.1371/journal.pcbi.1002561</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-frompapers-computing with neural synchrony-duration selectivity_params.html"
+                        title="previous chapter">Example: params (frompapers/computing with neural synchrony/duration selectivity)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-frompapers-computing with neural synchrony-olfaction_Fig11B_olfaction_stdp_testing.html"
+                        title="next chapter">Example: Fig11B_olfaction_stdp_testing (frompapers/computing with neural synchrony/olfaction)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-frompapers-computing with neural synchrony-duration selectivity_Fig1D_duration_selectivity.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-olfaction_Fig11B_olfaction_stdp_testing.html" title="Example: Fig11B_olfaction_stdp_testing (frompapers/computing with neural synchrony/olfaction)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-duration selectivity_params.html" title="Example: params (frompapers/computing with neural synchrony/duration selectivity)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

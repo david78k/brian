@@ -1,0 +1,269 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: Fig9B_olfaction (frompapers/computing with neural synchrony/olfaction) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: params (frompapers/computing with neural synchrony/olfaction)" href="examples-frompapers-computing with neural synchrony-olfaction_params.html" />
+    <link rel="prev" title="Example: Fig11B_olfaction_stdp_learning (frompapers/computing with neural synchrony/olfaction)" href="examples-frompapers-computing with neural synchrony-olfaction_Fig11B_olfaction_stdp_learning.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-olfaction_params.html" title="Example: params (frompapers/computing with neural synchrony/olfaction)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-olfaction_Fig11B_olfaction_stdp_learning.html" title="Example: Fig11B_olfaction_stdp_learning (frompapers/computing with neural synchrony/olfaction)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-fig9b-olfaction-frompapers-computing-with-neural-synchrony-olfaction">
+<span id="example-frompapers-computing-with-neural-synchrony-olfaction-fig9b-olfaction"></span><span id="index-0"></span><h1>Example: Fig9B_olfaction (frompapers/computing with neural synchrony/olfaction)<a class="headerlink" href="#example-fig9b-olfaction-frompapers-computing-with-neural-synchrony-olfaction" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="brette-r-2012-computing-with-neural-synchrony-plos-comp-biol-8-6-e1002561-doi-10-1371-journal-pcbi-1002561">
+<h2>Brette R (2012). Computing with neural synchrony. PLoS Comp Biol. 8(6): e1002561. doi:10.1371/journal.pcbi.1002561<a class="headerlink" href="#brette-r-2012-computing-with-neural-synchrony-plos-comp-biol-8-6-e1002561-doi-10-1371-journal-pcbi-1002561" title="Permalink to this headline">¶</a></h2>
+<p>Figure 9B.</p>
+<p>Caption (Fig. 9B). Top, Fluctuating
+concentration of three odors (A: blue, B: red, C: black). Middle, spiking responses of olfactory receptors.
+Bottom, Responses of postsynaptic neurons
+from the assembly selective to A (blue) and to B (red). Stimuli are presented is sequence: 1) odor A alone,
+2) odor B alone, 3) odor B alone with twice
+stronger intensity, 4) odor A with distracting odor C (same intensity), 5) odors A and B (same intensity).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">bmin</span><span class="p">,</span><span class="n">bmax</span><span class="o">=-</span><span class="mi">7</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span>
+
+<span class="k">def</span> <span class="nf">odor</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+    <span class="c"># Returns a random vector of binding constants</span>
+    <span class="k">return</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="n">rand</span><span class="p">(</span><span class="n">N</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">bmax</span><span class="o">-</span><span class="n">bmin</span><span class="p">)</span><span class="o">+</span><span class="n">bmin</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">hill_function</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">K</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span><span class="n">n</span><span class="o">=</span><span class="mf">3.</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Hill function:</span>
+<span class="sd">    * c = concentration</span>
+<span class="sd">    * K = half activation constant (choose K=1 for relative concentrations)</span>
+<span class="sd">    * n = Hill coefficient</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">c</span><span class="o">**</span><span class="n">n</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">c</span><span class="o">**</span><span class="n">n</span><span class="o">+</span><span class="n">K</span><span class="o">**</span><span class="n">n</span><span class="p">)</span>
+
+<span class="n">N</span><span class="o">=</span><span class="mi">5000</span> <span class="c"># number of receptors</span>
+
+<span class="c"># Odors</span>
+<span class="n">seed</span><span class="p">(</span><span class="mi">31415</span><span class="p">)</span> <span class="c"># Get the same neurons every time</span>
+<span class="n">intensity</span><span class="o">=</span><span class="mf">3000.</span>
+<span class="n">c1</span><span class="o">=</span><span class="n">odor</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+<span class="n">c2</span><span class="o">=</span><span class="n">odor</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+<span class="n">c0</span><span class="o">=</span><span class="n">c1</span>
+<span class="n">I1</span><span class="p">,</span><span class="n">I2</span><span class="o">=</span><span class="n">intensity</span><span class="p">,</span><span class="n">intensity</span>
+
+<span class="c"># Odor plumes (fluctuating concentrations)</span>
+<span class="n">tau_plume</span><span class="o">=</span><span class="mi">75</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">eq_plumes</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">dx/dt=-x/tau_plume+(2./tau_plume)**.5*xi : 1</span>
+<span class="s">y=clip(x,0,inf) : 1</span>
+<span class="s">&#39;&#39;&#39;</span>
+<span class="n">plume</span><span class="o">=</span><span class="n">NeuronGroup</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="n">eq_plumes</span><span class="p">)</span> <span class="c"># 2 odors</span>
+
+<span class="c"># Receptor neurons</span>
+<span class="n">Fmax</span><span class="o">=</span><span class="mi">40</span><span class="o">*</span><span class="n">Hz</span> <span class="c"># maximum firing rate</span>
+<span class="n">tau</span><span class="o">=</span><span class="mi">20</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">Imax</span><span class="o">=</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">Fmax</span><span class="o">*</span><span class="n">tau</span><span class="p">)))</span> <span class="c"># maximum input current</span>
+
+<span class="n">eq_receptors</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">dv/dt=(Imax*hill_function(c)-v)/tau : 1</span>
+<span class="s">c : 1  # concentrations (relative to activation constant)</span>
+<span class="s">&#39;&#39;&#39;</span>
+
+<span class="n">receptors</span><span class="o">=</span><span class="n">NeuronGroup</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="n">eq_receptors</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">reset</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">receptors</span><span class="o">.</span><span class="n">c</span><span class="o">=</span><span class="n">c1</span>
+
+<span class="nd">@network_operation</span>
+<span class="k">def</span> <span class="nf">odor_to_nose</span><span class="p">():</span>
+    <span class="c"># Send odor plume to the receptors</span>
+    <span class="n">receptors</span><span class="o">.</span><span class="n">c</span><span class="o">=</span><span class="n">I1</span><span class="o">*</span><span class="n">c1</span><span class="o">*</span><span class="n">clip</span><span class="p">(</span><span class="n">plume</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">0</span><span class="p">,</span><span class="n">Inf</span><span class="p">)</span><span class="o">+</span><span class="n">I2</span><span class="o">*</span><span class="n">c2</span><span class="o">*</span><span class="n">clip</span><span class="p">(</span><span class="n">plume</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="mi">0</span><span class="p">,</span><span class="n">Inf</span><span class="p">)</span>
+
+<span class="c"># Decoder neurons</span>
+<span class="n">M</span><span class="o">=</span><span class="mi">200</span>
+<span class="n">taud</span><span class="o">=</span><span class="mi">8</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">sigma</span><span class="o">=.</span><span class="mi">15</span>
+<span class="n">eq_decoders</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">dv/dt=-v/taud + sigma*(2/taud)**.5*xi : 1</span>
+<span class="s">&#39;&#39;&#39;</span>
+<span class="n">decoders</span><span class="o">=</span><span class="n">NeuronGroup</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">M</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="n">eq_decoders</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">reset</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="c"># First M neurons encode odor A, next M neurons encode odor B</span>
+
+<span class="c"># Synapses</span>
+<span class="n">syn</span><span class="o">=</span><span class="n">Connection</span><span class="p">(</span><span class="n">receptors</span><span class="p">,</span><span class="n">decoders</span><span class="p">,</span><span class="s">&#39;v&#39;</span><span class="p">)</span>
+
+<span class="c"># Connectivity according to synchrony partitions</span>
+<span class="n">bhalf</span><span class="o">=.</span><span class="mi">5</span><span class="o">*</span><span class="p">(</span><span class="n">bmin</span><span class="o">+</span><span class="n">bmax</span><span class="p">)</span> <span class="c"># select only those that are well activated</span>
+<span class="n">u</span><span class="o">=</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">log</span><span class="p">(</span><span class="n">c1</span><span class="p">)</span><span class="o">/</span><span class="n">log</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">-</span><span class="n">bhalf</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">bmax</span><span class="o">-</span><span class="n">bmin</span><span class="p">)</span> <span class="c"># normalized binding constants for odor A</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="p">):</span>
+    <span class="n">which</span><span class="o">=</span><span class="p">((</span><span class="n">u</span><span class="o">&gt;=</span><span class="n">i</span><span class="o">*</span><span class="mf">1.</span><span class="o">/</span><span class="n">M</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">u</span><span class="o">&lt;</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="mf">1.</span><span class="o">/</span><span class="n">M</span><span class="p">))</span> <span class="c"># we divide in M groups with similar values</span>
+    <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">which</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+        <span class="n">w</span><span class="o">=</span><span class="mf">1.</span><span class="o">/</span><span class="nb">sum</span><span class="p">(</span><span class="n">which</span><span class="p">)</span> <span class="c"># total synaptic weight for a postsynaptic neuron is 1</span>
+    <span class="n">syn</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">w</span><span class="o">*</span><span class="n">which</span>
+
+<span class="n">u</span><span class="o">=</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">log</span><span class="p">(</span><span class="n">c2</span><span class="p">)</span><span class="o">/</span><span class="n">log</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">-</span><span class="n">bhalf</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">bmax</span><span class="o">-</span><span class="n">bmin</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="p">):</span> <span class="c"># normalized binding constants for odor B</span>
+    <span class="n">which</span><span class="o">=</span><span class="p">((</span><span class="n">u</span><span class="o">&gt;=</span><span class="n">i</span><span class="o">*</span><span class="mf">1.</span><span class="o">/</span><span class="n">M</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">u</span><span class="o">&lt;</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="mf">1.</span><span class="o">/</span><span class="n">M</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">which</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+        <span class="n">w</span><span class="o">=</span><span class="mf">1.</span><span class="o">/</span><span class="nb">sum</span><span class="p">(</span><span class="n">which</span><span class="p">)</span>
+    <span class="n">syn</span><span class="p">[:,</span><span class="mi">2</span><span class="o">*</span><span class="n">M</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">w</span><span class="o">*</span><span class="n">which</span>
+
+<span class="c"># Record odor concentration and output spikes</span>
+<span class="n">O</span><span class="o">=</span><span class="n">StateMonitor</span><span class="p">(</span><span class="n">plume</span><span class="p">,</span><span class="s">&#39;y&#39;</span><span class="p">,</span><span class="n">record</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">S</span><span class="o">=</span><span class="n">SpikeMonitor</span><span class="p">(</span><span class="n">receptors</span><span class="p">)</span>
+<span class="n">S2</span><span class="o">=</span><span class="n">SpikeMonitor</span><span class="p">(</span><span class="n">decoders</span><span class="p">)</span>
+
+<span class="k">print</span> <span class="s">&quot;Odor A&quot;</span>
+<span class="n">I1</span><span class="p">,</span><span class="n">I2</span><span class="o">=</span><span class="n">intensity</span><span class="p">,</span><span class="mi">0</span>
+<span class="n">run</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">second</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">&quot;Odor B&quot;</span>
+<span class="n">I1</span><span class="p">,</span><span class="n">I2</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">intensity</span>
+<span class="n">run</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">second</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">&quot;Odor B x2&quot;</span>
+<span class="n">I1</span><span class="p">,</span><span class="n">I2</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">intensity</span>
+<span class="n">run</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">second</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">&quot;Odor A + odor C&quot;</span>
+<span class="n">I1</span><span class="p">,</span><span class="n">I2</span><span class="o">=</span><span class="n">intensity</span><span class="p">,</span><span class="n">intensity</span>
+<span class="n">old_c2</span><span class="o">=</span><span class="n">c2</span>
+<span class="n">c2</span><span class="o">=</span><span class="n">odor</span><span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="c"># different odor</span>
+<span class="n">run</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">second</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">&quot;Odor A + odor B&quot;</span>
+<span class="n">I1</span><span class="p">,</span><span class="n">I2</span><span class="o">=</span><span class="n">intensity</span><span class="p">,</span><span class="n">intensity</span>
+<span class="n">c2</span><span class="o">=</span><span class="n">old_c2</span>
+<span class="n">run</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">second</span><span class="p">)</span>
+
+<span class="n">t</span><span class="o">=</span><span class="n">O</span><span class="o">.</span><span class="n">times</span><span class="o">/</span><span class="n">ms</span>
+
+<span class="c"># Figure (9B)</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">311</span><span class="p">)</span> <span class="c"># odor fluctuations</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">t</span><span class="o">&lt;</span><span class="mi">2000</span><span class="p">],</span><span class="n">O</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">t</span><span class="o">&lt;</span><span class="mi">2000</span><span class="p">],</span><span class="s">&#39;b&#39;</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">[(</span><span class="n">t</span><span class="o">&gt;=</span><span class="mi">2000</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">t</span><span class="o">&lt;</span><span class="mi">4000</span><span class="p">)],</span><span class="n">O</span><span class="p">[</span><span class="mi">1</span><span class="p">][(</span><span class="n">t</span><span class="o">&gt;=</span><span class="mi">2000</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">t</span><span class="o">&lt;</span><span class="mi">4000</span><span class="p">)],</span><span class="s">&#39;r&#39;</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">[(</span><span class="n">t</span><span class="o">&gt;=</span><span class="mi">4000</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">t</span><span class="o">&lt;</span><span class="mi">6000</span><span class="p">)],</span><span class="mi">2</span><span class="o">*</span><span class="n">O</span><span class="p">[</span><span class="mi">1</span><span class="p">][(</span><span class="n">t</span><span class="o">&gt;=</span><span class="mi">4000</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">t</span><span class="o">&lt;</span><span class="mi">6000</span><span class="p">)],</span><span class="s">&#39;r&#39;</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">[(</span><span class="n">t</span><span class="o">&gt;=</span><span class="mi">6000</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">t</span><span class="o">&lt;</span><span class="mi">8000</span><span class="p">)],</span><span class="n">O</span><span class="p">[</span><span class="mi">0</span><span class="p">][(</span><span class="n">t</span><span class="o">&gt;=</span><span class="mi">6000</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">t</span><span class="o">&lt;</span><span class="mi">8000</span><span class="p">)],</span><span class="s">&#39;b&#39;</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">[(</span><span class="n">t</span><span class="o">&gt;=</span><span class="mi">6000</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">t</span><span class="o">&lt;</span><span class="mi">8000</span><span class="p">)],</span><span class="n">O</span><span class="p">[</span><span class="mi">1</span><span class="p">][(</span><span class="n">t</span><span class="o">&gt;=</span><span class="mi">6000</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">t</span><span class="o">&lt;</span><span class="mi">8000</span><span class="p">)],</span><span class="s">&#39;k&#39;</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">[(</span><span class="n">t</span><span class="o">&gt;=</span><span class="mi">8000</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">t</span><span class="o">&lt;</span><span class="mi">10000</span><span class="p">)],</span><span class="n">O</span><span class="p">[</span><span class="mi">1</span><span class="p">][(</span><span class="n">t</span><span class="o">&gt;=</span><span class="mi">8000</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">t</span><span class="o">&lt;</span><span class="mi">10000</span><span class="p">)],</span><span class="s">&#39;r&#39;</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">[(</span><span class="n">t</span><span class="o">&gt;=</span><span class="mi">8000</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">t</span><span class="o">&lt;</span><span class="mi">10000</span><span class="p">)],</span><span class="n">O</span><span class="p">[</span><span class="mi">0</span><span class="p">][(</span><span class="n">t</span><span class="o">&gt;=</span><span class="mi">8000</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">t</span><span class="o">&lt;</span><span class="mi">10000</span><span class="p">)],</span><span class="s">&#39;b&#39;</span><span class="p">)</span>
+<span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">10000</span><span class="p">)</span>
+<span class="n">xticks</span><span class="p">([])</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">312</span><span class="p">)</span>
+<span class="n">raster_plot</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
+<span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">10000</span><span class="p">)</span>
+<span class="n">ylim</span><span class="p">(</span><span class="mi">2500</span><span class="p">,</span><span class="mi">2600</span><span class="p">)</span> <span class="c"># 100 random neurons</span>
+<span class="n">xticks</span><span class="p">([])</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">313</span><span class="p">)</span>
+<span class="n">raster_plot</span><span class="p">(</span><span class="n">S2</span><span class="p">)</span>
+<span class="n">ylim</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="mi">300</span><span class="p">)</span>
+<span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">10000</span><span class="p">)</span>
+
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Example: Fig9B_olfaction (frompapers/computing with neural synchrony/olfaction)</a><ul>
+<li><a class="reference internal" href="#brette-r-2012-computing-with-neural-synchrony-plos-comp-biol-8-6-e1002561-doi-10-1371-journal-pcbi-1002561">Brette R (2012). Computing with neural synchrony. PLoS Comp Biol. 8(6): e1002561. doi:10.1371/journal.pcbi.1002561</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-frompapers-computing with neural synchrony-olfaction_Fig11B_olfaction_stdp_learning.html"
+                        title="previous chapter">Example: Fig11B_olfaction_stdp_learning (frompapers/computing with neural synchrony/olfaction)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-frompapers-computing with neural synchrony-olfaction_params.html"
+                        title="next chapter">Example: params (frompapers/computing with neural synchrony/olfaction)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-frompapers-computing with neural synchrony-olfaction_Fig9B_olfaction.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-olfaction_params.html" title="Example: params (frompapers/computing with neural synchrony/olfaction)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-olfaction_Fig11B_olfaction_stdp_learning.html" title="Example: Fig11B_olfaction_stdp_learning (frompapers/computing with neural synchrony/olfaction)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

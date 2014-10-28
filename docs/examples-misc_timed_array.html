@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: timed_array (misc) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: pulsepacket (misc)" href="examples-misc_pulsepacket.html" />
+    <link rel="prev" title="Example: COBAHH (misc)" href="examples-misc_COBAHH.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-misc_pulsepacket.html" title="Example: pulsepacket (misc)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-misc_COBAHH.html" title="Example: COBAHH (misc)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-timed-array-misc">
+<span id="example-misc-timed-array"></span><span id="index-0"></span><h1>Example: timed_array (misc)<a class="headerlink" href="#example-timed-array-misc" title="Permalink to this headline">¶</a></h1>
+<p>An example of the <a class="reference internal" href="reference-variableupdating.html#brian.TimedArray" title="brian.TimedArray"><tt class="xref py py-class docutils literal"><span class="pre">TimedArray</span></tt></a> class used for applying input currents
+to neurons.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">N</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">duration</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">ms</span>
+<span class="n">Vr</span> <span class="o">=</span> <span class="o">-</span><span class="mi">60</span> <span class="o">*</span> <span class="n">mV</span>
+<span class="n">Vt</span> <span class="o">=</span> <span class="o">-</span><span class="mi">50</span> <span class="o">*</span> <span class="n">mV</span>
+<span class="n">tau</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">ms</span>
+<span class="n">Rmin</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">Mohm</span>
+<span class="n">Rmax</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">Mohm</span>
+<span class="n">freq</span> <span class="o">=</span> <span class="mi">50</span> <span class="o">*</span> <span class="n">Hz</span>
+<span class="n">k</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">nA</span>
+
+<span class="n">eqs</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">dV/dt = (-(V-Vr)+R*I)/tau : volt</span>
+<span class="s">R : ohm</span>
+<span class="s">I : amp</span>
+<span class="s">&#39;&#39;&#39;</span>
+
+<span class="n">G</span> <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">eqs</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="s">&#39;V=Vr&#39;</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="s">&#39;V&gt;Vt&#39;</span><span class="p">)</span>
+<span class="n">G</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="n">Rmin</span><span class="p">,</span> <span class="n">Rmax</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+
+<span class="n">t</span> <span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="mi">0</span> <span class="o">*</span> <span class="n">second</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">duration</span> <span class="o">/</span> <span class="n">defaultclock</span><span class="o">.</span><span class="n">dt</span><span class="p">))</span>
+<span class="n">I</span> <span class="o">=</span> <span class="n">clip</span><span class="p">(</span><span class="n">k</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="n">freq</span> <span class="o">*</span> <span class="n">t</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Inf</span><span class="p">)</span>
+<span class="n">G</span><span class="o">.</span><span class="n">I</span> <span class="o">=</span> <span class="n">TimedArray</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
+
+<span class="n">M</span> <span class="o">=</span> <span class="n">MultiStateMonitor</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="n">run</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span>
+
+<span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+<span class="n">M</span><span class="p">[</span><span class="s">&#39;I&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;I (amp)&#39;</span><span class="p">)</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">)</span>
+<span class="n">M</span><span class="p">[</span><span class="s">&#39;V&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;V (volt)&#39;</span><span class="p">)</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-misc_COBAHH.html"
+                        title="previous chapter">Example: COBAHH (misc)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-misc_pulsepacket.html"
+                        title="next chapter">Example: pulsepacket (misc)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-misc_timed_array.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-misc_pulsepacket.html" title="Example: pulsepacket (misc)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-misc_COBAHH.html" title="Example: COBAHH (misc)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

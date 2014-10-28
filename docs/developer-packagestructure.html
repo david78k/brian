@@ -1,0 +1,234 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Brian package structure &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Developer’s guide" href="developer.html" />
+    <link rel="next" title="Repository structure" href="developer-repositorystructure.html" />
+    <link rel="prev" title="Code generation" href="developer-codegen.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="developer-repositorystructure.html" title="Repository structure"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="developer-codegen.html" title="Code generation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="developer.html" accesskey="U">Developer&#8217;s guide</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="brian-package-structure">
+<h1>Brian package structure<a class="headerlink" href="#brian-package-structure" title="Permalink to this headline">¶</a></h1>
+<p>List of modules with descriptions of contents:</p>
+<p><strong>Root package</strong></p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">base</span></tt></dt>
+<dd>Shared base classes for some Brian clases. At the moment, just the
+<tt class="xref py py-class docutils literal"><span class="pre">ObjectContainer</span></tt> class used to implement the <tt class="docutils literal"><span class="pre">contained_objects</span></tt>
+protocol.</dd>
+<dt><tt class="docutils literal"><span class="pre">clock</span></tt></dt>
+<dd>The <tt class="xref py py-class docutils literal"><span class="pre">Clock</span></tt> object, <tt class="xref py py-func docutils literal"><span class="pre">guess_clock()</span></tt> function, and other clock
+manipulation functions.</dd>
+<dt><tt class="docutils literal"><span class="pre">compartments</span></tt></dt>
+<dd>A class used in compartmental modelling (see user documentation).</dd>
+<dt><tt class="docutils literal"><span class="pre">connection</span></tt></dt>
+<dd>Everything to do with connections, including the <tt class="xref py py-class docutils literal"><span class="pre">Connection</span></tt> and
+<tt class="xref py py-class docutils literal"><span class="pre">DelayConnection</span></tt> classes, but also construction/connection matrices
+and connection vector code. One of the longest and most technical parts of
+Brian.</dd>
+<dt><tt class="docutils literal"><span class="pre">correlatedspikes</span></tt></dt>
+<dd>A tool for producing correlated spike trains.</dd>
+<dt><tt class="docutils literal"><span class="pre">directcontrol</span></tt></dt>
+<dd>Classes for producing groups which fire spikes at user specified times.</dd>
+<dt><tt class="docutils literal"><span class="pre">equations</span></tt></dt>
+<dd>Everything to do with the <tt class="xref py py-class docutils literal"><span class="pre">Equations</span></tt> class.</dd>
+<dt><tt class="docutils literal"><span class="pre">globalprefs</span></tt></dt>
+<dd>Global preferences for Brian, a few routines for getting and setting.</dd>
+<dt><tt class="docutils literal"><span class="pre">group</span></tt></dt>
+<dd>A base class for <tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt> which creates an <tt class="docutils literal"><span class="pre">_S</span></tt> attribute from
+an <tt class="xref py py-class docutils literal"><span class="pre">Equations</span></tt> object with the appropriate dynamical variables, and
+allows these variables to be accessed by e.g. <tt class="docutils literal"><span class="pre">grp.V</span></tt> by overriding the
+<tt class="docutils literal"><span class="pre">__getattr__</span></tt> and <tt class="docutils literal"><span class="pre">__setattr__</span></tt> methods.</dd>
+<dt><tt class="docutils literal"><span class="pre">inspection</span></tt></dt>
+<dd>Utility functions for inspecting namespaces, checking consistency of
+equations, some code manipulation, etc.</dd>
+<dt><tt class="docutils literal"><span class="pre">log</span></tt></dt>
+<dd>Brian&#8217;s somewhat under-developed logging capabilities.</dd>
+<dt><tt class="docutils literal"><span class="pre">magic</span></tt></dt>
+<dd>Classes and functions for tracking and finding instances of classes.</dd>
+<dt><tt class="docutils literal"><span class="pre">membrane_equations</span></tt></dt>
+<dd>More code for compartmental modelling (see user docs).</dd>
+<dt><tt class="docutils literal"><span class="pre">monitor</span></tt></dt>
+<dd>All the monitors, including <tt class="xref py py-class docutils literal"><span class="pre">SpikeMonitor</span></tt> and <tt class="xref py py-class docutils literal"><span class="pre">StateMonitor</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">network</span></tt></dt>
+<dd>The <tt class="xref py py-class docutils literal"><span class="pre">Network</span></tt> and <tt class="xref py py-class docutils literal"><span class="pre">MagicNetwork</span></tt> classes as well as the
+<tt class="xref py py-class docutils literal"><span class="pre">NetworkOperation</span></tt> class. Also includes the <tt class="xref py py-func docutils literal"><span class="pre">run()</span></tt>, etc.
+functions.</dd>
+<dt><tt class="docutils literal"><span class="pre">neurongroup</span></tt></dt>
+<dd>The <tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt> definition and some related stuff, including linked
+variables (the <tt class="xref py py-class docutils literal"><span class="pre">LinkedVar</span></tt> class) and <tt class="xref py py-class docutils literal"><span class="pre">PoissonGroup</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">optimiser</span></tt></dt>
+<dd>Some tools for freezing expressions (converting e.g. <tt class="docutils literal"><span class="pre">3*ms</span></tt> into 0.003) and
+simplifying some equations (e.g. <tt class="docutils literal"><span class="pre">a/(10*ms)</span></tt> converted to <tt class="docutils literal"><span class="pre">a*100</span></tt>).</dd>
+<dt><tt class="docutils literal"><span class="pre">plotting</span></tt></dt>
+<dd>Plotting tools, mostly <tt class="docutils literal"><span class="pre">raster_plot</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">quantityarray</span></tt></dt>
+<dd>A leftover from the day when Brian had support for arrays with units, will
+be removed when practical.</dd>
+<dt><tt class="docutils literal"><span class="pre">reset</span></tt></dt>
+<dd>Reset classes.</dd>
+<dt><tt class="docutils literal"><span class="pre">stateupdater</span></tt></dt>
+<dd>State update classes and the <tt class="xref py py-func docutils literal"><span class="pre">magic_state_updater()</span></tt> function.</dd>
+<dt><tt class="docutils literal"><span class="pre">stdp</span></tt></dt>
+<dd>STDP features.</dd>
+<dt><tt class="docutils literal"><span class="pre">stdunits</span></tt></dt>
+<dd>Standard unit names such as <tt class="docutils literal"><span class="pre">mV</span></tt> for <tt class="docutils literal"><span class="pre">mvolt</span></tt>, etc.</dd>
+<dt><tt class="docutils literal"><span class="pre">stp</span></tt></dt>
+<dd>Short term plasticity features.</dd>
+<dt><tt class="docutils literal"><span class="pre">threshold</span></tt></dt>
+<dd>Threshold classes.</dd>
+<dt><tt class="docutils literal"><span class="pre">timedarray</span></tt></dt>
+<dd>The <tt class="xref py py-class docutils literal"><span class="pre">TimedArray</span></tt> class and related functions.</dd>
+<dt><tt class="docutils literal"><span class="pre">units</span></tt></dt>
+<dd>The Brian units package, including the <tt class="xref py py-class docutils literal"><span class="pre">Quantity</span></tt> class.</dd>
+<dt><tt class="docutils literal"><span class="pre">unitsafefunctions</span></tt></dt>
+<dd>Some functions which override the numpy ones which are safe to use with
+units, e.g. <tt class="docutils literal"><span class="pre">sin(3*volt)</span></tt> raises a dimensionality error.</dd>
+</dl>
+<p><strong>``library`` subpackage</strong></p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">electrophysiology</span></tt></dt>
+<dd>Electrophysiology library with electrode and amplifier models.</dd>
+<dt><tt class="docutils literal"><span class="pre">IF</span></tt></dt>
+<dd>Integrate-and-fire models (leaky, quadratic, exponential...).</dd>
+<dt><tt class="docutils literal"><span class="pre">ionic_currents</span></tt></dt>
+<dd>Ionic current models (K+, Na+...).</dd>
+<dt><tt class="docutils literal"><span class="pre">random_processes</span></tt></dt>
+<dd>Currently only Ornstein-Uhlenbeck.</dd>
+<dt><tt class="docutils literal"><span class="pre">synapses</span></tt></dt>
+<dd>Synaptic models (exponential, alpha and biexponential models).</dd>
+</dl>
+<p><strong>``utils`` subpackage</strong></p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">approximatecomparisons</span></tt></dt>
+<dd>Some tools for doing approximate comparisons with floating point numbers
+(because they are inexact).</dd>
+<dt><tt class="docutils literal"><span class="pre">autodiff</span></tt></dt>
+<dd>Automatic differentiation routines (for single-valued functions).</dd>
+<dt><tt class="docutils literal"><span class="pre">circular</span></tt> and the <tt class="docutils literal"><span class="pre">ccircular</span></tt> subpackage</dt>
+<dd>The important <tt class="xref py py-class docutils literal"><span class="pre">SpikeContainer</span></tt> and related classes. The <tt class="docutils literal"><span class="pre">C</span></tt> version
+uses SWIG and is much faster but requires the user to compile themselves
+at the moment (this will be addressed at some point in the future).</dd>
+<dt><tt class="docutils literal"><span class="pre">documentation</span></tt></dt>
+<dd>Some utility functions related to documentation.</dd>
+<dt><tt class="docutils literal"><span class="pre">information_theory</span></tt></dt>
+<dd>Entropy and mutual information estimators. Requires the ANN wrapper in scikits.</dd>
+<dt><tt class="docutils literal"><span class="pre">parallelpython</span></tt></dt>
+<dd>A utility function for using the Parallel Python module.</dd>
+<dt><tt class="docutils literal"><span class="pre">parameters</span></tt></dt>
+<dd>The <tt class="xref py py-class docutils literal"><span class="pre">Parameters</span></tt> class, basically independent of Brian but
+potentially useful.</dd>
+<dt><tt class="docutils literal"><span class="pre">progressreporting</span></tt></dt>
+<dd>A progress reporting framework which <tt class="xref py py-meth docutils literal"><span class="pre">Network.run()</span></tt> can use to report
+how long it is taking to run, with text or graphical options.</dd>
+<dt><tt class="docutils literal"><span class="pre">statistics</span></tt></dt>
+<dd>Statistics of spike trains (CV, vector strength, correlograms...).</dd>
+<dt><tt class="docutils literal"><span class="pre">tabulate</span></tt></dt>
+<dd>Tabulation of numerical functions (precalculation).</dd>
+</dl>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="developer-codegen.html"
+                        title="previous chapter">Code generation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="developer-repositorystructure.html"
+                        title="next chapter">Repository structure</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/developer-packagestructure.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="developer-repositorystructure.html" title="Repository structure"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="developer-codegen.html" title="Code generation"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="developer.html" >Developer&#8217;s guide</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

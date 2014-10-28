@@ -1,0 +1,145 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: leaky_if (misc) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: mirollo_strogatz (misc)" href="examples-misc_mirollo_strogatz.html" />
+    <link rel="prev" title="Example: topographic_map2 (misc)" href="examples-misc_topographic_map2.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-misc_mirollo_strogatz.html" title="Example: mirollo_strogatz (misc)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-misc_topographic_map2.html" title="Example: topographic_map2 (misc)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-leaky-if-misc">
+<span id="example-misc-leaky-if"></span><span id="index-0"></span><h1>Example: leaky_if (misc)<a class="headerlink" href="#example-leaky-if-misc" title="Permalink to this headline">¶</a></h1>
+<p>A very simple example Brian script to show how to implement
+a leaky integrate and fire model. In this example, we also
+drive the single leaky integrate and fire neuron with
+regularly spaced spikes from the <a class="reference internal" href="reference-standard-groups.html#brian.SpikeGeneratorGroup" title="brian.SpikeGeneratorGroup"><tt class="xref py py-class docutils literal"><span class="pre">SpikeGeneratorGroup</span></tt></a>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">tau</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">ms</span>
+<span class="n">Vr</span> <span class="o">=</span> <span class="o">-</span><span class="mi">70</span> <span class="o">*</span> <span class="n">mV</span>
+<span class="n">Vt</span> <span class="o">=</span> <span class="o">-</span><span class="mi">55</span> <span class="o">*</span> <span class="n">mV</span>
+
+<span class="n">G</span> <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s">&#39;dV/dt = -(V-Vr)/tau : volt&#39;</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">Vt</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="n">Vr</span><span class="p">)</span>
+
+<span class="n">spikes</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="n">t</span><span class="o">*</span><span class="n">second</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">linspace</span><span class="p">(</span><span class="mi">10</span> <span class="o">*</span> <span class="n">ms</span><span class="p">,</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">ms</span><span class="p">,</span> <span class="mi">25</span><span class="p">)]</span>
+<span class="nb">input</span> <span class="o">=</span> <span class="n">SpikeGeneratorGroup</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">spikes</span><span class="p">)</span>
+
+<span class="n">C</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">G</span><span class="p">)</span>
+<span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">mV</span>
+
+<span class="n">M</span> <span class="o">=</span> <span class="n">StateMonitor</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="s">&#39;V&#39;</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="n">G</span><span class="o">.</span><span class="n">V</span> <span class="o">=</span> <span class="n">Vr</span>
+<span class="n">run</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">ms</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">times</span> <span class="o">/</span> <span class="n">ms</span><span class="p">,</span> <span class="n">M</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">mV</span><span class="p">)</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-misc_topographic_map2.html"
+                        title="previous chapter">Example: topographic_map2 (misc)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-misc_mirollo_strogatz.html"
+                        title="next chapter">Example: mirollo_strogatz (misc)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-misc_leaky_if.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-misc_mirollo_strogatz.html" title="Example: mirollo_strogatz (misc)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-misc_topographic_map2.html" title="Example: topographic_map2 (misc)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

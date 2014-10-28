@@ -1,0 +1,165 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Connection matrices &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Advanced concepts" href="advanced.html" />
+    <link rel="next" title="Parameters" href="parameters.html" />
+    <link rel="prev" title="Projects with multiple files or functions" href="tasks_multiplefiles.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="parameters.html" title="Parameters"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="tasks_multiplefiles.html" title="Projects with multiple files or functions"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="advanced.html" accesskey="U">Advanced concepts</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="connection-matrices">
+<h1>Connection matrices<a class="headerlink" href="#connection-matrices" title="Permalink to this headline">¶</a></h1>
+<p>A <a class="reference internal" href="reference-connections.html#brian.Connection" title="brian.Connection"><tt class="xref py py-class docutils literal"><span class="pre">Connection</span></tt></a> object has an attribute <tt class="docutils literal"><span class="pre">W</span></tt> which is its connection
+matrix.</p>
+<p>Brian&#8217;s system for connection matrices can be slightly confusing. The way it
+works is roughly as follows. There are two types of connection matrix data
+structures, <a class="reference internal" href="reference-connections.html#brian.ConstructionMatrix" title="brian.ConstructionMatrix"><tt class="xref py py-class docutils literal"><span class="pre">ConstructionMatrix</span></tt></a> and <a class="reference internal" href="reference-connections.html#brian.ConnectionMatrix" title="brian.ConnectionMatrix"><tt class="xref py py-class docutils literal"><span class="pre">ConnectionMatrix</span></tt></a>. The
+construction matrix types are used for building connectivity, and are optimised
+for insertion and deletion of elements, but access is slow. The connection
+matrix types are used when the simulation is running, and are optimised for
+fast access, but not for adding/removing or modifying elements. When a
+<a class="reference internal" href="reference-connections.html#brian.Connection" title="brian.Connection"><tt class="xref py py-class docutils literal"><span class="pre">Connection</span></tt></a> object is created, it is given a construction matrix data
+type, and when the network is run, this matrix is converted to its corresponding
+connection matrix type. As well as this construction/connection matrix type
+distinction, there is also the distinction between dense/sparse/dynamic matrices,
+each of which have their own construction and connection versions.</p>
+<p>The dense matrix structure is very simple, both the construction and connection
+types are basically just 2D numpy arrays.</p>
+<p>The sparse and dynamic matrix structures are very different for construction
+and connection. Both the sparse and dynamic construction matrices are
+essentially just the <tt class="docutils literal"><span class="pre">scipy.lil_matrix</span></tt> sparse matrix type, however we add
+some slight improvements to scipy&#8217;s matrix data type to make it more efficient
+for our case.</p>
+<p>The sparse and dynamic connection matrix structures are documented in more
+detail in the reference pages for <a class="reference internal" href="reference-connections.html#brian.SparseConnectionMatrix" title="brian.SparseConnectionMatrix"><tt class="xref py py-class docutils literal"><span class="pre">SparseConnectionMatrix</span></tt></a> and
+<a class="reference internal" href="reference-connections.html#brian.DynamicConnectionMatrix" title="brian.DynamicConnectionMatrix"><tt class="xref py py-class docutils literal"><span class="pre">DynamicConnectionMatrix</span></tt></a>.</p>
+<p>For customised run-time modifications to sparse and dense connection matrices
+you have two options. You can modify the data structures directly using the
+information in the reference pages linked to in the paragraph above, or you can
+use the methods defined in the <a class="reference internal" href="reference-connections.html#brian.ConnectionMatrix" title="brian.ConnectionMatrix"><tt class="xref py py-class docutils literal"><span class="pre">ConnectionMatrix</span></tt></a> class, which work for
+dense, sparse and dynamic matrix structures, and do not depend on implementation
+specific details. These methods provide element, row and column access. The
+row and column access methods use either <a class="reference internal" href="reference-connections.html#brian.DenseConnectionVector" title="brian.DenseConnectionVector"><tt class="xref py py-class docutils literal"><span class="pre">DenseConnectionVector</span></tt></a>
+or <a class="reference internal" href="reference-connections.html#brian.SparseConnectionVector" title="brian.SparseConnectionVector"><tt class="xref py py-class docutils literal"><span class="pre">SparseConnectionVector</span></tt></a> objects. The dense connection vector is just
+a 1D numpy array of length the size of the row/column. The sparse connection
+vector is slightly more complicated (but not much), see its documentation for
+details. The idea is that in most cases, both dense and sparse connection vectors
+can be operated on without having to know how they work, so for example if <tt class="docutils literal"><span class="pre">v</span></tt>
+is a <a class="reference internal" href="reference-connections.html#brian.ConnectionVector" title="brian.ConnectionVector"><tt class="xref py py-class docutils literal"><span class="pre">ConnectionVector</span></tt></a> then <tt class="docutils literal"><span class="pre">2*v</span></tt> is of the same type. So for a
+<a class="reference internal" href="reference-connections.html#brian.ConnectionMatrix" title="brian.ConnectionMatrix"><tt class="xref py py-class docutils literal"><span class="pre">ConnectionMatrix</span></tt></a> <tt class="docutils literal"><span class="pre">W</span></tt>, this should work, whatever the structure of
+<tt class="docutils literal"><span class="pre">W</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">W</span><span class="o">.</span><span class="n">set_row</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">W</span><span class="o">.</span><span class="n">get_row</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Or equivalently:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">W</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">W</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span>
+</pre></div>
+</div>
+<p>The syntax <tt class="docutils literal"><span class="pre">W[i,:]</span></tt>, <tt class="docutils literal"><span class="pre">W[:,i]</span></tt> and <tt class="docutils literal"><span class="pre">W[i,j]</span></tt> is supported for integers <tt class="docutils literal"><span class="pre">i</span></tt>
+and <tt class="docutils literal"><span class="pre">j</span></tt> for (respectively) row, column and element access.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="tasks_multiplefiles.html"
+                        title="previous chapter">Projects with multiple files or functions</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="parameters.html"
+                        title="next chapter">Parameters</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/advanced_connection_matrices.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="parameters.html" title="Parameters"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="tasks_multiplefiles.html" title="Projects with multiple files or functions"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="advanced.html" >Advanced concepts</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

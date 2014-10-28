@@ -1,0 +1,153 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: params (frompapers/computing with neural synchrony/olfaction) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: interface (interface)" href="examples-interface_interface.html" />
+    <link rel="prev" title="Example: Fig9B_olfaction (frompapers/computing with neural synchrony/olfaction)" href="examples-frompapers-computing with neural synchrony-olfaction_Fig9B_olfaction.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-interface_interface.html" title="Example: interface (interface)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-olfaction_Fig9B_olfaction.html" title="Example: Fig9B_olfaction (frompapers/computing with neural synchrony/olfaction)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-params-frompapers-computing-with-neural-synchrony-olfaction">
+<span id="example-frompapers-computing-with-neural-synchrony-olfaction-params"></span><h1>Example: params (frompapers/computing with neural synchrony/olfaction)<a class="headerlink" href="#example-params-frompapers-computing-with-neural-synchrony-olfaction" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="brette-r-2012-computing-with-neural-synchrony-plos-comp-biol-8-6-e1002561-doi-10-1371-journal-pcbi-1002561">
+<h2>Brette R (2012). Computing with neural synchrony. PLoS Comp Biol. 8(6): e1002561. doi:10.1371/journal.pcbi.1002561<a class="headerlink" href="#brette-r-2012-computing-with-neural-synchrony-plos-comp-biol-8-6-e1002561-doi-10-1371-journal-pcbi-1002561" title="Permalink to this headline">¶</a></h2>
+<p>Parameters for the olfactory model with STDP</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">N</span><span class="o">=</span><span class="mi">5000</span>
+<span class="c"># Coincidence detectors</span>
+<span class="n">sigma</span><span class="o">=.</span><span class="mi">15</span>
+<span class="n">taud</span><span class="o">=</span><span class="mi">8</span><span class="o">*</span><span class="n">ms</span>
+<span class="c"># Connections</span>
+<span class="n">Nsynapses</span><span class="o">=</span><span class="mi">50</span>
+<span class="n">w0</span><span class="o">=</span><span class="mf">150.</span><span class="o">/</span><span class="p">(</span><span class="mf">0.02</span><span class="o">*</span><span class="n">N</span><span class="p">)</span>
+<span class="c"># STDP</span>
+<span class="n">factor</span><span class="o">=</span><span class="mf">0.05</span>
+<span class="n">a_pre</span><span class="o">=</span><span class="mf">0.06</span><span class="o">*</span><span class="n">factor</span>
+<span class="n">b_post</span><span class="o">=-</span><span class="mf">1.</span><span class="o">*</span><span class="n">factor</span>
+<span class="n">tau_pre</span><span class="o">=</span><span class="mi">3</span><span class="o">*</span><span class="n">ms</span>
+<span class="c"># Intrinsic plasticity: non-specific weight increase</span>
+<span class="n">IP_period</span><span class="o">=</span><span class="mi">10</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">IP_rate</span><span class="o">=-</span><span class="n">b_post</span><span class="o">*</span><span class="mi">5</span><span class="o">*</span><span class="n">Hz</span> <span class="c"># target firing rate = 5 Hz</span>
+<span class="c"># Simulation control</span>
+<span class="n">record_period</span><span class="o">=</span><span class="mi">1</span><span class="o">*</span><span class="n">second</span>
+<span class="n">duration</span><span class="o">=</span><span class="mi">100</span><span class="o">*</span><span class="n">second</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Example: params (frompapers/computing with neural synchrony/olfaction)</a><ul>
+<li><a class="reference internal" href="#brette-r-2012-computing-with-neural-synchrony-plos-comp-biol-8-6-e1002561-doi-10-1371-journal-pcbi-1002561">Brette R (2012). Computing with neural synchrony. PLoS Comp Biol. 8(6): e1002561. doi:10.1371/journal.pcbi.1002561</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-frompapers-computing with neural synchrony-olfaction_Fig9B_olfaction.html"
+                        title="previous chapter">Example: Fig9B_olfaction (frompapers/computing with neural synchrony/olfaction)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-interface_interface.html"
+                        title="next chapter">Example: interface (interface)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-frompapers-computing with neural synchrony-olfaction_params.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-interface_interface.html" title="Example: interface (interface)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-olfaction_Fig9B_olfaction.html" title="Example: Fig9B_olfaction (frompapers/computing with neural synchrony/olfaction)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

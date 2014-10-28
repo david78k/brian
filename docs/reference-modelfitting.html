@@ -1,0 +1,529 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Model fitting toolbox &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Reference" href="reference.html" />
+    <link rel="next" title="Electrode compensation" href="reference-electrodecompensation.html" />
+    <link rel="prev" title="Progress reporting" href="reference-progressreporting.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="reference-electrodecompensation.html" title="Electrode compensation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="reference-progressreporting.html" title="Progress reporting"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="reference.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="model-fitting-toolbox">
+<h1>Model fitting toolbox<a class="headerlink" href="#model-fitting-toolbox" title="Permalink to this headline">¶</a></h1>
+<p>The model fitting toolbox uses the package
+<a class="reference external" href="http://code.google.com/p/playdoh/">Playdoh</a>, you can see the
+documentation <a class="reference external" href="http://playdoh.googlecode.com/svn/docs/index.html">here</a>.</p>
+<dl class="function">
+<dt id="brian.library.modelfitting.modelfitting">
+<tt class="descclassname">brian.library.modelfitting.</tt><tt class="descname">modelfitting</tt><big>(</big><em>**kwds</em><big>)</big><a class="headerlink" href="#brian.library.modelfitting.modelfitting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Model fitting function.</p>
+<p>Fits a spiking neuron model to electrophysiological data (injected current and spikes).</p>
+<p>See also the section <a class="reference internal" href="modelfitting.html#model-fitting-library"><em>Model fitting</em></a> in the user manual.</p>
+<p><strong>Arguments</strong></p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">model</span></tt></dt>
+<dd>An <a class="reference internal" href="reference-models-and-groups.html#brian.Equations" title="brian.Equations"><tt class="xref py py-class docutils literal"><span class="pre">Equations</span></tt></a> object containing the equations defining the model.</dd>
+<dt><tt class="docutils literal"><span class="pre">reset</span></tt></dt>
+<dd>A reset value for the membrane potential, or a string containing the reset
+equations.</dd>
+<dt><tt class="docutils literal"><span class="pre">threshold</span></tt></dt>
+<dd>A threshold value for the membrane potential, or a string containing the threshold
+equations.</dd>
+<dt><tt class="docutils literal"><span class="pre">refractory</span></tt></dt>
+<dd><p class="first">The refractory period in second. If it&#8217;s a single value, the same refractory will be
+used in all the simulations. If it&#8217;s a list or a tuple, the fitting will also
+optimize the refractory period (see <tt class="docutils literal"><span class="pre">**params</span></tt> below).</p>
+<p class="last">Warning: when using a refractory period, you can&#8217;t use a custom reset, only a fixed one.</p>
+</dd>
+<dt><tt class="docutils literal"><span class="pre">data</span></tt></dt>
+<dd>A list of spike times, or a list of several spike trains as a list of pairs (index, spike time)
+if the fit must be performed in parallel over several target spike trains. In this case,
+the modelfitting function returns as many parameters sets as target spike trains.</dd>
+<dt><tt class="docutils literal"><span class="pre">input_var='I'</span></tt></dt>
+<dd>The variable name used in the equations for the input current.</dd>
+<dt><tt class="docutils literal"><span class="pre">input</span></tt></dt>
+<dd>A vector of values containing the time-varying signal the neuron responds to (generally
+an injected current).</dd>
+<dt><tt class="docutils literal"><span class="pre">dt</span></tt></dt>
+<dd>The time step of the input (the inverse of the sampling frequency).</dd>
+<dt><tt class="docutils literal"><span class="pre">**params</span></tt></dt>
+<dd><p class="first">The list of parameters to fit the model with. Each parameter must be set as follows:
+<tt class="docutils literal"><span class="pre">param_name=[bound_min,</span> <span class="pre">min,</span> <span class="pre">max,</span> <span class="pre">bound_max]</span></tt>
+where <tt class="docutils literal"><span class="pre">bound_min</span></tt> and <tt class="docutils literal"><span class="pre">bound_max</span></tt> are the boundaries, and <tt class="docutils literal"><span class="pre">min</span></tt> and <tt class="docutils literal"><span class="pre">max</span></tt>
+specify the interval from which the parameter values are uniformly sampled at
+the beginning of the optimization algorithm.
+If not using boundaries, set <tt class="docutils literal"><span class="pre">param_name=[min,</span> <span class="pre">max]</span></tt>.</p>
+<p>Also, you can add a fit parameter which is a spike delay for all spikes :
+add the special parameter <tt class="docutils literal"><span class="pre">delays</span></tt> in <tt class="docutils literal"><span class="pre">**params</span></tt>, for example 
+<tt class="docutils literal"><span class="pre">modelfitting(...,</span> <span class="pre">delays=[-10*ms,</span> <span class="pre">10*ms])</span></tt>.</p>
+<p class="last">You can also add fit the refractory period by specifying 
+<tt class="docutils literal"><span class="pre">modelfitting(...,</span> <span class="pre">refractory=[-10*ms,</span> <span class="pre">10*ms])</span></tt>.</p>
+</dd>
+<dt><tt class="docutils literal"><span class="pre">popsize</span></tt></dt>
+<dd>Size of the population (number of particles) per target train used by the optimization algorithm.</dd>
+<dt><tt class="docutils literal"><span class="pre">maxiter</span></tt></dt>
+<dd>Number of iterations in the optimization algorithm.</dd>
+<dt><tt class="docutils literal"><span class="pre">optparams</span></tt></dt>
+<dd>Optimization algorithm parameters. It is a dictionary: keys are parameter names,
+values are parameter values or lists of parameters (one value per group). 
+This argument is specific to the optimization
+algorithm used. See <a class="reference internal" href="#brian.library.modelfitting.PSO" title="brian.library.modelfitting.PSO"><tt class="xref py py-class docutils literal"><span class="pre">PSO</span></tt></a>, <a class="reference internal" href="#brian.library.modelfitting.GA" title="brian.library.modelfitting.GA"><tt class="xref py py-class docutils literal"><span class="pre">GA</span></tt></a>, <a class="reference internal" href="#brian.library.modelfitting.CMAES" title="brian.library.modelfitting.CMAES"><tt class="xref py py-class docutils literal"><span class="pre">CMAES</span></tt></a>.</dd>
+<dt><tt class="docutils literal"><span class="pre">delta=4*ms</span></tt></dt>
+<dd>The precision factor delta (a scalar value in second).</dd>
+<dt><tt class="docutils literal"><span class="pre">slices=1</span></tt></dt>
+<dd>The number of time slices to use.</dd>
+<dt><tt class="docutils literal"><span class="pre">overlap=0*ms</span></tt></dt>
+<dd>When using several time slices, the overlap between consecutive slices, in seconds.</dd>
+<dt><tt class="docutils literal"><span class="pre">initial_values</span></tt></dt>
+<dd>A dictionary containing the initial values for the state variables.</dd>
+<dt><tt class="docutils literal"><span class="pre">cpu</span></tt></dt>
+<dd>The number of CPUs to use in parallel. It is set to the number of CPUs in the machine by default.</dd>
+<dt><tt class="docutils literal"><span class="pre">gpu</span></tt></dt>
+<dd>The number of GPUs to use in parallel. It is set to the number of GPUs in the machine by default.</dd>
+<dt><tt class="docutils literal"><span class="pre">precision</span></tt></dt>
+<dd>GPU only: a string set to either <tt class="docutils literal"><span class="pre">float</span></tt> or <tt class="docutils literal"><span class="pre">double</span></tt> to specify whether to use
+single or double precision on the GPU. If it is not specified, it will
+use the best precision available.</dd>
+<dt><tt class="docutils literal"><span class="pre">returninfo=False</span></tt></dt>
+<dd>Boolean indicating whether the modelfitting function should return technical information
+about the optimization.</dd>
+<dt><tt class="docutils literal"><span class="pre">scaling=None</span></tt></dt>
+<dd>Specify the scaling used for the parameters during the optimization. 
+It can be <tt class="docutils literal"><span class="pre">None</span></tt> or <tt class="docutils literal"><span class="pre">'mapminmax'</span></tt>. It is <tt class="docutils literal"><span class="pre">None</span></tt>
+by default (no scaling), and <tt class="docutils literal"><span class="pre">mapminmax</span></tt> by default for the CMAES algorithm.</dd>
+<dt><tt class="docutils literal"><span class="pre">algorithm=CMAES</span></tt></dt>
+<dd>The optimization algorithm. It can be <a class="reference internal" href="#brian.library.modelfitting.PSO" title="brian.library.modelfitting.PSO"><tt class="xref py py-class docutils literal"><span class="pre">PSO</span></tt></a>, <a class="reference internal" href="#brian.library.modelfitting.GA" title="brian.library.modelfitting.GA"><tt class="xref py py-class docutils literal"><span class="pre">GA</span></tt></a> or <a class="reference internal" href="#brian.library.modelfitting.CMAES" title="brian.library.modelfitting.CMAES"><tt class="xref py py-class docutils literal"><span class="pre">CMAES</span></tt></a>.</dd>
+<dt><tt class="docutils literal"><span class="pre">optparams={}</span></tt></dt>
+<dd>Optimization parameters. See</dd>
+<dt><tt class="docutils literal"><span class="pre">method='Euler'</span></tt></dt>
+<dd>Integration scheme used on the CPU and GPU: <tt class="docutils literal"><span class="pre">'Euler'</span></tt> (default), <tt class="docutils literal"><span class="pre">RK</span></tt>, 
+or <tt class="docutils literal"><span class="pre">exponential_Euler</span></tt>.
+See also <a class="reference internal" href="equations.html#numerical-integration"><em>Numerical integration</em></a>.</dd>
+<dt><tt class="docutils literal"><span class="pre">machines=[]</span></tt></dt>
+<dd>A list of machine names to use in parallel. See <a class="reference internal" href="modelfitting.html#modelfitting-clusters"><em>Clusters</em></a>.</dd>
+</dl>
+<p><strong>Return values</strong></p>
+<p>Return an <tt class="xref py py-class docutils literal"><span class="pre">OptimizationResult</span></tt> object with the following attributes:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">best_pos</span></tt></dt>
+<dd>Minimizing position found by the algorithm. For array-like fitness functions,
+it is a single vector if there is one group, or a list of vectors.
+For keyword-like fitness functions, it is a dictionary
+where keys are parameter names and values are numeric values. If there are several groups,
+it is a list of dictionaries.</dd>
+<dt><tt class="docutils literal"><span class="pre">best_fit</span></tt></dt>
+<dd>The value of the fitness function for the best positions. It is a single value if 
+there is one group, or it is a list if there are several groups.</dd>
+<dt><tt class="docutils literal"><span class="pre">info</span></tt></dt>
+<dd>A dictionary containing various information about the optimization.</dd>
+</dl>
+<p>Also, the following syntax is possible with an <tt class="docutils literal"><span class="pre">OptimizationResult</span></tt> instance <tt class="docutils literal"><span class="pre">or</span></tt>.
+The <tt class="docutils literal"><span class="pre">key</span></tt> is either an optimizing parameter name for keyword-like fitness functions,
+or a dimension index for array-like fitness functions.</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">or[key]</span></tt></dt>
+<dd>it is the best <tt class="docutils literal"><span class="pre">key</span></tt> parameter found (single value), or the list
+of the best parameters <tt class="docutils literal"><span class="pre">key</span></tt> found for all groups.</dd>
+<dt><tt class="docutils literal"><span class="pre">or[i]</span></tt></dt>
+<dd>where <tt class="docutils literal"><span class="pre">i</span></tt> is a group index. This object has attributes <tt class="docutils literal"><span class="pre">best_pos</span></tt>, <tt class="docutils literal"><span class="pre">best_fit</span></tt>,
+<tt class="docutils literal"><span class="pre">info</span></tt> but only for group <tt class="docutils literal"><span class="pre">i</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">or[i][key]</span></tt></dt>
+<dd>where <tt class="docutils literal"><span class="pre">i</span></tt> is a group index, is the same as <tt class="docutils literal"><span class="pre">or[i].best_pos[key]</span></tt>.</dd>
+</dl>
+<p>For more details on the gamma factor, see
+<a class="reference external" href="http://www.ncbi.nlm.nih.gov/pubmed/18160135">Jolivet et al. 2008, &#8220;A benchmark test for a quantitative assessment of simple neuron models&#8221;, J. Neurosci. Methods</a> (available in PDF
+<a class="reference external" href="http://icwww.epfl.ch/~gerstner/PUBLICATIONS/Jolivet08.pdf">here</a>).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.library.modelfitting.print_table">
+<tt class="descclassname">brian.library.modelfitting.</tt><tt class="descname">print_table</tt><big>(</big><em>results</em>, <em>precision=4</em>, <em>colwidth=16</em><big>)</big><a class="headerlink" href="#brian.library.modelfitting.print_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Displays the results of an optimization in a table.</p>
+<p>Arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">results</span></tt></dt>
+<dd>The results returned by the <tt class="docutils literal"><span class="pre">minimize</span></tt> of <tt class="docutils literal"><span class="pre">maximize</span></tt> function.</dd>
+<dt><tt class="docutils literal"><span class="pre">precision</span> <span class="pre">=</span> <span class="pre">4</span></tt></dt>
+<dd>The number of decimals to print for the parameter values.</dd>
+<dt><tt class="docutils literal"><span class="pre">colwidth</span> <span class="pre">=</span> <span class="pre">16</span></tt></dt>
+<dd>The width of the columns in the table.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.library.modelfitting.open_server">
+<tt class="descclassname">brian.library.modelfitting.</tt><tt class="descname">open_server</tt><big>(</big><em>port=None</em>, <em>maxcpu=None</em>, <em>maxgpu=None</em>, <em>local=None</em><big>)</big><a class="headerlink" href="#brian.library.modelfitting.open_server" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start the Playdoh server.</p>
+<p>Arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">port=DEFAULT_PORT</span></tt></dt>
+<dd>The port (integer) of the Playdoh server. The default is DEFAULT_PORT,
+which is 2718.</dd>
+<dt><tt class="docutils literal"><span class="pre">maxcpu=MAXCPU</span></tt></dt>
+<dd>The total number of CPUs the Playdoh server can use. <tt class="docutils literal"><span class="pre">MAXCPU</span></tt> is the
+total number of CPUs on the computer.</dd>
+<dt><tt class="docutils literal"><span class="pre">maxgpu=MAXGPU</span></tt></dt>
+<dd>The total number of GPUs the Playdoh server can use. <tt class="docutils literal"><span class="pre">MAXGPU</span></tt> is the
+total number of GPUs on the computer, if PyCUDA is installed.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.library.modelfitting.get_spikes">
+<tt class="descclassname">brian.library.modelfitting.</tt><tt class="descname">get_spikes</tt><big>(</big><em>model=None</em>, <em>reset=None</em>, <em>threshold=None</em>, <em>input=None</em>, <em>input_var='I'</em>, <em>dt=None</em>, <em>initial_values=None</em>, <em>**params</em><big>)</big><a class="headerlink" href="#brian.library.modelfitting.get_spikes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves the spike times corresponding to the best parameters found by
+the modelfitting function.</p>
+<p><strong>Arguments</strong></p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">model</span></tt>, <tt class="docutils literal"><span class="pre">reset</span></tt>, <tt class="docutils literal"><span class="pre">threshold</span></tt>, <tt class="docutils literal"><span class="pre">input</span></tt>, <tt class="docutils literal"><span class="pre">input_var</span></tt>, <tt class="docutils literal"><span class="pre">dt</span></tt>, <tt class="docutils literal"><span class="pre">initial_values</span></tt></dt>
+<dd>Same parameters as for the <tt class="docutils literal"><span class="pre">modelfitting</span></tt> function.</dd>
+<dt><tt class="docutils literal"><span class="pre">**params</span></tt></dt>
+<dd>The best parameters returned by the <tt class="docutils literal"><span class="pre">modelfitting</span></tt> function.</dd>
+</dl>
+<p><strong>Returns</strong></p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">spiketimes</span></tt></dt>
+<dd>The spike times of the model with the given input and parameters.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.library.modelfitting.predict">
+<tt class="descclassname">brian.library.modelfitting.</tt><tt class="descname">predict</tt><big>(</big><em>model=None</em>, <em>reset=None</em>, <em>threshold=None</em>, <em>data=None</em>, <em>delta=4.0 * msecond</em>, <em>input=None</em>, <em>input_var='I'</em>, <em>dt=None</em>, <em>**params</em><big>)</big><a class="headerlink" href="#brian.library.modelfitting.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predicts the gamma factor of a fitted model with respect to the data with
+a different input current.</p>
+<p><strong>Arguments</strong></p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">model</span></tt>, <tt class="docutils literal"><span class="pre">reset</span></tt>, <tt class="docutils literal"><span class="pre">threshold</span></tt>, <tt class="docutils literal"><span class="pre">input_var</span></tt>, <tt class="docutils literal"><span class="pre">dt</span></tt></dt>
+<dd>Same parameters as for the <tt class="docutils literal"><span class="pre">modelfitting</span></tt> function.</dd>
+<dt><tt class="docutils literal"><span class="pre">input</span></tt></dt>
+<dd>The input current, that can be different from the current used for the fitting
+procedure.</dd>
+<dt><tt class="docutils literal"><span class="pre">data</span></tt></dt>
+<dd>The experimental spike times to compute the gamma factor against. They have
+been obtained with the current <tt class="docutils literal"><span class="pre">input</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">**params</span></tt></dt>
+<dd>The best parameters returned by the <tt class="docutils literal"><span class="pre">modelfitting</span></tt> function.</dd>
+</dl>
+<p><strong>Returns</strong></p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">gamma</span></tt></dt>
+<dd>The gamma factor of the model spike trains against the data.
+If there were several groups in the fitting procedure, it is a vector
+containing the gamma factor for each group.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.library.modelfitting.PSO">
+<em class="property">class </em><tt class="descclassname">brian.library.modelfitting.</tt><tt class="descname">PSO</tt><a class="headerlink" href="#brian.library.modelfitting.PSO" title="Permalink to this definition">¶</a></dt>
+<dd><p>Particle Swarm Optimization algorithm.
+See the
+<a class="reference external" href="http://en.wikipedia.org/wiki/Particle_swarm_optimization">wikipedia entry on PSO</a>.</p>
+<p>Optimization parameters:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">omega</span></tt></dt>
+<dd>The parameter <tt class="docutils literal"><span class="pre">omega</span></tt> is the &#8220;inertial constant&#8221;</dd>
+<dt><tt class="docutils literal"><span class="pre">cl</span></tt></dt>
+<dd><dl class="first last docutils">
+<dt><tt class="docutils literal"><span class="pre">cl</span></tt> is the &#8220;local best&#8221; constant affecting how much</dt>
+<dd>the particle&#8217;s personal best position influences its movement.</dd>
+</dl>
+</dd>
+<dt><tt class="docutils literal"><span class="pre">cg</span></tt></dt>
+<dd><tt class="docutils literal"><span class="pre">cg</span></tt> is the &#8220;global best&#8221; constant affecting how much the global best
+position influences each particle&#8217;s movement.</dd>
+</dl>
+<p>See the
+<a class="reference external" href="http://en.wikipedia.org/wiki/Particle_swarm_optimization">wikipedia entry on PSO</a>
+for more details (note that they use <tt class="docutils literal"><span class="pre">c_1</span></tt> and <tt class="docutils literal"><span class="pre">c_2</span></tt> instead of <tt class="docutils literal"><span class="pre">cl</span></tt>
+and <tt class="docutils literal"><span class="pre">cg</span></tt>). Reasonable values are (.9, .5, 1.5), but experimentation
+with other values is a good idea.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.library.modelfitting.GA">
+<em class="property">class </em><tt class="descclassname">brian.library.modelfitting.</tt><tt class="descname">GA</tt><a class="headerlink" href="#brian.library.modelfitting.GA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Standard genetic algorithm.
+See the
+<a class="reference external" href="http://en.wikipedia.org/wiki/Genetic_algorithm">wikipedia entry on GA</a></p>
+<p>If more than one worker is used, it works in an island topology, i.e. as a
+coarse - grained parallel genetic algorithms which assumes
+a population on each of the computer nodes and migration of individuals
+among the nodes.</p>
+<p>Optimization parameters:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">proportion_parents</span> <span class="pre">=</span> <span class="pre">1</span></tt></dt>
+<dd>proportion (out of 1) of the entire population taken
+as potential parents.</dd>
+<dt><tt class="docutils literal"><span class="pre">migration_time_interval</span> <span class="pre">=</span> <span class="pre">20</span></tt></dt>
+<dd>whenever more than one worker is used, it is the number of
+iteration at which a migration happens.
+(note for different groups case: this parameter can only have
+one value, i.e. every group will have the same value
+(the first of the list))</dd>
+<dt><tt class="docutils literal"><span class="pre">proportion_migration</span> <span class="pre">=</span> <span class="pre">0.2</span></tt></dt>
+<dd>proportion (out of 1) of the island population that will migrate to
+the next island (the best one) and also the worst that will be
+replaced by the best of the previous island. (note for different
+groups case: this parameter can only have one value, i.e. every group
+will have the same value (the first of the list))</dd>
+<dt><tt class="docutils literal"><span class="pre">proportion_xover</span> <span class="pre">=</span> <span class="pre">0.65</span></tt></dt>
+<dd>proportion (out of 1) of the entire population which will
+undergo a cross over.</dd>
+<dt><tt class="docutils literal"><span class="pre">proportion_elite</span> <span class="pre">=</span> <span class="pre">0.05</span></tt></dt>
+<dd><p class="first">proportion (out of 1) of the entire population which will be kept
+for the next generation based on their best fitness.</p>
+<dl class="last docutils">
+<dt>The proportion of mutation is automatically set to</dt>
+<dd><tt class="docutils literal"><span class="pre">1</span> <span class="pre">-</span> <span class="pre">proportion_xover</span> <span class="pre">-</span> <span class="pre">proportion_elite</span></tt>.</dd>
+</dl>
+</dd>
+<dt><tt class="docutils literal"><span class="pre">func_selection</span> <span class="pre">=</span> <span class="pre">'stoch_uniform'</span></tt></dt>
+<dd>This function define the way the parents are chosen
+(it is the only one available). It lays out a line in
+which each parent corresponds to a section of the line of length
+proportional to its scaled value. The algorithm moves along the
+line in steps of equal size. At each step, the algorithm allocates
+a parent from the section it lands on. The first step is
+a uniform random number less than the step size.</dd>
+</dl>
+<p><tt class="docutils literal"><span class="pre">func_xover</span> <span class="pre">=</span> <span class="pre">'intermediate'</span></tt></p>
+<blockquote>
+<div><dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">func_xover</span></tt> specifies the function that performs the crossover.</dt>
+<dd>The following ones are available:</dd>
+</dl>
+<ul>
+<li><dl class="first docutils">
+<dt><cite>intermediate</cite>: creates children by taking a random weighted average</dt>
+<dd><p class="first">of the parents. You can specify the weights by a single parameter,
+<tt class="docutils literal"><span class="pre">ratio_xover</span></tt> (which is 0.5 by default). The function creates the
+child from parent1 and parent2 using the  following formula:</p>
+<div class="last highlight-python"><div class="highlight"><pre><span class="n">child</span> <span class="o">=</span> <span class="n">parent1</span> <span class="o">+</span> <span class="n">rand</span> <span class="o">*</span> <span class="n">Ratio</span> <span class="o">*</span> <span class="p">(</span> <span class="n">parent2</span> <span class="o">-</span> <span class="n">parent1</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><cite>discrete_random</cite>: creates a random binary vector and selects the</dt>
+<dd><p class="first last">genes where the vector is a 1 from the first parent, and the gene
+where the vector is a 0 from the second parent, and combines the
+genes to form the child.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first"><cite>one_point</cite>: chooses a random integer n between 1 and ndimensions
+and then selects vector entries numbered less than or equal to n
+from the first parent. It then Selects vector entries numbered
+greater than n from the second parent. Finally, it concatenates
+these entries to form a child vector.</p>
+</li>
+<li><dl class="first docutils">
+<dt><cite>two_points</cite>: it selects two random integers m and n between 1 and</dt>
+<dd><p class="first last">ndimensions. The function selects vector entries numbered less than
+or equal to m from the first parent. Then it selects vector entries
+numbered from m + 1 to n, inclusive, from the second parent. Then
+it selects vector entries numbered greater than n from the first
+parent. The algorithm then concatenates these genes to form
+a single gene.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first"><cite>heuristic</cite>: returns a child that lies on the line containing the two
+parents, a small distance away from the parent with the better
+fitness value in the direction away from the parent with the worse
+fitness value. You can specify how far the child is from the
+better parent by the parameter <tt class="docutils literal"><span class="pre">ratio_xover</span></tt>
+(which is 0.5 by default)</p>
+</li>
+<li><p class="first"><cite>linear_combination</cite>: creates children that are linear combinations
+of the two parents with  the parameter <tt class="docutils literal"><span class="pre">ratio_xover</span></tt>
+(which is 0.5 by default and should be between 0 and 1):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">child</span> <span class="o">=</span> <span class="n">parent1</span> <span class="o">+</span> <span class="n">Ratio</span> <span class="o">*</span> <span class="p">(</span> <span class="n">parent2</span> <span class="o">-</span> <span class="n">parent1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For  <tt class="docutils literal"><span class="pre">ratio_xover</span> <span class="pre">=</span> <span class="pre">0.5</span></tt> every child is an arithmetic mean of
+two parents.</p>
+</li>
+</ul>
+</div></blockquote>
+<p><tt class="docutils literal"><span class="pre">func_mutation</span> <span class="pre">=</span> <span class="pre">'gaussian'</span></tt></p>
+<blockquote>
+<div><p>This function define how the genetic algorithm makes small random
+changes in the individuals in the population to create mutation
+children. Mutation provides genetic diversity and enable the genetic
+algorithm to search a broader space. Different options are available:</p>
+<ul>
+<li><p class="first"><cite>gaussian</cite>: adds a random number taken from a Gaussian distribution
+with mean 0 to each entry of the parent vector.</p>
+<p>The &#8216;scale_mutation&#8217; parameter (0.8 by default) determines the
+standard deviation at the first generation by
+<tt class="docutils literal"><span class="pre">scale_mutation</span> <span class="pre">*</span> <span class="pre">(Xmax</span> <span class="pre">-</span> <span class="pre">Xmin)</span></tt> where
+Xmax and Xmin are the boundaries.</p>
+<p>The &#8216;shrink_mutation&#8217; parameter (0.2 by default) controls how the
+standard deviation shrinks as generations go by:</p>
+<div class="highlight-python"><pre>:math:`sigma_{i} = \sigma_{i-1}(1-shrink_{mutation} * i/maxiter)`
+at iteration i.</pre>
+</div>
+</li>
+<li><p class="first"><cite>uniform</cite>: The algorithm selects a fraction of the vector entries of
+an individual for mutation, where each entry has a probability
+<tt class="docutils literal"><span class="pre">mutation_rate</span></tt> (default is 0.1) of being mutated. In the second
+step, the algorithm replaces each selected entry by a random number
+selected uniformly from the range for that entry.</p>
+</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.library.modelfitting.CMAES">
+<em class="property">class </em><tt class="descclassname">brian.library.modelfitting.</tt><tt class="descname">CMAES</tt><a class="headerlink" href="#brian.library.modelfitting.CMAES" title="Permalink to this definition">¶</a></dt>
+<dd><p>Covariance Matrix Adaptation Evolution Strategy algorithm
+See the
+<a class="reference external" href="http://en.wikipedia.org/wiki/CMA-ES">wikipedia entry on CMAES</a>
+and also the author&#8217;s website &lt;<a class="reference external" href="http://www.lri.fr/~hansen/cmaesintro.html">http://www.lri.fr/~hansen/cmaesintro.html</a>&gt;`</p>
+<p>Optimization parameters:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">proportion_selective</span> <span class="pre">=</span> <span class="pre">0.5</span></tt></dt>
+<dd>This parameter (refered to as mu in the CMAES algorithm) is the
+proportion (out of 1) of the entire population that is selected and
+used to update the generative distribution. (note for different groups
+case: this parameter can only have one value, i.e. every group
+will have the same value (the first of the list))</dd>
+<dt><tt class="docutils literal"><span class="pre">bound_strategy</span> <span class="pre">=</span> <span class="pre">1</span></tt>:</dt>
+<dd><p class="first">In the case of a bounded problem, there are two ways to handle the new
+generated points which fall outside the boundaries.
+(note for different groups case: this parameter can only have one
+value, i.e. every group will have the same
+value (the first of the list))</p>
+<p><tt class="docutils literal"><span class="pre">bound_strategy</span> <span class="pre">=</span> <span class="pre">1</span></tt>. With this strategy, every point outside the
+domain is repaired, i.e. it is projected to its nearset possible
+value <img class="math" src="_images/math/4205e8d81bf3239c0a98c580d9b6e08693973300.png" alt="x_{repaired}"/>. In other words, components that are
+infeasible in <img class="math" src="_images/math/26eeb5258ca5099acf8fe96b2a1049c48c89a5e6.png" alt="x"/> are set to the (closest) boundary value
+in <img class="math" src="_images/math/4205e8d81bf3239c0a98c580d9b6e08693973300.png" alt="x_{repaired}"/> The fitness function on the repaired search
+points is evaluated and a penalty which depends on the distance to
+the repaired solution is added
+<img class="math" src="_images/math/28d2dcec2a3e58043f6b56921d57fcd58ac6418e.png" alt="f_{fitness}(x) = f(x_{repaired})+\gamma \|x-x_{repaired}\|^{2}"/>
+The repaired solution is disregarded afterwards.</p>
+<p class="last"><tt class="docutils literal"><span class="pre">bound_strategy</span> <span class="pre">=</span> <span class="pre">2</span></tt>. With this strategy any infeasible solution x is
+resampled until it become feasible. It should be used only if the
+optimal solution is not close to the infeasible domain.</p>
+</dd>
+</dl>
+<p>See p.28 of &lt;<a class="reference external" href="http://www.lri.fr/~hansen/cmatutorial.pdf">http://www.lri.fr/~hansen/cmatutorial.pdf</a>&gt; for more details
+<tt class="docutils literal"><span class="pre">gamma</span></tt>:</p>
+<blockquote>
+<div><tt class="docutils literal"><span class="pre">gamma</span></tt> is the weight <img class="math" src="_images/math/66981fa3920210c6ad8dbe5e968783d5dd7520c3.png" alt="\gamma"/> in the previously introduced
+penalty function. (note for different groups case: this parameter can
+only have one value, i.e. every group will have the same
+value (the first of the list))</div></blockquote>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="reference-progressreporting.html"
+                        title="previous chapter">Progress reporting</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="reference-electrodecompensation.html"
+                        title="next chapter">Electrode compensation</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/reference-modelfitting.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="reference-electrodecompensation.html" title="Electrode compensation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="reference-progressreporting.html" title="Progress reporting"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="reference.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

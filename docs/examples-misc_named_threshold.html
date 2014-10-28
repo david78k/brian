@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: named_threshold (misc) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: minimalexample (misc)" href="examples-misc_minimalexample.html" />
+    <link rel="prev" title="Example: linked_var (misc)" href="examples-misc_linked_var.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-misc_minimalexample.html" title="Example: minimalexample (misc)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-misc_linked_var.html" title="Example: linked_var (misc)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-named-threshold-misc">
+<span id="example-misc-named-threshold"></span><span id="index-0"></span><h1>Example: named_threshold (misc)<a class="headerlink" href="#example-named-threshold-misc" title="Permalink to this headline">¶</a></h1>
+<p>Example with named threshold and reset variables</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="n">eqs</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">dge/dt = -ge/(5*ms) : volt</span>
+<span class="s">dgi/dt = -gi/(10*ms) : volt</span>
+<span class="s">dx/dt = (ge+gi-(x+49*mV))/(20*ms) : volt</span>
+<span class="s">&#39;&#39;&#39;</span>
+<span class="n">P</span> <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="mi">4000</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">eqs</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="s">&#39;x&gt;-50*mV&#39;</span><span class="p">,</span> \
+              <span class="n">reset</span><span class="o">=</span><span class="n">Refractoriness</span><span class="p">(</span><span class="o">-</span><span class="mi">60</span> <span class="o">*</span> <span class="n">mV</span><span class="p">,</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">ms</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="s">&#39;x&#39;</span><span class="p">))</span>
+<span class="c">#P=NeuronGroup(4000,model=eqs,threshold=Threshold(-50*mV,state=&#39;x&#39;),\</span>
+<span class="c">#              reset=Reset(-60*mV,state=&#39;x&#39;)) # without refractoriness</span>
+<span class="n">P</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="o">-</span><span class="mi">60</span> <span class="o">*</span> <span class="n">mV</span>
+<span class="n">Pe</span> <span class="o">=</span> <span class="n">P</span><span class="o">.</span><span class="n">subgroup</span><span class="p">(</span><span class="mi">3200</span><span class="p">)</span>
+<span class="n">Pi</span> <span class="o">=</span> <span class="n">P</span><span class="o">.</span><span class="n">subgroup</span><span class="p">(</span><span class="mi">800</span><span class="p">)</span>
+<span class="n">Ce</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">Pe</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="s">&#39;ge&#39;</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mf">1.62</span> <span class="o">*</span> <span class="n">mV</span><span class="p">,</span> <span class="n">sparseness</span><span class="o">=</span><span class="mf">0.02</span><span class="p">)</span>
+<span class="n">Ci</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">Pi</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="s">&#39;gi&#39;</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span> <span class="o">-</span><span class="mi">9</span> <span class="o">*</span> <span class="n">mV</span><span class="p">,</span> <span class="n">sparseness</span><span class="o">=</span><span class="mf">0.02</span><span class="p">)</span>
+<span class="n">M</span> <span class="o">=</span> <span class="n">SpikeMonitor</span><span class="p">(</span><span class="n">P</span><span class="p">)</span>
+<span class="n">run</span><span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">second</span><span class="p">)</span>
+<span class="n">raster_plot</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-misc_linked_var.html"
+                        title="previous chapter">Example: linked_var (misc)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-misc_minimalexample.html"
+                        title="next chapter">Example: minimalexample (misc)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-misc_named_threshold.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-misc_minimalexample.html" title="Example: minimalexample (misc)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-misc_linked_var.html" title="Example: linked_var (misc)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

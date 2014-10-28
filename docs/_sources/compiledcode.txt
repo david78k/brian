@@ -1,0 +1,52 @@
+.. currentmodule:: brian
+
+.. _compiled-code:
+
+Compiled code
+=============
+
+Compiled C code can be used in several places in Brian to get speed improvements in cases where performance
+is the most important factor.
+
+Weave
+-----
+
+Weave is a SciPy module that allows the use of inlined C++ code. Brian by default doesn't use any C++
+optimisations for maximum compatibility across platforms, but you can enable several optimised
+versions of Brian objects and functions by enabling weave compilation. See :ref:`preferences`
+for more information.
+
+See also :ref:`efficiency-vectorisation` for some information on writing your own inlined C++ code
+using Weave.
+
+C++ objects
+-----------
+
+For maximum compatibility, Brian works with pure Python only. However, as well as the optional
+weave optimisations, there are also objects can run with a pure C++ version for a considerable speedup.
+For this to work, you need a copy of the ``gcc`` compiler installed (either on Linux, Mac or through cygwin on Windows)
+to build them. During installation (via ``easy_install``, ``pip`` or with ``python setup.py install``), two objects
+are compiled automatically: `brian.utils.fastexp.fastexp` (providing a fast, approximate exponential function) and
+`brian.utils.ccircular.ccircular` (a circular array data structure). If the compilation fails, a warning message
+will be displayed and the pure Python versions used instead.
+
+In addition, it is possible to compile a C++ version of a more recent datastructure underlying the Synapses object, the `SpikeQueue`.
+To compile this object, follow these instructions: 
+
+In a command prompt or shell window, go to the directory where Brian is installed. On Windows this
+will probably be ``C:\Python27\lib\site-packages\brian``. Now
+go to the ``experimental/cspikequeue`` folder. If you're on Linux (and this may also work for Mac) run
+the command ``python setup.py build_ext --inplace``. If you're on Windows you'll need to have cygwin with gcc
+installed, and then you run ``setup.py build_ext --inplace -c mingw32`` instead. You should see some
+compilation, possibly with some warnings but no errors.
+
+If all works OK, you should see a UserWarning when importing Brian. You can uninstall (and effectively switch off) the use of the C++ SpikeQueue by removing the ``*.so`` file in the ``experimental/cspikequeue/`` directory. Repeating the steps above (i.e. recompiling the object) will re-enable the C SpikeQueue.
+
+The same steps can also be used for compiling the `ccircular` or `fastexp` if they were not already compiled automatically during installation, just navigate
+to the respective directory. 
+
+Automatically generated C code
+------------------------------
+
+There is an experimental module for automatic generation of C code, see
+:ref:`experimental-codegen`. 

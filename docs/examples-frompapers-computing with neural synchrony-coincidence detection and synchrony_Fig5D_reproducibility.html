@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: Fig5D_reproducibility (frompapers/computing with neural synchrony/coincidence detection and synchrony) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: Fig1C (frompapers/computing with neural synchrony/coincidence detection and synchrony)" href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig1C.html" />
+    <link rel="prev" title="Example: Fig5E_precision_reliability (frompapers/computing with neural synchrony/coincidence detection and synchrony)" href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig5E_precision_reliability.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig1C.html" title="Example: Fig1C (frompapers/computing with neural synchrony/coincidence detection and synchrony)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig5E_precision_reliability.html" title="Example: Fig5E_precision_reliability (frompapers/computing with neural synchrony/coincidence detection and synchrony)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-fig5d-reproducibility-frompapers-computing-with-neural-synchrony-coincidence-detection-and-synchrony">
+<span id="example-frompapers-computing-with-neural-synchrony-coincidence-detection-and-synchrony-fig5d-reproducibility"></span><span id="index-0"></span><h1>Example: Fig5D_reproducibility (frompapers/computing with neural synchrony/coincidence detection and synchrony)<a class="headerlink" href="#example-fig5d-reproducibility-frompapers-computing-with-neural-synchrony-coincidence-detection-and-synchrony" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="brette-r-2012-computing-with-neural-synchrony-plos-comp-biol-8-6-e1002561-doi-10-1371-journal-pcbi-1002561">
+<h2>Brette R (2012). Computing with neural synchrony. PLoS Comp Biol. 8(6): e1002561. doi:10.1371/journal.pcbi.1002561<a class="headerlink" href="#brette-r-2012-computing-with-neural-synchrony-plos-comp-biol-8-6-e1002561-doi-10-1371-journal-pcbi-1002561" title="Permalink to this headline">¶</a></h2>
+<p>Figure 5D, left.</p>
+<p>Caption (Fig 5D). Responses of a noisy integrate-and-fire model in repeated trials.</p>
+<p>Protocol: neuron receives input = signal + noise, both O-U processes, signal
+is identical in all trials (frozen noise). The total variance is held fixed.
+Signal-to-noise ratio is 3 in this simulation.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="c"># The common noisy input</span>
+<span class="n">tau_noise</span><span class="o">=</span><span class="mi">5</span><span class="o">*</span><span class="n">ms</span>
+<span class="nb">input</span><span class="o">=</span><span class="n">NeuronGroup</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="s">&#39;dx/dt=-x/tau_noise+(2./tau_noise)**.5*xi:1&#39;</span><span class="p">)</span>
+
+<span class="c"># The noisy neurons receiving the same input + independent noise</span>
+<span class="n">tau</span><span class="o">=</span><span class="mi">10</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">SNR</span><span class="o">=</span><span class="mf">3.</span> <span class="c"># signal to noise ratio</span>
+<span class="n">sigma</span><span class="o">=.</span><span class="mi">5</span> <span class="c"># total input amplitude</span>
+<span class="n">Z</span><span class="o">=</span><span class="n">sigma</span><span class="o">*</span><span class="n">sqrt</span><span class="p">((</span><span class="n">tau_noise</span><span class="o">+</span><span class="n">tau</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">tau_noise</span><span class="o">*</span><span class="p">(</span><span class="n">SNR</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">)))</span> <span class="c"># normalizing factor</span>
+<span class="n">eqs_neurons</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">dx/dt=(Z*(SNR*I+u)-x)/tau:1</span>
+<span class="s">du/dt=-u/tau_noise+(2./tau_noise)**.5*xi:1</span>
+<span class="s">I : 1</span>
+<span class="s">&#39;&#39;&#39;</span>
+<span class="n">neurons</span><span class="o">=</span><span class="n">NeuronGroup</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="n">eqs_neurons</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">reset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">refractory</span><span class="o">=</span><span class="mi">5</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+<span class="n">neurons</span><span class="o">.</span><span class="n">x</span><span class="o">=</span><span class="n">rand</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span> <span class="c"># random initial conditions</span>
+<span class="n">neurons</span><span class="o">.</span><span class="n">I</span><span class="o">=</span><span class="n">linked_var</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span><span class="s">&#39;x&#39;</span><span class="p">)</span>
+<span class="n">spikes</span><span class="o">=</span><span class="n">SpikeMonitor</span><span class="p">(</span><span class="n">neurons</span><span class="p">)</span>
+
+<span class="n">run</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">second</span><span class="p">)</span>
+
+<span class="c"># Figure</span>
+<span class="n">raster_plot</span><span class="p">(</span><span class="n">spikes</span><span class="p">)</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Example: Fig5D_reproducibility (frompapers/computing with neural synchrony/coincidence detection and synchrony)</a><ul>
+<li><a class="reference internal" href="#brette-r-2012-computing-with-neural-synchrony-plos-comp-biol-8-6-e1002561-doi-10-1371-journal-pcbi-1002561">Brette R (2012). Computing with neural synchrony. PLoS Comp Biol. 8(6): e1002561. doi:10.1371/journal.pcbi.1002561</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig5E_precision_reliability.html"
+                        title="previous chapter">Example: Fig5E_precision_reliability (frompapers/computing with neural synchrony/coincidence detection and synchrony)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig1C.html"
+                        title="next chapter">Example: Fig1C (frompapers/computing with neural synchrony/coincidence detection and synchrony)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig5D_reproducibility.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig1C.html" title="Example: Fig1C (frompapers/computing with neural synchrony/coincidence detection and synchrony)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig5E_precision_reliability.html" title="Example: Fig5E_precision_reliability (frompapers/computing with neural synchrony/coincidence detection and synchrony)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

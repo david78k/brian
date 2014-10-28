@@ -1,0 +1,171 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: linked_var (misc) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: named_threshold (misc)" href="examples-misc_named_threshold.html" />
+    <link rel="prev" title="Example: topographic_map (misc)" href="examples-misc_topographic_map.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-misc_named_threshold.html" title="Example: named_threshold (misc)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-misc_topographic_map.html" title="Example: topographic_map (misc)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-linked-var-misc">
+<span id="example-misc-linked-var"></span><span id="index-0"></span><h1>Example: linked_var (misc)<a class="headerlink" href="#example-linked-var-misc" title="Permalink to this headline">¶</a></h1>
+<p>Example showing <a class="reference internal" href="reference-variableupdating.html#brian.linked_var" title="brian.linked_var"><tt class="xref py py-func docutils literal"><span class="pre">linked_var()</span></tt></a>, connecting two different <a class="reference internal" href="reference-models-and-groups.html#brian.NeuronGroup" title="brian.NeuronGroup"><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></a>
+variables. Here we show something like a simplified haircell and auditory nerve
+fibre model where the hair cells and ANFs are implemented as two separate
+<a class="reference internal" href="reference-models-and-groups.html#brian.NeuronGroup" title="brian.NeuronGroup"><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></a> objects. The hair cells filter their inputs via a
+differential equation, and then emit graded amounts of neurotransmitter
+(variable &#8216;y&#8217;) to the auditory nerve fibres input current (variable &#8216;I&#8217;).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">N</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">f</span> <span class="o">=</span> <span class="mi">50</span> <span class="o">*</span> <span class="n">Hz</span>
+<span class="n">a_min</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">a_max</span> <span class="o">=</span> <span class="mf">100.0</span>
+<span class="n">tau_haircell</span> <span class="o">=</span> <span class="mi">50</span> <span class="o">*</span> <span class="n">ms</span>
+<span class="n">tau</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">ms</span>
+<span class="n">duration</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">ms</span>
+
+<span class="n">eqs_haircells</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">input = a*sin(2*pi*f*t) : 1</span>
+<span class="s">x = clip(input, 0, Inf)**(1.0/3.0) : 1</span>
+<span class="s">a : 1</span>
+<span class="s">dy/dt = (x-y)/tau_haircell : 1</span>
+<span class="s">&#39;&#39;&#39;</span>
+
+<span class="n">haircells</span> <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">eqs_haircells</span><span class="p">)</span>
+<span class="n">haircells</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="n">a_min</span><span class="p">,</span> <span class="n">a_max</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+<span class="n">M_haircells</span> <span class="o">=</span> <span class="n">MultiStateMonitor</span><span class="p">(</span><span class="n">haircells</span><span class="p">,</span> <span class="nb">vars</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;input&#39;</span><span class="p">,</span> <span class="s">&#39;y&#39;</span><span class="p">),</span> <span class="n">record</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="n">eqs_nervefibres</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">dV/dt = (I-V)/tau : 1</span>
+<span class="s">I : 1</span>
+<span class="s">&#39;&#39;&#39;</span>
+<span class="n">nervefibres</span> <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">eqs_nervefibres</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">nervefibres</span><span class="o">.</span><span class="n">I</span> <span class="o">=</span> <span class="n">linked_var</span><span class="p">(</span><span class="n">haircells</span><span class="p">,</span> <span class="s">&#39;y&#39;</span><span class="p">)</span>
+<span class="n">M_nervefibres</span> <span class="o">=</span> <span class="n">MultiStateMonitor</span><span class="p">(</span><span class="n">nervefibres</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="n">run</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span>
+
+<span class="n">subplot</span><span class="p">(</span><span class="mi">221</span><span class="p">)</span>
+<span class="n">M_haircells</span><span class="p">[</span><span class="s">&#39;input&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;haircell.input&#39;</span><span class="p">)</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">222</span><span class="p">)</span>
+<span class="n">M_haircells</span><span class="p">[</span><span class="s">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;haircell.y&#39;</span><span class="p">)</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">223</span><span class="p">)</span>
+<span class="n">M_nervefibres</span><span class="p">[</span><span class="s">&#39;I&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;nervefibres.I&#39;</span><span class="p">)</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">224</span><span class="p">)</span>
+<span class="n">M_nervefibres</span><span class="p">[</span><span class="s">&#39;V&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;nervefibres.V&#39;</span><span class="p">)</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-misc_topographic_map.html"
+                        title="previous chapter">Example: topographic_map (misc)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-misc_named_threshold.html"
+                        title="next chapter">Example: named_threshold (misc)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-misc_linked_var.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-misc_named_threshold.html" title="Example: named_threshold (misc)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-misc_topographic_map.html" title="Example: topographic_map (misc)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,204 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Simulation control &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="User manual" href="usermanual.html" />
+    <link rel="next" title="More on equations" href="equations.html" />
+    <link rel="prev" title="Clocks" href="clocks.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="equations.html" title="More on equations"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="clocks.html" title="Clocks"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="usermanual.html" accesskey="U">User manual</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="simulation-control">
+<span id="index-0"></span><h1>Simulation control<a class="headerlink" href="#simulation-control" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="the-update-schedule">
+<span id="index-1"></span><h2>The update schedule<a class="headerlink" href="#the-update-schedule" title="Permalink to this headline">¶</a></h2>
+<p>When a simulation is run, the operations are done in the following order by default:</p>
+<ol class="arabic simple">
+<li>Update every <a class="reference internal" href="reference-models-and-groups.html#brian.NeuronGroup" title="brian.NeuronGroup"><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></a>, this typically performs an integration time step for the differential equations defining the neuron model.</li>
+<li>Check the threshold condition and propagate the spikes to the target neurons.</li>
+<li>Update every <a class="reference internal" href="reference-synapses.html#brian.Synapses" title="brian.Synapses"><tt class="xref py py-class docutils literal"><span class="pre">Synapses</span></tt></a>, this may include updating the state of targeted <a class="reference internal" href="reference-models-and-groups.html#brian.NeuronGroup" title="brian.NeuronGroup"><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></a> objects</li>
+<li>Reset all neurons that spiked.</li>
+<li>Call all user-defined operations and state monitors.</li>
+</ol>
+<p>The user-defined operations and state monitors can be placed at other places in this schedule, by
+using the keyword <tt class="docutils literal"><span class="pre">when</span></tt>. The values can be <tt class="docutils literal"><span class="pre">start</span></tt>, <tt class="docutils literal"><span class="pre">before_groups</span></tt>, <tt class="docutils literal"><span class="pre">after_groups</span></tt>,
+<tt class="docutils literal"><span class="pre">middle</span></tt>, <tt class="docutils literal"><span class="pre">before_connections</span></tt>, <tt class="docutils literal"><span class="pre">after_connections</span></tt>, <tt class="docutils literal"><span class="pre">before_resets</span></tt>, <tt class="docutils literal"><span class="pre">after_resets</span></tt> or
+<tt class="docutils literal"><span class="pre">end</span></tt> (default: end). For example, to call a function <tt class="docutils literal"><span class="pre">f</span></tt> at the beginning of every timestep:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@network_operation</span><span class="p">(</span><span class="n">when</span><span class="o">=</span><span class="s">&#39;start&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">f</span><span class="p">():</span>
+  <span class="n">do_something</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>or to record the value of a state variable just before the resets:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">M</span><span class="o">=</span><span class="n">StateMonitor</span><span class="p">(</span><span class="n">group</span><span class="p">,</span><span class="s">&#39;x&#39;</span><span class="p">,</span><span class="n">record</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">when</span><span class="o">=</span><span class="s">&#39;before_resets&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="basic-simulation-control">
+<h2>Basic simulation control<a class="headerlink" href="#basic-simulation-control" title="Permalink to this headline">¶</a></h2>
+<p>The simulation is run simply as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">run</span><span class="p">(</span><span class="mi">1000</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where 1000 ms is the duration of the run. It can be stopped during the simulation with the instruction
+<a class="reference internal" href="reference-network.html#brian.stop" title="brian.stop"><tt class="xref py py-func docutils literal"><span class="pre">stop()</span></tt></a>, and the network can be reinitialised with the instruction <a class="reference internal" href="reference-network.html#brian.reinit" title="brian.reinit"><tt class="xref py py-func docutils literal"><span class="pre">reinit()</span></tt></a>.
+The <a class="reference internal" href="reference-network.html#brian.run" title="brian.run"><tt class="xref py py-func docutils literal"><span class="pre">run()</span></tt></a> function also has some options for reporting the progress of the
+simulation as it runs, for example this will print out the elapsed time,
+percentage of the simulation this is complete, and an estimate of the
+remaining time every 10s:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">run</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">second</span><span class="p">,</span> <span class="n">report</span><span class="o">=</span><span class="s">&#39;text&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>When the <a class="reference internal" href="reference-network.html#brian.run" title="brian.run"><tt class="xref py py-func docutils literal"><span class="pre">run()</span></tt></a> function is called, Brian looks for all relevant
+objects in the namespace (groups, connections, monitors, user operations), and runs them.
+In complex scripts, the user might want to run only selected objects. In that
+case, there are two options. The first is to create a <a class="reference internal" href="reference-network.html#brian.Network" title="brian.Network"><tt class="xref py py-class docutils literal"><span class="pre">Network</span></tt></a> object
+(see next section). The second is to use the <a class="reference internal" href="reference-network.html#brian.forget" title="brian.forget"><tt class="xref py py-func docutils literal"><span class="pre">forget()</span></tt></a> function on objects
+you want to exclude from being used. These can then be later added back using
+the <a class="reference internal" href="reference-network.html#brian.recall" title="brian.recall"><tt class="xref py py-func docutils literal"><span class="pre">recall()</span></tt></a> function.</p>
+<p>Users of <tt class="docutils literal"><span class="pre">ipython</span></tt> may also want to make use of the <a class="reference internal" href="reference-network.html#brian.clear" title="brian.clear"><tt class="xref py py-func docutils literal"><span class="pre">clear()</span></tt></a> function which removes all Brian objects
+and deletes their data. This is useful because <tt class="docutils literal"><span class="pre">ipython</span></tt> keeps persistent references to these objects
+which stops memory from being freed.</p>
+</div>
+<div class="section" id="the-network-class">
+<h2>The Network class<a class="headerlink" href="#the-network-class" title="Permalink to this headline">¶</a></h2>
+<p>A <a class="reference internal" href="reference-network.html#brian.Network" title="brian.Network"><tt class="xref py py-class docutils literal"><span class="pre">Network</span></tt></a> object holds a collection of objets that can be run, i.e., objects with class <a class="reference internal" href="reference-models-and-groups.html#brian.NeuronGroup" title="brian.NeuronGroup"><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></a>,
+<a class="reference internal" href="reference-connections.html#brian.Connection" title="brian.Connection"><tt class="xref py py-class docutils literal"><span class="pre">Connection</span></tt></a>, <a class="reference internal" href="reference-monitors.html#brian.SpikeMonitor" title="brian.SpikeMonitor"><tt class="xref py py-class docutils literal"><span class="pre">SpikeMonitor</span></tt></a>, <a class="reference internal" href="reference-monitors.html#brian.StateMonitor" title="brian.StateMonitor"><tt class="xref py py-class docutils literal"><span class="pre">StateMonitor</span></tt></a> (or subclasses) or any user-defined operation with the decorator
+<a class="reference internal" href="reference-network.html#brian.network_operation" title="brian.network_operation"><tt class="xref py py-func docutils literal"><span class="pre">network_operation()</span></tt></a>. Thoses objects can then be simulated. Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">G</span> <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">C</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">net</span> <span class="o">=</span> <span class="n">Network</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="n">C</span><span class="p">)</span>
+<span class="n">net</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="mi">1</span><span class="o">*</span><span class="n">second</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can also pass lists of objects. The simulation can be controlled with the methods
+<tt class="docutils literal"><span class="pre">stop</span></tt> and <tt class="docutils literal"><span class="pre">reinit</span></tt>.</p>
+</div>
+<div class="section" id="the-magicnetwork-object">
+<h2>The <a class="reference internal" href="reference-network.html#brian.MagicNetwork" title="brian.MagicNetwork"><tt class="xref py py-class docutils literal"><span class="pre">MagicNetwork</span></tt></a> object<a class="headerlink" href="#the-magicnetwork-object" title="Permalink to this headline">¶</a></h2>
+<p>When <a class="reference internal" href="reference-network.html#brian.run" title="brian.run"><tt class="xref py py-func docutils literal"><span class="pre">run()</span></tt></a>, <a class="reference internal" href="reference-network.html#brian.reinit" title="brian.reinit"><tt class="xref py py-func docutils literal"><span class="pre">reinit()</span></tt></a> and <a class="reference internal" href="reference-network.html#brian.stop" title="brian.stop"><tt class="xref py py-func docutils literal"><span class="pre">stop()</span></tt></a> are called, they act on the &#8220;magic network&#8221; (the network
+consisting of all relevant objects such as groups, connections, monitors and user operations). This &#8220;magic
+network&#8221; can be explicitly constructed using the <a class="reference internal" href="reference-network.html#brian.MagicNetwork" title="brian.MagicNetwork"><tt class="xref py py-class docutils literal"><span class="pre">MagicNetwork</span></tt></a> object:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">G</span> <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">C</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">net</span> <span class="o">=</span> <span class="n">MagicNetwork</span><span class="p">()</span>
+<span class="n">net</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="mi">1</span><span class="o">*</span><span class="n">second</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Simulation control</a><ul>
+<li><a class="reference internal" href="#the-update-schedule">The update schedule</a></li>
+<li><a class="reference internal" href="#basic-simulation-control">Basic simulation control</a></li>
+<li><a class="reference internal" href="#the-network-class">The Network class</a></li>
+<li><a class="reference internal" href="#the-magicnetwork-object">The <tt class="docutils literal"><span class="pre">MagicNetwork</span></tt> object</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="clocks.html"
+                        title="previous chapter">Clocks</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="equations.html"
+                        title="next chapter">More on equations</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/simulation.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="equations.html" title="More on equations"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="clocks.html" title="Clocks"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="usermanual.html" >User manual</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

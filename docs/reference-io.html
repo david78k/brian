@@ -1,0 +1,249 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Input/output &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Reference" href="reference.html" />
+    <link rel="next" title="Task farming" href="reference-taskfarm.html" />
+    <link rel="prev" title="Analysis" href="reference-analysis.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="reference-taskfarm.html" title="Task farming"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="reference-analysis.html" title="Analysis"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="reference.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="input-output">
+<span id="reference-io"></span><h1>Input/output<a class="headerlink" href="#input-output" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="general-data-management">
+<h2>General data management<a class="headerlink" href="#general-data-management" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="brian.tools.datamanager.DataManager">
+<em class="property">class </em><tt class="descclassname">brian.tools.datamanager.</tt><tt class="descname">DataManager</tt><big>(</big><em>name</em>, <em>datapath=''</em><big>)</big><a class="headerlink" href="#brian.tools.datamanager.DataManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>DataManager is a simple class for managing data produced by multiple
+runs of a simulation carried out in separate processes or machines. Each
+process is assigned a unique ID and Python Shelf object to write its data
+to. Each shelf is a dictionary whose keys must be strings. The DataManager
+can collate information across multiple shelves using the get(key) method,
+which returns a dictionary with keys the unique session names, and values
+the value written in that session (typically only the values will be of
+interest). If each value is a tuple or list then you can use the
+get_merged(key) to get a concatenated list. If the data type is more
+complicated you can use the get(key) method and merge by hand. The idea
+is each process generates files with names that do not interfere with each
+other so that there are no file concurrency issues, and then in the data
+analysis phase, the data generated separately by each process is merged
+together.</p>
+<p>Methods:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">get(key)</span></tt></dt>
+<dd>Return dictionary with keys the session names, and values the values
+stored in that session for the given key.</dd>
+<dt><tt class="docutils literal"><span class="pre">get_merged(key)</span></tt></dt>
+<dd>Return a single list of the merged lists or tuples if each value for
+every session is a list or tuple.</dd>
+<dt><tt class="docutils literal"><span class="pre">get_matching(match)</span></tt></dt>
+<dd>Returns a dictionary with keys the keys matching match and values
+get(key). If match is a string, a matching key has to start with that
+string. If match is a function, a key matches if match(key).</dd>
+<dt><tt class="docutils literal"><span class="pre">get_merged_matching(match)</span></tt></dt>
+<dd>Like get_merged(key) but across all keys that match.</dd>
+<dt><tt class="docutils literal"><span class="pre">get_flat_matching(match)</span></tt></dt>
+<dd>Returns a straight list of every value session[key] for all sessions
+and all keys matching match.</dd>
+<dt><tt class="docutils literal"><span class="pre">iteritems()</span></tt></dt>
+<dd>Returns all <tt class="docutils literal"><span class="pre">(key,</span> <span class="pre">value)</span></tt> pairs, for each Shelf file, as an iterator
+(useful for large files with too much data to be loaded into memory).</dd>
+<dt><tt class="docutils literal"><span class="pre">itervalues()</span></tt></dt>
+<dd>Return all values, for each Shelf file, as an iterator.</dd>
+<dt><tt class="docutils literal"><span class="pre">items()</span></tt>, <tt class="docutils literal"><span class="pre">values()</span></tt></dt>
+<dd>As for <tt class="docutils literal"><span class="pre">iteritems</span></tt> and <tt class="docutils literal"><span class="pre">itervalues</span></tt> but returns a list rather than
+an iterator.</dd>
+<dt><tt class="docutils literal"><span class="pre">itemcount()</span></tt></dt>
+<dd>Returns the total number of items across all the Shelf files.</dd>
+<dt><tt class="docutils literal"><span class="pre">keys()</span></tt></dt>
+<dd>A list of all the keys across all sessions.</dd>
+<dt><tt class="docutils literal"><span class="pre">session()</span></tt></dt>
+<dd>Returns a randomly named session Shelf, multiple processes can write to
+these without worrying about concurrency issues.</dd>
+<dt><tt class="docutils literal"><span class="pre">computer_session()</span></tt></dt>
+<dd>Returns a consistently named Shelf specific to that user and computer,
+only one process can write to it without worrying about concurrency issues.</dd>
+<dt><tt class="docutils literal"><span class="pre">locking_session()</span></tt>, <tt class="docutils literal"><span class="pre">locking_computer_session()</span></tt></dt>
+<dd>Returns a LockingSession object, a limited proxy to the underlying
+Shelf which acquires and releases a lock before and after every
+operation, making it safe for concurrent access.</dd>
+<dt><tt class="docutils literal"><span class="pre">session_filenames()</span></tt></dt>
+<dd>A list of all the shelf filenames for all sessions.</dd>
+<dt><tt class="docutils literal"><span class="pre">make_unique_key()</span></tt></dt>
+<dd>Generates a unique key for inserting an element into a session without
+overwriting data, uses uuid4.</dd>
+</dl>
+<p>Attributes:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">basepath</span></tt></dt>
+<dd>The base path for data files.</dd>
+<dt><tt class="docutils literal"><span class="pre">computer_name</span></tt></dt>
+<dd>A (hopefully) unique identifier for the user and computer, consists of
+the username and the computer network name.</dd>
+<dt><tt class="docutils literal"><span class="pre">computer_session_filename</span></tt></dt>
+<dd>The filename of the computer-specific session file. This file should
+only be accessed by one process at a time, there&#8217;s no way to protect
+against concurrent write accesses causing it to be corrupted.</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="spikes-management">
+<h2>Spikes management<a class="headerlink" href="#spikes-management" title="Permalink to this headline">¶</a></h2>
+<p>The following function describes how to load Address-Event Representation files (AER files).
+See also the <a class="reference internal" href="reference-monitors.html#brian.AERSpikeMonitor" title="brian.AERSpikeMonitor"><tt class="xref py py-class docutils literal"><span class="pre">AERSpikeMonitor</span></tt></a> for saving spikes in that format, and <a class="reference internal" href="reference-standard-groups.html#brian.SpikeGeneratorGroup" title="brian.SpikeGeneratorGroup"><tt class="xref py py-class docutils literal"><span class="pre">SpikeGeneratorGroup</span></tt></a> for reusing them in a simulation.</p>
+<span class="target" id="index-0"></span><dl class="function">
+<dt id="brian.load_aer">
+<tt class="descclassname">brian.</tt><tt class="descname">load_aer</tt><big>(</big><em>filename</em>, <em>check_sorted=False</em>, <em>reinit_time=False</em><big>)</big><a class="headerlink" href="#brian.load_aer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads Address Event Representation (AER) data files for use in
+Brian. Files contain spikes as a binary representation of an
+<tt class="docutils literal"><span class="pre">address</span></tt> (i.e. neuron identifier) and a timestamp.</p>
+<p>This function returns two arrays, an array of addresses (neuron indices) and an array of spike times (in second).</p>
+<p>Note: For index files (that point to multiple .(ae)dat files, typically aeidx files) it
+will return a list containing tuples (addr, time) as for single files.</p>
+<p>Usage:</p>
+<p>ids, times = load_aer(&#8216;/path/to/file.aedat&#8217;)</p>
+<p>Keyword Arguments:</p>
+<p><tt class="docutils literal"><span class="pre">reinit_time</span></tt> If True, sets the first spike time to zero and all others relative to that one.</p>
+<p><tt class="docutils literal"><span class="pre">check_sorted</span></tt> If True, checks if timestamps are sorted, and sorts them if necessary.</p>
+<p>Example use:</p>
+<p>To use the spikes recorded in the AER file <tt class="docutils literal"><span class="pre">filename</span></tt> in a Brian <tt class="docutils literal"><span class="pre">NeuronGroup</span></tt>, one should do:</p>
+<p>addr, timestamp =  load_AER(filename, reinit_time = True)
+G = AERSpikeGeneratorGroup((addr, timestamps))</p>
+<p>An example script can be found in examples/misc/spikes_io.py</p>
+</dd></dl>
+
+</div>
+<div class="section" id="other-external-datatypes">
+<h2>Other external datatypes<a class="headerlink" href="#other-external-datatypes" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="index-1"></span><dl class="function">
+<dt id="brian.read_neuron_dat">
+<tt class="descclassname">brian.</tt><tt class="descname">read_neuron_dat</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#brian.read_neuron_dat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a Neuron vector file (.dat).</p>
+<p>Returns vector of times, vector(s) of values</p>
+</dd></dl>
+
+<span class="target" id="index-2"></span><dl class="function">
+<dt id="brian.read_atf">
+<tt class="descclassname">brian.</tt><tt class="descname">read_atf</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#brian.read_atf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads an Axon ATF file (.atf).</p>
+<p>Returns vector of times, vector of values</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Input/output</a><ul>
+<li><a class="reference internal" href="#general-data-management">General data management</a></li>
+<li><a class="reference internal" href="#spikes-management">Spikes management</a></li>
+<li><a class="reference internal" href="#other-external-datatypes">Other external datatypes</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="reference-analysis.html"
+                        title="previous chapter">Analysis</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="reference-taskfarm.html"
+                        title="next chapter">Task farming</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/reference-io.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="reference-taskfarm.html" title="Task farming"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="reference-analysis.html" title="Analysis"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="reference.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

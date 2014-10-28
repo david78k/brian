@@ -1,0 +1,164 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>GPU/CUDA &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Experimental features" href="experimental.html" />
+    <link rel="next" title="Multilinear state updater" href="experimental-multilinearstateupdater.html" />
+    <link rel="prev" title="Code generation" href="experimental-codegen.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="experimental-multilinearstateupdater.html" title="Multilinear state updater"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="experimental-codegen.html" title="Code generation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="experimental.html" accesskey="U">Experimental features</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="gpu-cuda">
+<h1>GPU/CUDA<a class="headerlink" href="#gpu-cuda" title="Permalink to this headline">¶</a></h1>
+<p>Brian has some experimental support for doing numerical integration only using
+GPUs, using the <a class="reference external" href="http://mathema.tician.de/software/pycuda">PyCUDA package</a>.</p>
+<p>Note that only numerical integration is done on the GPU, which means that
+variables that can be altered on the CPU (via synapses or user operations) need
+to be copied to and from the GPU each time step, as well as variables that are
+used for thresholding and reset operations. This creates a memory bandwidth
+bottleneck, which means that for the moment the GPU code is only useful for
+complicated neuron models such as Hodgkin-Huxley type neurons (although in this
+case it can lead to very substantial speed improvements).</p>
+<dl class="class">
+<dt id="brian.experimental.cuda.GPUNeuronGroup">
+<em class="property">class </em><tt class="descclassname">brian.experimental.cuda.</tt><tt class="descname">GPUNeuronGroup</tt><big>(</big><em>N</em>, <em>model</em>, <em>threshold=None</em>, <em>reset=NoReset()</em>, <em>init=None</em>, <em>refractory=0.0 * second</em>, <em>level=0</em>, <em>clock=None</em>, <em>order=1</em>, <em>implicit=False</em>, <em>unit_checking=True</em>, <em>max_delay=0.0 * second</em>, <em>compile=False</em>, <em>freeze=False</em>, <em>method=None</em>, <em>precision='double'</em>, <em>maxblocksize=512</em>, <em>forcesync=False</em>, <em>pagelocked_mem=True</em>, <em>gpu_to_cpu_vars=None</em>, <em>cpu_to_gpu_vars=None</em><big>)</big><a class="headerlink" href="#brian.experimental.cuda.GPUNeuronGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Neuron group which performs numerical integration on the GPU.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This class is still experimental, not supported and subject to change
+in future versions of Brian.</p>
+</div>
+<p>Initialised with arguments as for <tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt> and additionally:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">precision='double'</span></tt></dt>
+<dd>The GPU scalar precision to use, older models can only use
+<tt class="docutils literal"><span class="pre">precision='float'</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">maxblocksize=512</span></tt></dt>
+<dd>If GPU compilation fails, reduce this value.</dd>
+<dt><tt class="docutils literal"><span class="pre">forcesync=False</span></tt></dt>
+<dd>Whether or not to force copying of state variables to and from the
+GPU each time step. This is slow, so it is better to specify precisely
+which variables should be copied to and from using <tt class="docutils literal"><span class="pre">gpu_to_cpu_vars</span></tt>
+and <tt class="docutils literal"><span class="pre">cpu_to_gpu_vars</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">pagelocked_mem=True</span></tt></dt>
+<dd>Whether to store state variables in pagelocked memory on the CPU,
+which makes copying data to/from the GPU twice as fast.</dd>
+<dt><tt class="docutils literal"><span class="pre">cpu_to_gpu_vars=None</span></tt>, <tt class="docutils literal"><span class="pre">gpu_to_cpu_vars=None</span></tt></dt>
+<dd>Which variables should be copied each time step from the CPU to the GPU
+(before state update) and from the GPU to the CPU (after state update).</dd>
+</dl>
+<p>The point of the copying of variables to and from the GPU is that the GPU
+maintains a separate memory from the CPU, and so changes made on either the
+CPU or GPU won&#8217;t automatically be reflected in the other. Since only
+numerical integration is done on the GPU, any state variable that is
+modified by incoming synapses, for example, should be copied to and from
+the GPU each time step. In addition, any variables used for thresholding
+or resetting need to be appropriately copied (GPU-&gt;CPU for thresholding, and
+both for resetting).</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="experimental-codegen.html"
+                        title="previous chapter">Code generation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="experimental-multilinearstateupdater.html"
+                        title="next chapter">Multilinear state updater</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/experimental-cuda.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="experimental-multilinearstateupdater.html" title="Multilinear state updater"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="experimental-codegen.html" title="Code generation"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="experimental.html" >Experimental features</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

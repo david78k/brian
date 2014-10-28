@@ -1,0 +1,346 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Standard Groups &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Reference" href="reference.html" />
+    <link rel="next" title="Connections" href="reference-connections.html" />
+    <link rel="prev" title="Integration" href="reference-integration.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="reference-connections.html" title="Connections"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="reference-integration.html" title="Integration"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="reference.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="standard-groups">
+<h1>Standard Groups<a class="headerlink" href="#standard-groups" title="Permalink to this headline">¶</a></h1>
+<p>Some standard types of <a class="reference internal" href="reference-models-and-groups.html#brian.NeuronGroup" title="brian.NeuronGroup"><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></a> have already been defined.
+<a class="reference internal" href="#brian.PoissonGroup" title="brian.PoissonGroup"><tt class="xref py py-class docutils literal"><span class="pre">PoissonGroup</span></tt></a> and <a class="reference internal" href="#brian.PoissonInput" title="brian.PoissonInput"><tt class="xref py py-class docutils literal"><span class="pre">PoissonInput</span></tt></a> to generate spikes with Poisson
+statistics, <a class="reference internal" href="#brian.PulsePacket" title="brian.PulsePacket"><tt class="xref py py-class docutils literal"><span class="pre">PulsePacket</span></tt></a> to generate pulse packets with specified
+parameters, and <a class="reference internal" href="#brian.SpikeGeneratorGroup" title="brian.SpikeGeneratorGroup"><tt class="xref py py-class docutils literal"><span class="pre">SpikeGeneratorGroup</span></tt></a> to generate spikes which fire at
+prespecified times.</p>
+<span class="target" id="index-0"></span><dl class="class">
+<dt id="brian.PoissonGroup">
+<em class="property">class </em><tt class="descclassname">brian.</tt><tt class="descname">PoissonGroup</tt><big>(</big><em>N</em>, <em>rates=0.0 * hertz</em>, <em>clock=None</em><big>)</big><a class="headerlink" href="#brian.PoissonGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>A group that generates independent Poisson spike trains.</p>
+<p><strong>Initialised as:</strong></p>
+<div class="highlight-python"><pre>PoissonGroup(N,rates[,clock])</pre>
+</div>
+<p>with arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">N</span></tt></dt>
+<dd>The number of neurons in the group</dd>
+<dt><tt class="docutils literal"><span class="pre">rates</span></tt></dt>
+<dd>A scalar, array or function returning a scalar or array.
+The array should have the same length as the number of
+neurons in the group. The function should take one
+argument <tt class="docutils literal"><span class="pre">t</span></tt> the current simulation time.</dd>
+<dt><tt class="docutils literal"><span class="pre">clock</span></tt></dt>
+<dd>The clock which the group will update with, do not
+specify to use the default clock.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.PoissonInput">
+<em class="property">class </em><tt class="descclassname">brian.</tt><tt class="descname">PoissonInput</tt><big>(</big><em>target</em>, <em>N=None</em>, <em>rate=None</em>, <em>weight=None</em>, <em>state=None</em>, <em>jitter=None</em>, <em>reliability=None</em>, <em>copies=1</em>, <em>record=False</em>, <em>freeze=False</em><big>)</big><a class="headerlink" href="#brian.PoissonInput" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a Poisson input to a NeuronGroup. Allows to efficiently simulate a large number of 
+independent Poisson inputs to a NeuronGroup variable, without simulating every synapse
+individually. The synaptic events are generated randomly during the simulation and
+are not preloaded and stored in memory (unless record=True is used).
+All the inputs must target the same variable, have the same frequency and same synaptic
+weight. You can use as many PoissonInput objects as you want, even targetting a same NeuronGroup.
+There is the possibility to consider time jitter in the presynaptic spikes, and
+synaptic unreliability. The inputs can also be recorded if needed. Finally, all
+neurons from the NeuronGroup receive independent realizations of Poisson spike trains,
+except if the keyword freeze=True is used, in which case all neurons receive the same
+Poisson input.</p>
+<p><strong>Initialised as:</strong></p>
+<div class="highlight-python"><pre>PoissonInput(target[, N][, rate][, weight][, state][, jitter][, reliability][, copies][, record][, freeze])</pre>
+</div>
+<p>with arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">target</span></tt></dt>
+<dd>The target <a class="reference internal" href="reference-models-and-groups.html#brian.NeuronGroup" title="brian.NeuronGroup"><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></a></dd>
+<dt><tt class="docutils literal"><span class="pre">N</span></tt></dt>
+<dd>The number of independent Poisson inputs</dd>
+<dt><tt class="docutils literal"><span class="pre">rate</span></tt></dt>
+<dd>The rate of each Poisson process</dd>
+<dt><tt class="docutils literal"><span class="pre">weight</span></tt></dt>
+<dd>The synaptic weight</dd>
+<dt><tt class="docutils literal"><span class="pre">state</span></tt></dt>
+<dd>The name or the index of the synaptic variable of the <a class="reference internal" href="reference-models-and-groups.html#brian.NeuronGroup" title="brian.NeuronGroup"><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></a></dd>
+<dt><tt class="docutils literal"><span class="pre">jitter</span></tt></dt>
+<dd>is <tt class="docutils literal"><span class="pre">None</span></tt> by default. There is the possibility to consider <tt class="docutils literal"><span class="pre">copies</span></tt> presynaptic
+spikes at each Poisson event, randomly shifted according to an exponential law
+with parameter <tt class="docutils literal"><span class="pre">jitter=taujitter</span></tt> (in second).</dd>
+<dt><tt class="docutils literal"><span class="pre">reliability</span></tt> </dt>
+<dd>is <tt class="docutils literal"><span class="pre">None</span></tt> by default. There is the possibility to consider <tt class="docutils literal"><span class="pre">copies</span></tt> presynaptic
+spikes at each Poisson event, where each of these spikes is unreliable, i.e. it occurs
+with probability <tt class="docutils literal"><span class="pre">jitter=alpha</span></tt> (between 0 and 1).</dd>
+<dt><tt class="docutils literal"><span class="pre">copies</span></tt></dt>
+<dd>The number of copies of each Poisson event. This is identical to <tt class="docutils literal"><span class="pre">weight=copies*w</span></tt>, except
+if <tt class="docutils literal"><span class="pre">jitter</span></tt> or <tt class="docutils literal"><span class="pre">reliability</span></tt> are specified.</dd>
+<dt><tt class="docutils literal"><span class="pre">record</span></tt></dt>
+<dd><tt class="docutils literal"><span class="pre">True</span></tt> if the input has to be recorded. In this case, the recorded events are
+stored in the <tt class="docutils literal"><span class="pre">recorded_events</span></tt> attribute, as a list of pairs <tt class="docutils literal"><span class="pre">(i,t)</span></tt> where <tt class="docutils literal"><span class="pre">i</span></tt> is the
+neuron index and <tt class="docutils literal"><span class="pre">t</span></tt> is the event time.</dd>
+<dt><tt class="docutils literal"><span class="pre">freeze</span></tt></dt>
+<dd><tt class="docutils literal"><span class="pre">True</span></tt> if the input must be the same for all neurons of the <a class="reference internal" href="reference-models-and-groups.html#brian.NeuronGroup" title="brian.NeuronGroup"><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></a></dd>
+</dl>
+</dd></dl>
+
+<span class="target" id="index-1"></span><dl class="class">
+<dt id="brian.PulsePacket">
+<em class="property">class </em><tt class="descclassname">brian.</tt><tt class="descname">PulsePacket</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.PulsePacket" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fires a Gaussian distributed packet of n spikes with given spread</p>
+<p><strong>Initialised as:</strong></p>
+<div class="highlight-python"><pre>PulsePacket(t,n,sigma[,clock])</pre>
+</div>
+<p>with arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">t</span></tt></dt>
+<dd>The mean firing time</dd>
+<dt><tt class="docutils literal"><span class="pre">n</span></tt></dt>
+<dd>The number of spikes in the packet</dd>
+<dt><tt class="docutils literal"><span class="pre">sigma</span></tt></dt>
+<dd>The standard deviation of the firing times.</dd>
+<dt><tt class="docutils literal"><span class="pre">clock</span></tt></dt>
+<dd>The clock to use (omit to use default or local clock)</dd>
+</dl>
+<p><strong>Methods</strong></p>
+<p>This class is derived from <a class="reference internal" href="#brian.SpikeGeneratorGroup" title="brian.SpikeGeneratorGroup"><tt class="xref py py-class docutils literal"><span class="pre">SpikeGeneratorGroup</span></tt></a> and has all its
+methods as well as one additional method:</p>
+<dl class="method">
+<dt id="brian.PulsePacket.generate">
+<tt class="descname">generate</tt><big>(</big><em>t</em>, <em>n</em>, <em>sigma</em><big>)</big><a class="headerlink" href="#brian.PulsePacket.generate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change the parameters and/or generate a new pulse packet.</p>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="index-2"></span><dl class="class">
+<dt id="brian.SpikeGeneratorGroup">
+<em class="property">class </em><tt class="descclassname">brian.</tt><tt class="descname">SpikeGeneratorGroup</tt><big>(</big><em>N</em>, <em>spiketimes</em>, <em>clock=None</em>, <em>period=None</em>, <em>sort=True</em>, <em>gather=None</em><big>)</big><a class="headerlink" href="#brian.SpikeGeneratorGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Emits spikes at given times</p>
+<p>Initialised as:</p>
+<div class="highlight-python"><pre>SpikeGeneratorGroup(N,spiketimes[,clock[,period]])</pre>
+</div>
+<p>with arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">N</span></tt></dt>
+<dd>The number of neurons in the group.</dd>
+<dt><tt class="docutils literal"><span class="pre">spiketimes</span></tt></dt>
+<dd>An object specifying which neurons should fire and when. It can be a container
+such as a <tt class="docutils literal"><span class="pre">list</span></tt>, containing tuples <tt class="docutils literal"><span class="pre">(i,t)</span></tt> meaning neuron <tt class="docutils literal"><span class="pre">i</span></tt> fires at
+time <tt class="docutils literal"><span class="pre">t</span></tt>, or a callable object which returns such a container (which
+allows you to use generator objects even though this is slower, see below). <tt class="docutils literal"><span class="pre">i</span></tt> can be an integer
+or an array (list of neurons that spike at the same time).
+If <tt class="docutils literal"><span class="pre">spiketimes</span></tt> is not a list or tuple, the pairs <tt class="docutils literal"><span class="pre">(i,t)</span></tt> need to be
+sorted in time. You can also pass a numpy array
+<tt class="docutils literal"><span class="pre">spiketimes</span></tt> where the first column of the array
+is the neuron indices, and the second column is the times in
+seconds. Alternatively you can pass a tuple with two arrays, the first one being the neuron indices and the second one times. WARNING: units are not checked in this case, the time array should be in seconds.</dd>
+<dt><tt class="docutils literal"><span class="pre">clock</span></tt></dt>
+<dd>An optional clock to update with (omit to use the default clock).</dd>
+<dt><tt class="docutils literal"><span class="pre">period</span></tt></dt>
+<dd>Optionally makes the spikes recur periodically with the given
+period. Note that iterator objects cannot be used as the <tt class="docutils literal"><span class="pre">spikelist</span></tt>
+with a period as they cannot be reinitialised.</dd>
+<dt><tt class="docutils literal"><span class="pre">gather=False</span></tt></dt>
+<dd>Set to True if you want to gather spike events that fall in the same
+timestep. (Deprecated since Brian 1.3.1)</dd>
+<dt><tt class="docutils literal"><span class="pre">sort=True</span></tt></dt>
+<dd>Set to False if your spike events are already sorted.</dd>
+</dl>
+<p>Has an attribute:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">spiketimes</span></tt></dt>
+<dd>This can be used to reset the list of spike times, however the values of
+<tt class="docutils literal"><span class="pre">N</span></tt>, <tt class="docutils literal"><span class="pre">clock</span></tt> and <tt class="docutils literal"><span class="pre">period</span></tt> cannot be changed.</dd>
+</dl>
+<p><strong>Sample usages</strong></p>
+<p>The simplest usage would be a list of pairs <tt class="docutils literal"><span class="pre">(i,t)</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">spiketimes</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="o">*</span><span class="n">ms</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">ms</span><span class="p">)]</span>
+<span class="n">SpikeGeneratorGroup</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">spiketimes</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>A more complicated example would be to pass a generator:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">random</span>
+<span class="k">def</span> <span class="nf">nextspike</span><span class="p">():</span>
+    <span class="n">nexttime</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="o">*</span><span class="n">ms</span><span class="p">,</span><span class="mi">10</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">9</span><span class="p">),</span><span class="n">nexttime</span><span class="p">)</span>
+        <span class="n">nexttime</span> <span class="o">=</span> <span class="n">nexttime</span> <span class="o">+</span> <span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="o">*</span><span class="n">ms</span><span class="p">,</span><span class="mi">10</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+<span class="n">P</span> <span class="o">=</span> <span class="n">SpikeGeneratorGroup</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="n">nextspike</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>This would give a neuron group <tt class="docutils literal"><span class="pre">P</span></tt> with 10 neurons, where a random one
+of the neurons fires at an average rate of one every 5ms. Please note that as of 1.3.1, this behavior is preserved but will run slower than initializing with arrays, or lists.</p>
+<p><strong>Notes</strong></p>
+<p>Note that if a neuron fires more than one spike in a given interval <tt class="docutils literal"><span class="pre">dt</span></tt>, additional
+spikes will be discarded. A warning will be issued if this
+is detected.</p>
+<p>Also, if you want to use a SpikeGeneratorGroup with many spikes and/or neurons, please use an initialization with arrays.</p>
+<p>Also note that if you pass a generator, then reinitialising the group will not have the
+expected effect because a generator object cannot be reinitialised. Instead, you should
+pass a callable object which returns a generator. In the example above, that would be
+done by calling:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">P</span> <span class="o">=</span> <span class="n">SpikeGeneratorGroup</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="n">nextspike</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Whenever P is reinitialised, it will call <tt class="docutils literal"><span class="pre">nextspike()</span></tt> to create the required spike
+container.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.MultipleSpikeGeneratorGroup">
+<em class="property">class </em><tt class="descclassname">brian.</tt><tt class="descname">MultipleSpikeGeneratorGroup</tt><big>(</big><em>spiketimes</em>, <em>clock=None</em>, <em>period=None</em><big>)</big><a class="headerlink" href="#brian.MultipleSpikeGeneratorGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Emits spikes at given times</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p>This function has been deprecated after Brian 1.3.1 and will be removed
+in a future release. Use <a class="reference internal" href="#brian.SpikeGeneratorGroup" title="brian.SpikeGeneratorGroup"><tt class="xref py py-class docutils literal"><span class="pre">SpikeGeneratorGroup</span></tt></a> instead. To
+convert <tt class="docutils literal"><span class="pre">spiketimes</span></tt> for <a class="reference internal" href="#brian.MultipleSpikeGeneratorGroup" title="brian.MultipleSpikeGeneratorGroup"><tt class="xref py py-class docutils literal"><span class="pre">MultipleSpikeGeneratorGroup</span></tt></a> into
+a form suitable for <a class="reference internal" href="#brian.SpikeGeneratorGroup" title="brian.SpikeGeneratorGroup"><tt class="xref py py-class docutils literal"><span class="pre">SpikeGeneratorGroup</span></tt></a>, do:</p>
+<div class="last highlight-python"><div class="highlight"><pre><span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">spiketimes</span><span class="p">)</span>
+<span class="n">spiketimes</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">spiketimes</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+</pre></div>
+</div>
+</div>
+<p><strong>Initialised as:</strong></p>
+<div class="highlight-python"><pre>MultipleSpikeGeneratorGroup(spiketimes[,clock[,period]])</pre>
+</div>
+<p>with arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">spiketimes</span></tt></dt>
+<dd>a list of spike time containers, one for each neuron in the group,
+although note that elements of <tt class="docutils literal"><span class="pre">spiketimes</span></tt> can also be callable objects which
+return spike time containers if you want to be able to reinitialise (see below).
+At it&#8217;s simplest, <tt class="docutils literal"><span class="pre">spiketimes</span></tt> could be a list of lists, where <tt class="docutils literal"><span class="pre">spiketimes[0]</span></tt> contains
+the firing times for neuron 0, <tt class="docutils literal"><span class="pre">spiketimes[1]</span></tt> for neuron 1, etc. But, any iterable
+object can be passed, so <tt class="docutils literal"><span class="pre">spiketimes[0]</span></tt> could be a generator for example. Each
+spike time container should be sorted in time. If the containers are numpy arrays units
+will not be checked (times should be in seconds).</dd>
+<dt><tt class="docutils literal"><span class="pre">clock</span></tt></dt>
+<dd>A clock, if omitted the default clock will be used.</dd>
+<dt><tt class="docutils literal"><span class="pre">period</span></tt></dt>
+<dd>Optionally makes the spikes recur periodically with the given
+period. Note that iterator objects cannot be used as the <tt class="docutils literal"><span class="pre">spikelist</span></tt>
+with a period as they cannot be reinitialised.</dd>
+</dl>
+<p>Note that if two or more spike times fall within the same <tt class="docutils literal"><span class="pre">dt</span></tt>, spikes will stack up
+and come out one per dt until the stack is exhausted. A warning will be generated
+if this happens.</p>
+<p>Also note that if you pass a generator, then reinitialising the group will not have the
+expected effect because a generator object cannot be reinitialised. Instead, you should
+pass a callable object which returns a generator, this will be called each time the
+object is reinitialised by calling the <tt class="docutils literal"><span class="pre">reinit()</span></tt> method.</p>
+<p><strong>Sample usage:</strong></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">spiketimes</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="o">*</span><span class="n">msecond</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">msecond</span><span class="p">]]</span>
+<span class="n">P</span> <span class="o">=</span> <span class="n">MultipleSpikeGeneratorGroup</span><span class="p">(</span><span class="n">spiketimes</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="reference-integration.html"
+                        title="previous chapter">Integration</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="reference-connections.html"
+                        title="next chapter">Connections</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/reference-standard-groups.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="reference-connections.html" title="Connections"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="reference-integration.html" title="Integration"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="reference.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

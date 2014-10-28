@@ -1,0 +1,248 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: Fig11B_olfaction_stdp_learning (frompapers/computing with neural synchrony/olfaction) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: Fig9B_olfaction (frompapers/computing with neural synchrony/olfaction)" href="examples-frompapers-computing with neural synchrony-olfaction_Fig9B_olfaction.html" />
+    <link rel="prev" title="Example: Fig11B_olfaction_stdp_testing (frompapers/computing with neural synchrony/olfaction)" href="examples-frompapers-computing with neural synchrony-olfaction_Fig11B_olfaction_stdp_testing.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-olfaction_Fig9B_olfaction.html" title="Example: Fig9B_olfaction (frompapers/computing with neural synchrony/olfaction)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-olfaction_Fig11B_olfaction_stdp_testing.html" title="Example: Fig11B_olfaction_stdp_testing (frompapers/computing with neural synchrony/olfaction)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-fig11b-olfaction-stdp-learning-frompapers-computing-with-neural-synchrony-olfaction">
+<span id="example-frompapers-computing-with-neural-synchrony-olfaction-fig11b-olfaction-stdp-learning"></span><span id="index-0"></span><h1>Example: Fig11B_olfaction_stdp_learning (frompapers/computing with neural synchrony/olfaction)<a class="headerlink" href="#example-fig11b-olfaction-stdp-learning-frompapers-computing-with-neural-synchrony-olfaction" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="brette-r-2012-computing-with-neural-synchrony-plos-comp-biol-8-6-e1002561-doi-10-1371-journal-pcbi-1002561">
+<h2>Brette R (2012). Computing with neural synchrony. PLoS Comp Biol. 8(6): e1002561. doi:10.1371/journal.pcbi.1002561<a class="headerlink" href="#brette-r-2012-computing-with-neural-synchrony-plos-comp-biol-8-6-e1002561-doi-10-1371-journal-pcbi-1002561" title="Permalink to this headline">¶</a></h2>
+<p>Figure 11B. Learning to recognize odors.
+(long simulation)</p>
+<p>Caption (Fig. 11B). After learning, responses
+of postsynaptic neurons, ordered by tuning ratio, to odor A (blue) and odor B (red),
+with an increasing concentration (0.1 to 10, where 1 is odor
+concentration in the learning phase).</p>
+<p>After this script, run the other file: Fig11B_olfaction_stdp_testing.py.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">params</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">brian.experimental.connectionmonitor</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="n">bmin</span><span class="p">,</span><span class="n">bmax</span><span class="o">=-</span><span class="mi">7</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span>
+
+<span class="k">def</span> <span class="nf">odor</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+    <span class="c"># Returns a random vector of binding constants</span>
+    <span class="k">return</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="n">rand</span><span class="p">(</span><span class="n">N</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">bmax</span><span class="o">-</span><span class="n">bmin</span><span class="p">)</span><span class="o">+</span><span class="n">bmin</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">hill_function</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">K</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span><span class="n">n</span><span class="o">=</span><span class="mf">3.</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Hill function:</span>
+<span class="sd">    * c = concentration</span>
+<span class="sd">    * K = half activation constant (choose K=1 for relative concentrations)</span>
+<span class="sd">    * n = Hill coefficient</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">c</span><span class="o">**</span><span class="n">n</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">c</span><span class="o">**</span><span class="n">n</span><span class="o">+</span><span class="n">K</span><span class="o">**</span><span class="n">n</span><span class="p">)</span>
+
+<span class="n">N</span><span class="o">=</span><span class="mi">5000</span> <span class="c"># number of receptors</span>
+
+<span class="n">seed</span><span class="p">(</span><span class="mi">31415</span><span class="p">)</span> <span class="c"># Get the same neurons every time</span>
+<span class="n">intensity</span><span class="o">=</span><span class="mf">3000.</span>
+
+<span class="c"># Odor plumes</span>
+<span class="n">tau_plume</span><span class="o">=</span><span class="mi">75</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">eq_plumes</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">dx/dt=-x/tau_plume+(2./tau_plume)**.5*xi : 1</span>
+<span class="s">y=clip(x,0,inf) : 1</span>
+<span class="s">&#39;&#39;&#39;</span>
+<span class="n">plume</span><span class="o">=</span><span class="n">NeuronGroup</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="n">eq_plumes</span><span class="p">)</span> <span class="c"># 1 odor</span>
+
+<span class="c"># Receptor neurons</span>
+<span class="n">Fmax</span><span class="o">=</span><span class="mi">40</span><span class="o">*</span><span class="n">Hz</span> <span class="c"># maximum firing rate</span>
+<span class="n">tau</span><span class="o">=</span><span class="mi">20</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">Imax</span><span class="o">=</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">Fmax</span><span class="o">*</span><span class="n">tau</span><span class="p">)))</span> <span class="c"># maximum input current</span>
+
+<span class="n">eq_receptors</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">dv/dt=(Imax*hill_function(c)-v)/tau : 1</span>
+<span class="s">c : 1  # concentrations (relative to activation constant)</span>
+<span class="s">&#39;&#39;&#39;</span>
+
+<span class="n">receptors</span><span class="o">=</span><span class="n">NeuronGroup</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="n">eq_receptors</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">reset</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="nd">@network_operation</span>
+<span class="k">def</span> <span class="nf">odor_to_nose</span><span class="p">():</span>
+    <span class="c"># Send odor plume to the receptors</span>
+    <span class="n">receptors</span><span class="o">.</span><span class="n">c</span><span class="o">=</span><span class="n">I1</span><span class="o">*</span><span class="n">c1</span><span class="o">*</span><span class="n">clip</span><span class="p">(</span><span class="n">plume</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">0</span><span class="p">,</span><span class="n">Inf</span><span class="p">)</span>
+
+<span class="n">odors</span><span class="o">=</span><span class="p">[</span><span class="n">odor</span><span class="p">(</span><span class="n">N</span><span class="p">),</span><span class="n">odor</span><span class="p">(</span><span class="n">N</span><span class="p">)]</span> <span class="c"># two odors</span>
+<span class="n">c1</span><span class="o">=</span><span class="n">odors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">stimuli</span><span class="o">=</span><span class="p">[]</span>
+<span class="c"># A random odor is presented every 200 ms</span>
+<span class="nd">@network_operation</span><span class="p">(</span><span class="n">clock</span><span class="o">=</span><span class="n">EventClock</span><span class="p">(</span><span class="n">dt</span><span class="o">=</span><span class="mi">200</span><span class="o">*</span><span class="n">ms</span><span class="p">))</span>
+<span class="k">def</span> <span class="nf">change_odor</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">c1</span>
+    <span class="n">nodor</span><span class="o">=</span><span class="n">randint</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">odors</span><span class="p">))</span>
+    <span class="n">c1</span><span class="o">=</span><span class="n">odors</span><span class="p">[</span><span class="n">nodor</span><span class="p">]</span>
+    <span class="n">stimuli</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="nb">float</span><span class="p">(</span><span class="n">defaultclock</span><span class="o">.</span><span class="n">t</span><span class="p">),</span><span class="nb">float</span><span class="p">(</span><span class="n">nodor</span><span class="p">)))</span>
+
+<span class="c"># Decoder neurons</span>
+<span class="n">M</span><span class="o">=</span><span class="mi">30</span>
+<span class="n">eq_decoders</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">dv/dt=-v/taud + sigma*(2/taud)**.5*xi : 1</span>
+<span class="s">&#39;&#39;&#39;</span>
+<span class="n">decoders</span><span class="o">=</span><span class="n">NeuronGroup</span><span class="p">(</span><span class="n">M</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="n">eq_decoders</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">reset</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">S2</span><span class="o">=</span><span class="n">SpikeMonitor</span><span class="p">(</span><span class="n">decoders</span><span class="p">)</span>
+
+<span class="c"># Random synapses</span>
+<span class="n">syn</span><span class="o">=</span><span class="n">Connection</span><span class="p">(</span><span class="n">receptors</span><span class="p">,</span><span class="n">decoders</span><span class="p">,</span><span class="s">&#39;v&#39;</span><span class="p">,</span><span class="n">sparseness</span><span class="o">=</span><span class="n">Nsynapses</span><span class="o">*</span><span class="mf">1.</span><span class="o">/</span><span class="n">N</span><span class="p">,</span><span class="n">weight</span><span class="o">=</span><span class="n">w0</span><span class="p">)</span>
+
+<span class="c"># STDP</span>
+<span class="n">eqs_stdp</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">dApre/dt=-Apre/tau_pre : 1</span>
+<span class="s">Apost : 1</span>
+<span class="s">&#39;&#39;&#39;</span>
+<span class="n">pre</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">Apre+=a_pre</span>
+<span class="s">#w+=0</span>
+<span class="s">&#39;&#39;&#39;</span>
+<span class="n">post</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">Apost+=0</span>
+<span class="s">w+=Apre+b_post*w</span>
+<span class="s">&#39;&#39;&#39;</span>
+<span class="n">stdp</span><span class="o">=</span><span class="n">STDP</span><span class="p">(</span><span class="n">syn</span><span class="p">,</span><span class="n">eqs_stdp</span><span class="p">,</span><span class="n">pre</span><span class="o">=</span><span class="n">pre</span><span class="p">,</span><span class="n">post</span><span class="o">=</span><span class="n">post</span><span class="p">,</span><span class="n">wmax</span><span class="o">=</span><span class="n">Inf</span><span class="p">)</span>
+<span class="n">MC</span><span class="o">=</span><span class="n">ConnectionMonitor</span><span class="p">(</span><span class="n">syn</span><span class="p">,</span><span class="n">store</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">clock</span><span class="o">=</span><span class="n">EventClock</span><span class="p">(</span><span class="n">dt</span><span class="o">=</span><span class="n">record_period</span><span class="p">))</span>
+
+<span class="nd">@network_operation</span><span class="p">(</span><span class="n">EventClock</span><span class="p">(</span><span class="n">dt</span><span class="o">=</span><span class="n">IP_period</span><span class="p">))</span>
+<span class="k">def</span> <span class="nf">intrinsic_plasticity</span><span class="p">():</span> <span class="c"># synaptic scaling</span>
+    <span class="c"># Increases weights of all synapses</span>
+    <span class="n">syn</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">alldata</span><span class="o">+=</span><span class="n">syn</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">alldata</span><span class="o">*</span><span class="n">IP_rate</span><span class="o">*</span><span class="n">IP_period</span>
+
+<span class="c"># Record the evolution of weights</span>
+<span class="n">weights</span><span class="o">=</span><span class="p">[]</span>
+<span class="nd">@network_operation</span><span class="p">(</span><span class="n">EventClock</span><span class="p">(</span><span class="n">dt</span><span class="o">=</span><span class="n">record_period</span><span class="p">))</span>
+<span class="k">def</span> <span class="nf">recordW</span><span class="p">():</span>
+    <span class="n">Z</span><span class="o">=</span><span class="n">syn</span><span class="o">.</span><span class="n">W</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">weights</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span>
+
+<span class="n">I1</span><span class="o">=</span><span class="n">intensity</span>
+<span class="k">print</span> <span class="s">&quot;Started&quot;</span>
+<span class="n">run</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span><span class="n">report</span><span class="o">=</span><span class="s">&quot;text&quot;</span><span class="p">)</span>
+
+<span class="c"># Save data</span>
+<span class="n">wsave</span><span class="o">=</span><span class="p">[(</span><span class="n">t</span><span class="p">,</span><span class="n">M</span><span class="o">.</span><span class="n">todense</span><span class="p">())</span> <span class="k">for</span> <span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">M</span><span class="p">)</span> <span class="ow">in</span> <span class="n">MC</span><span class="o">.</span><span class="n">values</span><span class="p">]</span>
+<span class="n">numpy</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;weights.npy&quot;</span><span class="p">,</span><span class="n">array</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">wsave</span><span class="p">)[</span><span class="mi">1</span><span class="p">]))</span> <span class="c"># 3D array (t,i,j)</span>
+<span class="n">numpy</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;spikesout.npy&quot;</span><span class="p">,</span><span class="n">array</span><span class="p">(</span><span class="n">S2</span><span class="o">.</span><span class="n">spikes</span><span class="p">))</span>
+<span class="n">numpy</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;stimuli.npy&quot;</span><span class="p">,</span><span class="n">array</span><span class="p">(</span><span class="n">stimuli</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Example: Fig11B_olfaction_stdp_learning (frompapers/computing with neural synchrony/olfaction)</a><ul>
+<li><a class="reference internal" href="#brette-r-2012-computing-with-neural-synchrony-plos-comp-biol-8-6-e1002561-doi-10-1371-journal-pcbi-1002561">Brette R (2012). Computing with neural synchrony. PLoS Comp Biol. 8(6): e1002561. doi:10.1371/journal.pcbi.1002561</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-frompapers-computing with neural synchrony-olfaction_Fig11B_olfaction_stdp_testing.html"
+                        title="previous chapter">Example: Fig11B_olfaction_stdp_testing (frompapers/computing with neural synchrony/olfaction)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-frompapers-computing with neural synchrony-olfaction_Fig9B_olfaction.html"
+                        title="next chapter">Example: Fig9B_olfaction (frompapers/computing with neural synchrony/olfaction)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-frompapers-computing with neural synchrony-olfaction_Fig11B_olfaction_stdp_learning.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-olfaction_Fig9B_olfaction.html" title="Example: Fig9B_olfaction (frompapers/computing with neural synchrony/olfaction)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-olfaction_Fig11B_olfaction_stdp_testing.html" title="Example: Fig11B_olfaction_stdp_testing (frompapers/computing with neural synchrony/olfaction)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

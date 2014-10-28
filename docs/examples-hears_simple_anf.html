@@ -1,0 +1,148 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: simple_anf (hears) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: sound_localisation_model (hears)" href="examples-hears_sound_localisation_model.html" />
+    <link rel="prev" title="Example: cochleagram (hears)" href="examples-hears_cochleagram.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-hears_sound_localisation_model.html" title="Example: sound_localisation_model (hears)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-hears_cochleagram.html" title="Example: cochleagram (hears)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-simple-anf-hears">
+<span id="example-hears-simple-anf"></span><span id="index-0"></span><h1>Example: simple_anf (hears)<a class="headerlink" href="#example-simple-anf-hears" title="Permalink to this headline">¶</a></h1>
+<p>Example of a simple auditory nerve fibre model with Brian hears.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">brian.hears</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">sound1</span> <span class="o">=</span> <span class="n">tone</span><span class="p">(</span><span class="mi">1</span><span class="o">*</span><span class="n">kHz</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="o">*</span><span class="n">second</span><span class="p">)</span>
+<span class="n">sound2</span> <span class="o">=</span> <span class="n">whitenoise</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="o">*</span><span class="n">second</span><span class="p">)</span>
+
+<span class="n">sound</span> <span class="o">=</span> <span class="n">sound1</span><span class="o">+</span><span class="n">sound2</span>
+<span class="n">sound</span> <span class="o">=</span> <span class="n">sound</span><span class="o">.</span><span class="n">ramp</span><span class="p">()</span>
+
+<span class="n">cf</span> <span class="o">=</span> <span class="n">erbspace</span><span class="p">(</span><span class="mi">20</span><span class="o">*</span><span class="n">Hz</span><span class="p">,</span> <span class="mi">20</span><span class="o">*</span><span class="n">kHz</span><span class="p">,</span> <span class="mi">3000</span><span class="p">)</span>
+<span class="n">cochlea</span> <span class="o">=</span> <span class="n">Gammatone</span><span class="p">(</span><span class="n">sound</span><span class="p">,</span> <span class="n">cf</span><span class="p">)</span>
+
+<span class="c"># Half-wave rectification and compression [x]^(1/3)</span>
+<span class="n">ihc</span> <span class="o">=</span> <span class="n">FunctionFilterbank</span><span class="p">(</span><span class="n">cochlea</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mi">3</span><span class="o">*</span><span class="n">clip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Inf</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="mf">3.0</span><span class="p">))</span>
+
+<span class="c"># Leaky integrate-and-fire model with noise and refractoriness</span>
+<span class="n">eqs</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">dv/dt = (I-v)/(1*ms)+0.2*xi*(2/(1*ms))**.5 : 1</span>
+<span class="s">I : 1</span>
+<span class="s">&#39;&#39;&#39;</span>
+<span class="n">anf</span> <span class="o">=</span> <span class="n">FilterbankGroup</span><span class="p">(</span><span class="n">ihc</span><span class="p">,</span> <span class="s">&#39;I&#39;</span><span class="p">,</span> <span class="n">eqs</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">refractory</span><span class="o">=</span><span class="mi">5</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+
+<span class="n">M</span> <span class="o">=</span> <span class="n">SpikeMonitor</span><span class="p">(</span><span class="n">anf</span><span class="p">)</span>
+<span class="n">run</span><span class="p">(</span><span class="n">sound</span><span class="o">.</span><span class="n">duration</span><span class="p">)</span>
+<span class="n">raster_plot</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-hears_cochleagram.html"
+                        title="previous chapter">Example: cochleagram (hears)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-hears_sound_localisation_model.html"
+                        title="next chapter">Example: sound_localisation_model (hears)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-hears_simple_anf.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-hears_sound_localisation_model.html" title="Example: sound_localisation_model (hears)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-hears_cochleagram.html" title="Example: cochleagram (hears)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

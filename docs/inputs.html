@@ -1,0 +1,309 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Inputs &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="User manual" href="usermanual.html" />
+    <link rel="next" title="User-defined operations" href="operations.html" />
+    <link rel="prev" title="Recording" href="recording.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="operations.html" title="User-defined operations"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="recording.html" title="Recording"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="usermanual.html" accesskey="U">User manual</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="inputs">
+<h1>Inputs<a class="headerlink" href="#inputs" title="Permalink to this headline">¶</a></h1>
+<p>Some specific types of neuron groups are available to provide inputs to a network.</p>
+<div class="section" id="poisson-inputs">
+<h2>Poisson inputs<a class="headerlink" href="#poisson-inputs" title="Permalink to this headline">¶</a></h2>
+<p>Poisson spike trains can be generated as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">group</span><span class="o">=</span><span class="n">PoissonGroup</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="n">rates</span><span class="o">=</span><span class="mi">10</span><span class="o">*</span><span class="n">Hz</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here 100 neurons are defined, which emit spikes independently according to Poisson
+processes with rates 10 Hz. To have different rates across the group,
+initialise with an array of rates:</p>
+<blockquote>
+<div>group=PoissonGroup(100,rates=linspace(0*Hz,10*Hz,100))</div></blockquote>
+<p>Inhomogeneous Poisson processes can be defined by passing a function of time that returns the
+rates:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">group</span><span class="o">=</span><span class="n">PoissonGroup</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="n">rates</span><span class="o">=</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:(</span><span class="mi">1</span><span class="o">+</span><span class="n">cos</span><span class="p">(</span><span class="n">t</span><span class="p">))</span><span class="o">*</span><span class="mi">10</span><span class="o">*</span><span class="n">Hz</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>or:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">r0</span><span class="o">=</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="o">*</span><span class="n">Hz</span><span class="p">,</span><span class="mi">10</span><span class="o">*</span><span class="n">Hz</span><span class="p">,</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">group</span><span class="o">=</span><span class="n">PoissonGroup</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="n">rates</span><span class="o">=</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:(</span><span class="mi">1</span><span class="o">+</span><span class="n">cos</span><span class="p">(</span><span class="n">t</span><span class="p">))</span><span class="o">*</span><span class="n">r0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>There is another class for Poisson inputs: <a class="reference internal" href="reference-standard-groups.html#brian.PoissonInput" title="brian.PoissonInput"><tt class="xref py py-class docutils literal"><span class="pre">PoissonInput</span></tt></a>, which updates
+the state variable of a <a class="reference internal" href="reference-models-and-groups.html#brian.NeuronGroup" title="brian.NeuronGroup"><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></a> dynamically without storing in memory all
+the Poisson events. It can be used like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="nb">input</span> <span class="o">=</span> <span class="n">PoissonInput</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="n">rate</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="s">&#39;I&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In this case, the variable <tt class="docutils literal"><span class="pre">I</span></tt> represents the sum of <tt class="docutils literal"><span class="pre">N</span></tt> independent Poisson
+spike inputs with rate <tt class="docutils literal"><span class="pre">rate</span></tt>, where each individual synaptic event increases
+the variable <tt class="docutils literal"><span class="pre">I</span></tt> by <tt class="docutils literal"><span class="pre">w</span></tt>. Several <a class="reference internal" href="reference-standard-groups.html#brian.PoissonInput" title="brian.PoissonInput"><tt class="xref py py-class docutils literal"><span class="pre">PoissonInput</span></tt></a> objects can be
+created for a given <a class="reference internal" href="reference-models-and-groups.html#brian.NeuronGroup" title="brian.NeuronGroup"><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></a>, in which case all the independent
+inputs are linearly superimposed.</p>
+<dl class="docutils">
+<dt>Other features of the <a class="reference internal" href="reference-standard-groups.html#brian.PoissonInput" title="brian.PoissonInput"><tt class="xref py py-class docutils literal"><span class="pre">PoissonInput</span></tt></a> class include the following (see the reference):</dt>
+<dd><ul class="first last simple">
+<li>record the individual Poisson events (<tt class="docutils literal"><span class="pre">record=True</span></tt> keyword),</li>
+<li>having identical Poisson events for all neurons, instead of having
+independent copies for every neuron (<tt class="docutils literal"><span class="pre">freeze=True</span></tt> keyword)</li>
+<li>copying every Poisson input a specified number of times (<tt class="docutils literal"><span class="pre">copies=p</span></tt> keyword). This
+is equivalent of specifying <tt class="docutils literal"><span class="pre">weight=p*w</span></tt>, except that those copies can be randomly shifted
+(<tt class="docutils literal"><span class="pre">jitter</span></tt> keyword), or can be unreliable to model synapse unreliability (<tt class="docutils literal"><span class="pre">reliability</span></tt>
+keyword). The latter case corresponds to a Binomial synaptic weight.</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="correlated-inputs">
+<h2>Correlated inputs<a class="headerlink" href="#correlated-inputs" title="Permalink to this headline">¶</a></h2>
+<p>Generation of correlated spike trains is partially implemented, using algorithms from the
+the following paper: Brette, R. (2009) <a class="reference external" href="http://www.di.ens.fr/~brette/papers/Brette2008NC.html">Generation of correlated spike trains</a>,
+Neural Computation 21(1): 188-215. Currently, only the method with Cox processes
+(or doubly stochastic processes, first method in the paper) is fully implemented.</p>
+<div class="section" id="doubly-stochastic-processes">
+<h3>Doubly stochastic processes<a class="headerlink" href="#doubly-stochastic-processes" title="Permalink to this headline">¶</a></h3>
+<p>To generate correlated spike trains with identical rates and homogeneous exponential correlations,
+use the class <tt class="xref py py-class docutils literal"><span class="pre">HomogeneousCorrelatedSpikeTrains</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">group</span><span class="o">=</span><span class="n">HomogeneousCorrelatedSpikeTrains</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="n">r</span><span class="o">=</span><span class="mi">10</span><span class="o">*</span><span class="n">Hz</span><span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span><span class="n">tauc</span><span class="o">=</span><span class="mi">10</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where <tt class="docutils literal"><span class="pre">r</span></tt> is the rate, <tt class="docutils literal"><span class="pre">c</span></tt> is the total correlation strength and <tt class="docutils literal"><span class="pre">tauc</span></tt> is the correlation time constant.
+The cross-covariance functions are <cite>(c*r/tauc)*exp(-|s|/tauc)</cite>.
+To generate correlated spike trains with arbitrary rates r(i) and
+cross-covariance functions <cite>c(i,j)*exp(-|s|/tauc)</cite>, use the class <tt class="xref py py-class docutils literal"><span class="pre">CorrelatedSpikeTrains</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">group</span><span class="o">=</span><span class="n">CorrelatedSpikeTrains</span><span class="p">(</span><span class="n">rates</span><span class="p">,</span><span class="n">C</span><span class="p">,</span><span class="n">tauc</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where <tt class="docutils literal"><span class="pre">rates</span></tt> is the vector of rates r(i), <tt class="docutils literal"><span class="pre">C</span></tt> is the correlation matrix (which must be
+symmetrical) and <tt class="docutils literal"><span class="pre">tauc</span></tt> is the correlation time constant. Note that distortions are introduced
+with strong correlations and short correlation time constants. For short time constants,
+the mixture method is more appropriate (see the paper above).
+The two classes <tt class="xref py py-class docutils literal"><span class="pre">HomogeneousCorrelatedSpikeTrains</span></tt> and <tt class="xref py py-class docutils literal"><span class="pre">CorrelatedSpikeTrains</span></tt>
+define neuron groups, which can be directly used with <a class="reference internal" href="reference-connections.html#brian.Connection" title="brian.Connection"><tt class="xref py py-class docutils literal"><span class="pre">Connection</span></tt></a> objects.</p>
+</div>
+<div class="section" id="mixture-method">
+<h3>Mixture method<a class="headerlink" href="#mixture-method" title="Permalink to this headline">¶</a></h3>
+<p>The mixture method to generate correlated spike trains is only partially implemented and the
+interface may change in future releases. Currently, one can use the function
+<tt class="xref py py-func docutils literal"><span class="pre">mixture_process()</span></tt> to generate spike trains:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">spiketrains</span><span class="o">=</span><span class="n">mixture_process</span><span class="p">(</span><span class="n">nu</span><span class="p">,</span><span class="n">P</span><span class="p">,</span><span class="n">tauc</span><span class="p">,</span><span class="n">t</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where <tt class="docutils literal"><span class="pre">nu</span></tt> is the vector of rates of the source spike trains,
+<tt class="docutils literal"><span class="pre">P</span></tt> is the mixture matrix (entries between 0 and 1),
+<tt class="docutils literal"><span class="pre">tauc</span></tt> is the correlation time constant,
+<tt class="docutils literal"><span class="pre">t</span></tt> is the duration. It returns a list of
+(neuron_number,spike_time), which can be passed to
+<tt class="docutils literal"><span class="pre">SpikeGeneratorGroup</span></tt>. This method is appropriate for short time constants and is explained
+in the paper mentioned above.</p>
+</div>
+</div>
+<div class="section" id="input-spike-trains">
+<h2>Input spike trains<a class="headerlink" href="#input-spike-trains" title="Permalink to this headline">¶</a></h2>
+<p>A set of spike trains can be explicitly defined as list of pairs (i,t)
+(meaning neuron i fires at time t), which used to initialise a
+<a class="reference internal" href="reference-standard-groups.html#brian.SpikeGeneratorGroup" title="brian.SpikeGeneratorGroup"><tt class="xref py py-class docutils literal"><span class="pre">SpikeGeneratorGroup</span></tt></a>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">spiketimes</span><span class="o">=</span><span class="p">[(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="o">*</span><span class="n">ms</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">ms</span><span class="p">)]</span>
+<span class="nb">input</span><span class="o">=</span><span class="n">SpikeGeneratorGroup</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="n">spiketimes</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The neuron 0 fires at time 1 ms and neuron 1 fires at time 2 ms (there are 5 neurons,
+but 3 of them never spike).
+One may also pass a generator instead of a list (in that case the pairs should be
+ordered in time).</p>
+<div class="section" id="gaussian-spike-packets">
+<h3>Gaussian spike packets<a class="headerlink" href="#gaussian-spike-packets" title="Permalink to this headline">¶</a></h3>
+<p>There is a subclass of <a class="reference internal" href="reference-standard-groups.html#brian.SpikeGeneratorGroup" title="brian.SpikeGeneratorGroup"><tt class="xref py py-class docutils literal"><span class="pre">SpikeGeneratorGroup</span></tt></a> for generating spikes with a Gaussian
+distribution:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="nb">input</span><span class="o">=</span><span class="n">PulsePacket</span><span class="p">(</span><span class="n">t</span><span class="o">=</span><span class="mi">10</span><span class="o">*</span><span class="n">ms</span><span class="p">,</span><span class="n">n</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">sigma</span><span class="o">=</span><span class="mi">3</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here 10 spikes are produced, with spike times distributed according a Gaussian distribution with
+mean 10 ms and standard deviation 3 ms.</p>
+</div>
+</div>
+<div class="section" id="direct-input">
+<h2>Direct input<a class="headerlink" href="#direct-input" title="Permalink to this headline">¶</a></h2>
+<p>Inputs may also be defined by accessing directly the state variables of a neuron group. The standard way
+to do this is to insert parameters in the equations:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">eqs</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">dv/dt = (I-v)/tau : volt</span>
+<span class="s">I : volt</span>
+<span class="s">&#39;&#39;&#39;</span>
+<span class="n">group</span> <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">eqs</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="mi">0</span><span class="o">*</span><span class="n">mV</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">15</span><span class="o">*</span><span class="n">mV</span><span class="p">)</span>
+<span class="n">group</span><span class="o">.</span><span class="n">I</span> <span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="o">*</span><span class="n">mV</span><span class="p">,</span> <span class="mi">20</span><span class="o">*</span><span class="n">mV</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here the value of the parameter I for each neuron is provided at initialisation time
+(evenly distributed between 0 mV and 20 mV).</p>
+<div class="section" id="time-varying-inputs">
+<h3>Time varying inputs<a class="headerlink" href="#time-varying-inputs" title="Permalink to this headline">¶</a></h3>
+<p>It is possible to change the value of I every timestep by using a user-defined operation (see next
+section). Alternatively, you can use a <a class="reference internal" href="reference-variableupdating.html#brian.TimedArray" title="brian.TimedArray"><tt class="xref py py-class docutils literal"><span class="pre">TimedArray</span></tt></a> to specify the values the variable will
+have at each time interval, for example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">eqs</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">dv/dt = (I-v)/tau : volt</span>
+<span class="s">I : volt</span>
+<span class="s">&#39;&#39;&#39;</span>
+<span class="n">group</span> <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">eqs</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="mi">0</span><span class="o">*</span><span class="n">mV</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">15</span><span class="o">*</span><span class="n">mV</span><span class="p">)</span>
+<span class="n">group</span><span class="o">.</span><span class="n">I</span> <span class="o">=</span> <span class="n">TimedArray</span><span class="p">(</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="o">*</span><span class="n">mV</span><span class="p">,</span> <span class="mi">20</span><span class="o">*</span><span class="n">mV</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="n">dt</span><span class="o">=</span><span class="mi">10</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here <tt class="docutils literal"><span class="pre">I</span></tt> will have value <tt class="docutils literal"><span class="pre">0*mV</span></tt> for t between 0 and <tt class="docutils literal"><span class="pre">10*ms`,</span> <span class="pre">``0.2*mV</span></tt> between <tt class="docutils literal"><span class="pre">10*ms</span></tt> and
+<tt class="docutils literal"><span class="pre">20*ms</span></tt>, and so on. A more intuitive syntax is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">I</span> <span class="o">=</span> <span class="n">TimedArray</span><span class="p">(</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="o">*</span><span class="n">mV</span><span class="p">,</span> <span class="mi">20</span><span class="o">*</span><span class="n">mV</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="n">dt</span><span class="o">=</span><span class="mi">10</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+<span class="n">eqs</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">dv/dt = (I(t) * volt - v)/tau : volt</span>
+<span class="s">&#39;&#39;&#39;</span>
+<span class="n">group</span> <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">eqs</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="mi">0</span><span class="o">*</span><span class="n">mV</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">15</span><span class="o">*</span><span class="n">mV</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note however that the more efficient exact linear differential equations solver won&#8217;t be used in this
+case because <tt class="docutils literal"><span class="pre">I(t)</span></tt> could be any function, so the previous mechanism is often preferable.
+Additionally, be aware that the call to <tt class="docutils literal"><span class="pre">I(t)</span></tt> does return a value without units (as units cannot
+be stored in arrays), therefore you have to explicitly multiply it with the respective unit.</p>
+</div>
+<div class="section" id="linked-variables">
+<h3>Linked variables<a class="headerlink" href="#linked-variables" title="Permalink to this headline">¶</a></h3>
+<p>Another option is to link the variable of one group to the variables of another group using
+<a class="reference internal" href="reference-variableupdating.html#brian.linked_var" title="brian.linked_var"><tt class="xref py py-func docutils literal"><span class="pre">linked_var()</span></tt></a>, for example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">G</span> <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">H</span> <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">G</span><span class="o">.</span><span class="n">V</span> <span class="o">=</span> <span class="n">linked_var</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="s">&#39;W&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In this scenario, the variable V in group G will always be updated with
+the values from variable W in group H. The groups G and H must be the
+same size (although subgroups can be used if they are not the same size).</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Inputs</a><ul>
+<li><a class="reference internal" href="#poisson-inputs">Poisson inputs</a></li>
+<li><a class="reference internal" href="#correlated-inputs">Correlated inputs</a><ul>
+<li><a class="reference internal" href="#doubly-stochastic-processes">Doubly stochastic processes</a></li>
+<li><a class="reference internal" href="#mixture-method">Mixture method</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#input-spike-trains">Input spike trains</a><ul>
+<li><a class="reference internal" href="#gaussian-spike-packets">Gaussian spike packets</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#direct-input">Direct input</a><ul>
+<li><a class="reference internal" href="#time-varying-inputs">Time varying inputs</a></li>
+<li><a class="reference internal" href="#linked-variables">Linked variables</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="recording.html"
+                        title="previous chapter">Recording</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="operations.html"
+                        title="next chapter">User-defined operations</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/inputs.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="operations.html" title="User-defined operations"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="recording.html" title="Recording"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="usermanual.html" >User manual</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

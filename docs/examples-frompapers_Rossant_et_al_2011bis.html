@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: Rossant_et_al_2011bis (frompapers) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: Touboul_Brette_2008 (frompapers)" href="examples-frompapers_Touboul_Brette_2008.html" />
+    <link rel="prev" title="Example: Muller_et_al_2011 (frompapers)" href="examples-frompapers_Muller_et_al_2011.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers_Touboul_Brette_2008.html" title="Example: Touboul_Brette_2008 (frompapers)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers_Muller_et_al_2011.html" title="Example: Muller_et_al_2011 (frompapers)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-rossant-et-al-2011bis-frompapers">
+<span id="example-frompapers-rossant-et-al-2011bis"></span><span id="index-0"></span><h1>Example: Rossant_et_al_2011bis (frompapers)<a class="headerlink" href="#example-rossant-et-al-2011bis-frompapers" title="Permalink to this headline">¶</a></h1>
+</div>
+<div class="section" id="distributed-synchrony-example">
+<h1>Distributed synchrony example<a class="headerlink" href="#distributed-synchrony-example" title="Permalink to this headline">¶</a></h1>
+<p>Fig. 14 from:</p>
+<blockquote>
+<div>Rossant C, Leijon S, Magnusson AK, Brette R (2011).
+&#8220;Sensitivity of noisy neurons to coincident inputs&#8221;.
+Journal of Neuroscience, 31(47).</div></blockquote>
+<p>5000 independent E/I Poisson inputs are injected into a leaky integrate-and-fire neuron.
+Synchronous events, following an independent Poisson process at 40 Hz, are considered,
+where 15 E Poisson spikes are randomly shifted to be synchronous at those events.
+The output firing rate is then significantly higher, showing that the spike timing of
+less than 1% of the excitatory synapses have an important impact on the postsynaptic firing.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="c"># neuron parameters</span>
+<span class="n">theta</span> <span class="o">=</span> <span class="o">-</span><span class="mi">55</span><span class="o">*</span><span class="n">mV</span>
+<span class="n">El</span> <span class="o">=</span> <span class="o">-</span><span class="mi">65</span><span class="o">*</span><span class="n">mV</span>
+<span class="n">vmean</span> <span class="o">=</span> <span class="o">-</span><span class="mi">65</span><span class="o">*</span><span class="n">mV</span>
+<span class="n">taum</span> <span class="o">=</span> <span class="mi">5</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">taue</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">taui</span> <span class="o">=</span> <span class="mi">10</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">eqs</span> <span class="o">=</span> <span class="n">Equations</span><span class="p">(</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">                dv/dt  = (ge+gi-(v-El))/taum : volt</span>
+<span class="s">                dge/dt = -ge/taue : volt</span>
+<span class="s">                dgi/dt = -gi/taui : volt</span>
+<span class="s">                &quot;&quot;&quot;</span><span class="p">)</span>
+
+<span class="c"># input parameters</span>
+<span class="n">p</span> <span class="o">=</span> <span class="mi">15</span>
+<span class="n">ne</span> <span class="o">=</span> <span class="mi">4000</span>
+<span class="n">ni</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="n">lambdac</span> <span class="o">=</span> <span class="mi">40</span><span class="o">*</span><span class="n">Hz</span>
+<span class="n">lambdae</span> <span class="o">=</span> <span class="n">lambdai</span> <span class="o">=</span> <span class="mi">1</span><span class="o">*</span><span class="n">Hz</span>
+
+<span class="c"># synapse parameters</span>
+<span class="n">we</span> <span class="o">=</span> <span class="o">.</span><span class="mi">5</span><span class="o">*</span><span class="n">mV</span><span class="o">/</span><span class="p">(</span><span class="n">taum</span><span class="o">/</span><span class="n">taue</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="n">taum</span><span class="o">/</span><span class="p">(</span><span class="n">taue</span><span class="o">-</span><span class="n">taum</span><span class="p">))</span>
+<span class="n">wi</span> <span class="o">=</span> <span class="p">(</span><span class="n">vmean</span><span class="o">-</span><span class="n">El</span><span class="o">-</span><span class="n">lambdae</span><span class="o">*</span><span class="n">ne</span><span class="o">*</span><span class="n">we</span><span class="o">*</span><span class="n">taue</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">lambdae</span><span class="o">*</span><span class="n">ni</span><span class="o">*</span><span class="n">taui</span><span class="p">)</span>
+
+<span class="c"># NeuronGroup definition</span>
+<span class="n">group</span> <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">eqs</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="n">El</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="n">refractory</span><span class="o">=</span><span class="mi">5</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+<span class="n">group</span><span class="o">.</span><span class="n">v</span> <span class="o">=</span> <span class="n">El</span>
+<span class="n">group</span><span class="o">.</span><span class="n">ge</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">gi</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="c"># independent E/I Poisson inputs</span>
+<span class="n">p1</span> <span class="o">=</span> <span class="n">PoissonInput</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">N</span><span class="o">=</span><span class="n">ne</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="n">lambdae</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">we</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="s">&#39;ge&#39;</span><span class="p">)</span>
+<span class="n">p2</span> <span class="o">=</span> <span class="n">PoissonInput</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">N</span><span class="o">=</span><span class="n">ni</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="n">lambdai</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">wi</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="s">&#39;gi&#39;</span><span class="p">)</span>
+
+<span class="c"># independent E/I Poisson inputs + synchronous E events</span>
+<span class="n">p3</span> <span class="o">=</span> <span class="n">PoissonInput</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">N</span><span class="o">=</span><span class="n">ne</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="n">lambdae</span><span class="o">-</span><span class="p">(</span><span class="n">p</span><span class="o">*</span><span class="mf">1.0</span><span class="o">/</span><span class="n">ne</span><span class="p">)</span><span class="o">*</span><span class="n">lambdac</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">we</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="s">&#39;ge&#39;</span><span class="p">)</span>
+<span class="n">p4</span> <span class="o">=</span> <span class="n">PoissonInput</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">N</span><span class="o">=</span><span class="n">ni</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="n">lambdai</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">wi</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="s">&#39;gi&#39;</span><span class="p">)</span>
+<span class="n">p5</span> <span class="o">=</span> <span class="n">PoissonInput</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">N</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="n">lambdac</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">p</span><span class="o">*</span><span class="n">we</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="s">&#39;ge&#39;</span><span class="p">)</span>
+
+<span class="c"># run the simulation</span>
+<span class="n">reinit_default_clock</span><span class="p">()</span>
+<span class="n">M</span> <span class="o">=</span> <span class="n">SpikeMonitor</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+<span class="n">SM</span> <span class="o">=</span> <span class="n">StateMonitor</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s">&#39;v&#39;</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">run</span><span class="p">(</span><span class="mi">1</span><span class="o">*</span><span class="n">second</span><span class="p">)</span>
+
+<span class="c"># plot trace and spikes</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]:</span>
+    <span class="n">spikes</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">spiketimes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-.</span><span class="mo">0001</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">SM</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">plot</span><span class="p">(</span><span class="n">SM</span><span class="o">.</span><span class="n">times</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+    <span class="n">plot</span><span class="p">(</span><span class="n">tile</span><span class="p">(</span><span class="n">spikes</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)),</span>
+         <span class="n">vstack</span><span class="p">((</span><span class="n">val</span><span class="p">[</span><span class="n">array</span><span class="p">(</span><span class="n">spikes</span><span class="o">*</span><span class="mi">10000</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)],</span>
+                 <span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spikes</span><span class="p">)))),</span> <span class="s">&#39;b&#39;</span><span class="p">)</span>
+    <span class="n">title</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">: </span><span class="si">%d</span><span class="s"> spikes/second&quot;</span> <span class="o">%</span> <span class="p">([</span><span class="s">&quot;uncorrelated inputs&quot;</span><span class="p">,</span> <span class="s">&quot;correlated inputs&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+                                    <span class="nb">len</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">spiketimes</span><span class="p">[</span><span class="n">i</span><span class="p">])))</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Example: Rossant_et_al_2011bis (frompapers)</a></li>
+<li><a class="reference internal" href="#distributed-synchrony-example">Distributed synchrony example</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-frompapers_Muller_et_al_2011.html"
+                        title="previous chapter">Example: Muller_et_al_2011 (frompapers)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-frompapers_Touboul_Brette_2008.html"
+                        title="next chapter">Example: Touboul_Brette_2008 (frompapers)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-frompapers_Rossant_et_al_2011bis.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers_Touboul_Brette_2008.html" title="Example: Touboul_Brette_2008 (frompapers)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers_Muller_et_al_2011.html" title="Example: Muller_et_al_2011 (frompapers)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

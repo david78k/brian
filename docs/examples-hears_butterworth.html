@@ -1,0 +1,160 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: butterworth (hears) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: time_varying_filter2 (hears)" href="examples-hears_time_varying_filter2.html" />
+    <link rel="prev" title="Example: ircam_hrtf (hears)" href="examples-hears_ircam_hrtf.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-hears_time_varying_filter2.html" title="Example: time_varying_filter2 (hears)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-hears_ircam_hrtf.html" title="Example: ircam_hrtf (hears)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-butterworth-hears">
+<span id="example-hears-butterworth"></span><span id="index-0"></span><h1>Example: butterworth (hears)<a class="headerlink" href="#example-butterworth-hears" title="Permalink to this headline">¶</a></h1>
+<p>Example of the use of the class <a class="reference internal" href="reference-hears.html#brian.hears.Butterworth" title="brian.hears.Butterworth"><tt class="xref py py-class docutils literal"><span class="pre">Butterworth</span></tt></a> available in
+the library. In this example, a white noise is filtered by a bank of butterworth
+bandpass filters and lowpass filters which are different for every channels. The
+centre or cutoff frequency of the filters are linearly taken between 100kHz and
+1000kHz and its bandwidth frequency increases linearly with frequency.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">brian.hears</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">level</span> <span class="o">=</span> <span class="mi">50</span><span class="o">*</span><span class="n">dB</span>  <span class="c"># level of the input sound in rms dB SPL</span>
+<span class="n">sound</span> <span class="o">=</span> <span class="n">whitenoise</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span><span class="o">.</span><span class="n">ramp</span><span class="p">()</span>
+<span class="n">sound</span> <span class="o">=</span> <span class="n">sound</span><span class="o">.</span><span class="n">atlevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+<span class="n">order</span> <span class="o">=</span> <span class="mi">2</span> <span class="c">#order of the filters</span>
+
+<span class="c">#### example of a bank of bandpass filter ################</span>
+<span class="n">nchannels</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="n">center_frequencies</span> <span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">Hz</span><span class="p">,</span> <span class="mi">1000</span><span class="o">*</span><span class="n">Hz</span><span class="p">,</span> <span class="n">nchannels</span><span class="p">)</span>
+<span class="n">bw</span> <span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="mi">50</span><span class="o">*</span><span class="n">Hz</span><span class="p">,</span> <span class="mi">300</span><span class="o">*</span><span class="n">Hz</span><span class="p">,</span> <span class="n">nchannels</span><span class="p">)</span> <span class="c"># bandwidth of the filters</span>
+<span class="c">#arrays of shape (2 x nchannels) defining the passband frequencies (Hz)</span>
+<span class="n">fc</span> <span class="o">=</span> <span class="n">vstack</span><span class="p">((</span><span class="n">center_frequencies</span><span class="o">-</span><span class="n">bw</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">center_frequencies</span><span class="o">+</span><span class="n">bw</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
+
+<span class="n">filterbank</span> <span class="o">=</span> <span class="n">Butterworth</span><span class="p">(</span><span class="n">sound</span><span class="p">,</span> <span class="n">nchannels</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">fc</span><span class="p">,</span> <span class="s">&#39;bandpass&#39;</span><span class="p">)</span>
+
+<span class="n">filterbank_mon</span> <span class="o">=</span> <span class="n">filterbank</span><span class="o">.</span><span class="n">process</span><span class="p">()</span>
+
+<span class="n">figure</span><span class="p">()</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+<span class="n">imshow</span><span class="p">(</span><span class="n">flipud</span><span class="p">(</span><span class="n">filterbank_mon</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">aspect</span><span class="o">=</span><span class="s">&#39;auto&#39;</span><span class="p">)</span>
+
+<span class="c">### example of a bank of lowpass filter ################</span>
+<span class="n">nchannels</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="n">cutoff_frequencies</span> <span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="mi">200</span><span class="o">*</span><span class="n">Hz</span><span class="p">,</span> <span class="mi">1000</span><span class="o">*</span><span class="n">Hz</span><span class="p">,</span> <span class="n">nchannels</span><span class="p">)</span>
+
+<span class="n">filterbank</span> <span class="o">=</span> <span class="n">Butterworth</span><span class="p">(</span><span class="n">sound</span><span class="p">,</span> <span class="n">nchannels</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">cutoff_frequencies</span><span class="p">,</span> <span class="s">&#39;low&#39;</span><span class="p">)</span>
+
+<span class="n">filterbank_mon</span> <span class="o">=</span> <span class="n">filterbank</span><span class="o">.</span><span class="n">process</span><span class="p">()</span>
+
+<span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">)</span>
+<span class="n">imshow</span><span class="p">(</span><span class="n">flipud</span><span class="p">(</span><span class="n">filterbank_mon</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">aspect</span><span class="o">=</span><span class="s">&#39;auto&#39;</span><span class="p">)</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-hears_ircam_hrtf.html"
+                        title="previous chapter">Example: ircam_hrtf (hears)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-hears_time_varying_filter2.html"
+                        title="next chapter">Example: time_varying_filter2 (hears)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-hears_butterworth.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-hears_time_varying_filter2.html" title="Example: time_varying_filter2 (hears)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-hears_ircam_hrtf.html" title="Example: ircam_hrtf (hears)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

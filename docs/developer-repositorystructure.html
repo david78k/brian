@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Repository structure &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Developer’s guide" href="developer.html" />
+    <link rel="prev" title="Brian package structure" href="developer-packagestructure.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="developer-packagestructure.html" title="Brian package structure"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="developer.html" accesskey="U">Developer&#8217;s guide</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="repository-structure">
+<h1>Repository structure<a class="headerlink" href="#repository-structure" title="Permalink to this headline">¶</a></h1>
+<p>The Brian source code repository is broken into the following directories:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">brian</span></tt></dt>
+<dd><p class="first">The main package, documented above, with the following additional directories:</p>
+<dl class="last docutils">
+<dt><tt class="docutils literal"><span class="pre">deprecated</span></tt></dt>
+<dd>For code that is no longer up to date, but that we keep for backwards
+compatibility.</dd>
+<dt><tt class="docutils literal"><span class="pre">experimental</span></tt></dt>
+<dd>Package for storing experimental code that can be used but whose
+syntax and functionality may change.</dd>
+<dt><tt class="docutils literal"><span class="pre">library</span></tt></dt>
+<dd>Modules where specific models are defined (e.g. neuron and synaptic models).</dd>
+<dt><tt class="docutils literal"><span class="pre">tests</span></tt></dt>
+<dd><p class="first">Package for storing tests, composed of:</p>
+<dl class="last docutils">
+<dt><tt class="docutils literal"><span class="pre">testcorrectness</span></tt></dt>
+<dd>Package for tests of mathematical correctness of algorithms, etc.</dd>
+<dt><tt class="docutils literal"><span class="pre">testinterface</span></tt></dt>
+<dd>Package for tests of individual Brian modules. Module names are
+the names of the module being tested prepended by &#8216;test&#8217;.</dd>
+</dl>
+</dd>
+<dt><tt class="docutils literal"><span class="pre">unused</span></tt></dt>
+<dd>Old stuff</dd>
+<dt><tt class="docutils literal"><span class="pre">utils</span></tt></dt>
+<dd>Modules that are not Brian-specific, for example circular.py defines
+circular arrays used for storing spiking events.</dd>
+</dl>
+</dd>
+<dt><tt class="docutils literal"><span class="pre">dev</span></tt></dt>
+<dd><p class="first">The main development folder, for works in progress, debugging stuff, tools,
+etc. Consists of:</p>
+<dl class="last docutils">
+<dt><tt class="docutils literal"><span class="pre">benchmarking</span></tt></dt>
+<dd>Code for benchmarking performance against other languages and
+simulators.</dd>
+<dt><tt class="docutils literal"><span class="pre">BEPs</span></tt></dt>
+<dd>The Brian Enhancement Proposals.</dd>
+<dt><tt class="docutils literal"><span class="pre">debugging</span></tt></dt>
+<dd><p class="first">Dumping ground for files used for debugging a problem.</p>
+<dl class="last docutils">
+<dt><tt class="docutils literal"><span class="pre">troubleshooting</span></tt></dt>
+<dd>Used for debugging problems from the <tt class="docutils literal"><span class="pre">brian-support</span></tt> mailing list.</dd>
+</dl>
+</dd>
+<dt><tt class="docutils literal"><span class="pre">ideas</span></tt></dt>
+<dd>For ideas for new features, incomplete implementations, etc. This is
+where new things go before going into the main Brian package or the
+<tt class="docutils literal"><span class="pre">experimental</span></tt> package.</dd>
+<dt><tt class="docutils literal"><span class="pre">logo</span></tt></dt>
+<dd>The Brian logo in various sizes.</dd>
+<dt><tt class="docutils literal"><span class="pre">optimising</span></tt></dt>
+<dd>Ideas for making Brian faster.</dd>
+<dt><tt class="docutils literal"><span class="pre">speedtracking</span></tt></dt>
+<dd>A sort of testing framework which tracks, over time, the speed of
+various Brian features.</dd>
+<dt><tt class="docutils literal"><span class="pre">tests</span></tt></dt>
+<dd>A few scripts to run Brian&#8217;s tests.</dd>
+<dt><tt class="docutils literal"><span class="pre">tools</span></tt></dt>
+<dd><p class="first">The main folder for developer tools.</p>
+<dl class="last docutils">
+<dt><tt class="docutils literal"><span class="pre">docs</span></tt></dt>
+<dd>Scripts for invoking Sphinx and building the documentation. Includes
+script to automatically generate documentation for examples and
+tutorials, and to build index entries for these.</dd>
+<dt><tt class="docutils literal"><span class="pre">newrelease</span></tt></dt>
+<dd>Tools for creating a new public release of Brian.</dd>
+<dt><tt class="docutils literal"><span class="pre">searchreplace</span></tt></dt>
+<dd>Some tools for doing global changes to the code (e.g. syntax
+changes).</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+<dt><tt class="docutils literal"><span class="pre">dist</span></tt></dt>
+<dd>Automatically generated distribution files.</dd>
+<dt><tt class="docutils literal"><span class="pre">docs</span></tt></dt>
+<dd>Automatically generated documentation files in HTML/PDF format.</dd>
+<dt><tt class="docutils literal"><span class="pre">docs_sphinx</span></tt></dt>
+<dd>Sources for Sphinx documentation.</dd>
+<dt><tt class="docutils literal"><span class="pre">examples</span></tt></dt>
+<dd>Examples of Brian&#8217;s use. Documentation is automatically generated from all
+of these examples.</dd>
+<dt><tt class="docutils literal"><span class="pre">tutorials</span></tt></dt>
+<dd>Source files for the tutorials, documentation is automatically generated
+from these. Each tutorial has a directory, possibly containing an
+<tt class="docutils literal"><span class="pre">introduction.txt</span></tt> Sphinx source, followed by a series of files in
+alphabetical order (e.g. 1a, 1b, 1c, etc.). Multi-line strings are treated
+as Sphinx source code (take a look at a few examples to get the idea).</dd>
+</dl>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="developer-packagestructure.html"
+                        title="previous chapter">Brian package structure</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/developer-repositorystructure.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="developer-packagestructure.html" title="Brian package structure"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="developer.html" >Developer&#8217;s guide</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

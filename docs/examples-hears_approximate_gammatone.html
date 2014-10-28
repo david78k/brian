@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: approximate_gammatone (hears) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: tan_carney_Fig11 (hears/tan_carney_2003)" href="examples-hears-tan_carney_2003_tan_carney_Fig11.html" />
+    <link rel="prev" title="Example: cochlear_models (hears)" href="examples-hears_cochlear_models.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-hears-tan_carney_2003_tan_carney_Fig11.html" title="Example: tan_carney_Fig11 (hears/tan_carney_2003)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-hears_cochlear_models.html" title="Example: cochlear_models (hears)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-approximate-gammatone-hears">
+<span id="example-hears-approximate-gammatone"></span><span id="index-0"></span><h1>Example: approximate_gammatone (hears)<a class="headerlink" href="#example-approximate-gammatone-hears" title="Permalink to this headline">¶</a></h1>
+<p>Example of the use of the class <a class="reference internal" href="reference-hears.html#brian.hears.ApproximateGammatone" title="brian.hears.ApproximateGammatone"><tt class="xref py py-class docutils literal"><span class="pre">ApproximateGammatone</span></tt></a>
+available in the library. It implements a filterbank of approximate gammatone
+filters as  described in Hohmann, V., 2002, &#8220;Frequency analysis and synthesis
+using a Gammatone filterbank&#8221;, Acta Acustica United with Acustica.
+In this example, a white noise is filtered by a gammatone filterbank and the
+resulting cochleogram is plotted.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">brian.hears</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">level</span><span class="o">=</span><span class="mi">50</span><span class="o">*</span><span class="n">dB</span> <span class="c"># level of the input sound in rms dB SPL</span>
+<span class="n">sound</span> <span class="o">=</span> <span class="n">whitenoise</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span><span class="o">.</span><span class="n">ramp</span><span class="p">()</span> <span class="c"># generation of a white noise</span>
+<span class="n">sound</span> <span class="o">=</span> <span class="n">sound</span><span class="o">.</span><span class="n">atlevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span> <span class="c"># set the sound to a certain dB level</span>
+
+<span class="n">nbr_center_frequencies</span> <span class="o">=</span> <span class="mi">50</span>  <span class="c"># number of frequency channels in the filterbank</span>
+<span class="c"># center frequencies with a spacing following an ERB scale</span>
+<span class="n">center_frequencies</span> <span class="o">=</span> <span class="n">erbspace</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">Hz</span><span class="p">,</span> <span class="mi">1000</span><span class="o">*</span><span class="n">Hz</span><span class="p">,</span> <span class="n">nbr_center_frequencies</span><span class="p">)</span>
+<span class="c"># bandwidth of the filters (different in each channel)</span>
+<span class="n">bw</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="mf">0.037</span><span class="o">+</span><span class="mf">0.785</span><span class="o">*</span><span class="n">log10</span><span class="p">(</span><span class="n">center_frequencies</span><span class="p">))</span>
+
+<span class="n">gammatone</span> <span class="o">=</span> <span class="n">ApproximateGammatone</span><span class="p">(</span><span class="n">sound</span><span class="p">,</span> <span class="n">center_frequencies</span><span class="p">,</span> <span class="n">bw</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="n">gt_mon</span> <span class="o">=</span> <span class="n">gammatone</span><span class="o">.</span><span class="n">process</span><span class="p">()</span>
+
+<span class="n">figure</span><span class="p">()</span>
+<span class="n">imshow</span><span class="p">(</span><span class="n">flipud</span><span class="p">(</span><span class="n">gt_mon</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">aspect</span><span class="o">=</span><span class="s">&#39;auto&#39;</span><span class="p">)</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-hears_cochlear_models.html"
+                        title="previous chapter">Example: cochlear_models (hears)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-hears-tan_carney_2003_tan_carney_Fig11.html"
+                        title="next chapter">Example: tan_carney_Fig11 (hears/tan_carney_2003)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-hears_approximate_gammatone.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-hears-tan_carney_2003_tan_carney_Fig11.html" title="Example: tan_carney_Fig11 (hears/tan_carney_2003)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-hears_cochlear_models.html" title="Example: cochlear_models (hears)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,278 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: Guetig_Sompolinsky_2009 (frompapers) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: Brette_Guigon_2003 (frompapers)" href="examples-frompapers_Brette_Guigon_2003.html" />
+    <link rel="prev" title="Example: Sturzl_et_al_2000 (frompapers)" href="examples-frompapers_Sturzl_et_al_2000.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers_Brette_Guigon_2003.html" title="Example: Brette_Guigon_2003 (frompapers)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers_Sturzl_et_al_2000.html" title="Example: Sturzl_et_al_2000 (frompapers)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-guetig-sompolinsky-2009-frompapers">
+<span id="example-frompapers-guetig-sompolinsky-2009"></span><span id="index-0"></span><h1>Example: Guetig_Sompolinsky_2009 (frompapers)<a class="headerlink" href="#example-guetig-sompolinsky-2009-frompapers" title="Permalink to this headline">¶</a></h1>
+<p>Implementation of the basic model (no speech recognition, no learning)
+described in:
+Gutig and Sompolinsky (2009): &#8220;Time-Warp-Invariant Neuronal Processing&#8221;
+PLoS Biology, Vol. 7 (7), e1000141</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="k">class</span> <span class="nc">TimeWarpModel</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    A simple neuron model for testing the &quot;time-warp invariance&quot; with</span>
+<span class="sd">    conductance based or current based synapses. The neuron receives balanced</span>
+<span class="sd">    excitatory and inhibitory input from a random spike train. The same spike</span>
+<span class="sd">    train can be fed into the model with different time warps.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conductance_based</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Create a new model with conductance based or current based synapses</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c"># Model parameters</span>
+        <span class="n">E_e</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="n">E_i</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">E_L</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">g_L</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mf">100.0</span><span class="o">*</span><span class="n">msecond</span><span class="p">)</span>
+        <span class="n">tau_syn</span> <span class="o">=</span> <span class="mi">1</span><span class="o">*</span><span class="n">ms</span>
+        <span class="n">N_ex</span> <span class="o">=</span> <span class="mi">250</span>
+        <span class="n">N_inh</span> <span class="o">=</span> <span class="mi">250</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">=</span> <span class="n">N_ex</span> <span class="o">+</span> <span class="n">N_inh</span>
+
+        <span class="c"># Equations</span>
+        <span class="k">if</span> <span class="n">conductance_based</span><span class="p">:</span>
+            <span class="n">eqs</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">                dV/dt = -(V - E_L) * g_L - I_syn  : 1</span>
+<span class="s">                I_syn = I_ge + I_gi  : second**-1</span>
+<span class="s">                I_ge = (V - E_e) * g_e : second**-1</span>
+<span class="s">                I_gi = (V - E_i) * g_i : second**-1</span>
+<span class="s">                dg_e/dt = -g_e/tau_syn : second**-1</span>
+<span class="s">                dg_i/dt = -g_i/tau_syn : second**-1</span>
+<span class="s">                &#39;&#39;&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">eqs</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">                dV/dt = -(V - E_L) * g_L - I_syn  : 1</span>
+<span class="s">                I_syn = -5 * g_e + g_i : second**-1</span>
+<span class="s">                dg_e/dt = -g_e/tau_syn : second**-1</span>
+<span class="s">                dg_i/dt = -g_i/tau_syn : second**-1</span>
+<span class="s">                &#39;&#39;&#39;</span>
+
+        <span class="c"># for simpler voltage traces: no spiking</span>
+        <span class="n">neuron</span> <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">eqs</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+
+        <span class="c"># every input neuron fires once in a random interval</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unwarped_spiketimes</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="o">*</span> <span class="mi">250</span> <span class="o">*</span> <span class="n">ms</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span>
+                                    <span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">),</span> <span class="n">rand</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">))]</span>
+
+        <span class="c"># final spiketimes will be set in the run function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input</span> <span class="o">=</span> <span class="n">SpikeGeneratorGroup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">,</span> <span class="p">[])</span>
+
+        <span class="n">e_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">subgroup</span><span class="p">(</span><span class="n">N_ex</span><span class="p">)</span>
+        <span class="n">i_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">subgroup</span><span class="p">(</span><span class="n">N_inh</span><span class="p">)</span>
+        <span class="n">e_conn</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">e_input</span><span class="p">,</span> <span class="n">neuron</span><span class="p">,</span> <span class="s">&#39;g_e&#39;</span><span class="p">,</span>
+                                  <span class="n">weight</span><span class="o">=</span><span class="mi">6</span> <span class="o">/</span> <span class="p">(</span><span class="n">N_ex</span> <span class="o">*</span> <span class="n">tau_syn</span><span class="p">))</span>
+        <span class="n">i_conn</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">i_input</span><span class="p">,</span> <span class="n">neuron</span><span class="p">,</span> <span class="s">&#39;g_i&#39;</span><span class="p">,</span>
+                                  <span class="n">weight</span><span class="o">=</span><span class="mi">5</span> <span class="o">*</span> <span class="mi">6</span> <span class="o">/</span> <span class="p">(</span><span class="n">N_ex</span> <span class="o">*</span> <span class="n">tau_syn</span><span class="p">))</span>
+
+        <span class="c"># record membrane potential</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span> <span class="o">=</span> <span class="n">StateMonitor</span><span class="p">(</span><span class="n">neuron</span><span class="p">,</span> <span class="n">varname</span><span class="o">=</span><span class="s">&#39;V&#39;</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="c"># putting everything together</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">net</span> <span class="o">=</span> <span class="n">Network</span><span class="p">(</span><span class="n">neuron</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="p">,</span> <span class="n">e_conn</span><span class="p">,</span> <span class="n">i_conn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Run the network with the original spike train warped by a certain factor</span>
+<span class="sd">        beta. Beta &gt; 1 corresponds to an extended and beta &lt; 1 to a shrinked</span>
+<span class="sd">        input spike train.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">reinit</span><span class="p">()</span>
+
+        <span class="c">#warp spike train in time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">spiketimes</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">beta</span><span class="o">*</span><span class="n">t</span><span class="p">)</span>
+                                 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">unwarped_spiketimes</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">beta</span> <span class="o">*</span> <span class="mi">250</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+
+        <span class="c">#Return the voltage trace</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">times</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">cond_model</span> <span class="o">=</span> <span class="n">TimeWarpModel</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">curr_model</span> <span class="o">=</span> <span class="n">TimeWarpModel</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">cond_model</span><span class="o">.</span><span class="n">N</span>
+
+    <span class="c"># #########################################################################</span>
+    <span class="c"># Reproduce Fig. 2 from Gütig and Sompolinsky (2009)</span>
+    <span class="c"># #########################################################################</span>
+    <span class="n">beta</span> <span class="o">=</span> <span class="mf">2.0</span>
+    <span class="n">times1</span><span class="p">,</span> <span class="n">v1</span> <span class="o">=</span> <span class="n">cond_model</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">times2</span><span class="p">,</span> <span class="n">v2</span> <span class="o">=</span> <span class="n">cond_model</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">)</span>
+    <span class="n">maxtime</span> <span class="o">=</span> <span class="mi">250</span> <span class="o">*</span> <span class="n">beta</span>
+    <span class="n">subplot</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">neurons</span><span class="p">,</span> <span class="n">times</span><span class="p">)</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">cond_model</span><span class="o">.</span><span class="n">unwarped_spiketimes</span><span class="p">)</span>
+    <span class="n">plot</span><span class="p">(</span><span class="n">array</span><span class="p">(</span><span class="n">times</span><span class="p">)</span> <span class="o">/</span> <span class="n">ms</span><span class="p">,</span> <span class="n">neurons</span><span class="p">,</span> <span class="s">&#39;g.&#39;</span><span class="p">)</span>
+    <span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxtime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">N</span><span class="p">])</span>
+    <span class="n">xticks</span><span class="p">([])</span>
+    <span class="n">yticks</span><span class="p">([])</span>
+    <span class="n">title</span><span class="p">(</span><span class="s">&#39;Time-warp-invariant voltage traces (conductance-based)&#39;</span><span class="p">)</span>
+
+    <span class="n">subplot</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">plot</span><span class="p">(</span><span class="n">times1</span> <span class="o">/</span> <span class="n">ms</span><span class="p">,</span> <span class="n">v1</span><span class="p">,</span> <span class="s">&#39;g&#39;</span><span class="p">)</span>
+    <span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxtime</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">])</span>
+    <span class="n">xticks</span><span class="p">([])</span>
+    <span class="n">yticks</span><span class="p">([])</span>
+
+    <span class="n">subplot</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">plot</span><span class="p">(</span><span class="n">array</span><span class="p">(</span><span class="n">times</span><span class="p">)</span> <span class="o">*</span> <span class="n">beta</span> <span class="o">/</span> <span class="n">ms</span><span class="p">,</span> <span class="n">neurons</span><span class="p">,</span> <span class="s">&#39;b.&#39;</span><span class="p">)</span>
+    <span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxtime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">N</span><span class="p">])</span>
+    <span class="n">xticks</span><span class="p">([])</span>
+    <span class="n">yticks</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">500</span><span class="p">])</span>
+
+    <span class="n">subplot</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">plot</span><span class="p">(</span><span class="n">times2</span> <span class="o">/</span> <span class="n">ms</span><span class="p">,</span> <span class="n">v2</span><span class="p">,</span> <span class="s">&#39;b&#39;</span><span class="p">)</span>
+    <span class="n">plot</span><span class="p">(</span><span class="n">times1</span> <span class="o">/</span> <span class="n">ms</span> <span class="o">*</span> <span class="n">beta</span><span class="p">,</span> <span class="n">v1</span><span class="p">,</span> <span class="s">&#39;g&#39;</span><span class="p">)</span>
+    <span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxtime</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">])</span>
+    <span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;Time (ms)&#39;</span><span class="p">)</span>
+    <span class="n">xticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="mi">500</span><span class="p">])</span>
+    <span class="n">yticks</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">show</span><span class="p">()</span>
+    <span class="c"># #########################################################################</span>
+    <span class="c"># Reproduce Fig. 3(C) from Gütig and Sompolinsky (2009), but for random</span>
+    <span class="c"># spike trains and not in a speech recognition task</span>
+    <span class="c"># #########################################################################</span>
+
+    <span class="n">betas</span> <span class="o">=</span> <span class="n">arange</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">3.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+    <span class="c">#betas = array([1.0, 2.0])</span>
+    <span class="n">cond_results</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">curr_results</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">beta</span> <span class="ow">in</span> <span class="n">betas</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&#39;Testing warp factor </span><span class="si">%.1f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">beta</span>
+        <span class="n">cond_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cond_model</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">beta</span><span class="p">))</span>
+        <span class="n">curr_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">curr_model</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">beta</span><span class="p">))</span>
+
+    <span class="n">figure</span><span class="p">()</span>
+    <span class="n">colors</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">gist_earth</span><span class="p">((</span><span class="n">betas</span> <span class="o">-</span> <span class="n">betas</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">betas</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">betas</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">lookup</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">betas</span><span class="p">,</span> <span class="n">colors</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">beta</span><span class="p">,</span> <span class="n">cond_result</span><span class="p">,</span> <span class="n">curr_result</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">betas</span><span class="p">,</span> <span class="n">cond_results</span><span class="p">,</span>
+                                              <span class="n">curr_results</span><span class="p">):</span>
+        <span class="n">times_cond</span><span class="p">,</span> <span class="n">v_cond</span> <span class="o">=</span> <span class="n">cond_result</span>
+        <span class="n">times_curr</span><span class="p">,</span> <span class="n">v_curr</span> <span class="o">=</span> <span class="n">curr_result</span>
+        <span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">plot</span><span class="p">(</span><span class="n">times_cond</span> <span class="o">/</span> <span class="n">ms</span> <span class="o">/</span> <span class="n">beta</span><span class="p">,</span> <span class="n">v_cond</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">lookup</span><span class="p">[</span><span class="n">beta</span><span class="p">])</span>
+        <span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">])</span>
+        <span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">plot</span><span class="p">(</span><span class="n">times_curr</span> <span class="o">/</span> <span class="n">ms</span> <span class="o">/</span> <span class="n">beta</span><span class="p">,</span> <span class="n">v_curr</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">lookup</span><span class="p">[</span><span class="n">beta</span><span class="p">])</span>
+        <span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">])</span>
+    <span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">title</span><span class="p">(</span><span class="s">&#39;conductance based&#39;</span><span class="p">)</span>
+    <span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">title</span><span class="p">(</span><span class="s">&#39;current based&#39;</span><span class="p">)</span>
+    <span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-frompapers_Sturzl_et_al_2000.html"
+                        title="previous chapter">Example: Sturzl_et_al_2000 (frompapers)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-frompapers_Brette_Guigon_2003.html"
+                        title="next chapter">Example: Brette_Guigon_2003 (frompapers)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-frompapers_Guetig_Sompolinsky_2009.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers_Brette_Guigon_2003.html" title="Example: Brette_Guigon_2003 (frompapers)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers_Sturzl_et_al_2000.html" title="Example: Sturzl_et_al_2000 (frompapers)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,355 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Simulation principles &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Developer’s guide" href="developer.html" />
+    <link rel="next" title="Main code structure" href="developer-codestructure.html" />
+    <link rel="prev" title="Guidelines" href="developer-guidelines.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="developer-codestructure.html" title="Main code structure"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="developer-guidelines.html" title="Guidelines"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="developer.html" accesskey="U">Developer&#8217;s guide</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="simulation-principles">
+<h1>Simulation principles<a class="headerlink" href="#simulation-principles" title="Permalink to this headline">¶</a></h1>
+<p>The following paper outlines the principles of Brian simulation: Goodman, D and
+Brette R (2008),
+<a class="reference external" href="http://www.frontiersin.org/neuroinformatics/paper/10.3389/neuro.11/005.2008/">Brian: a simulator for spiking neural networks in Python</a>,
+Front. Neuroinform. doi:10.3389/neuro.11.005.2008.</p>
+<p>This one describes the simulation algorithms, which are based on vectorisation:
+Brette R and Goodman, DF,
+<a class="reference external" href="http://www.briansimulator.org/WordPress/wp-content/uploads/2010/10/algorithms-preprint.pdf">Vectorised algorithms for spiking neural network simulation</a>,
+Neural Computation (in press).</p>
+<div class="section" id="sample-script">
+<h2>Sample script<a class="headerlink" href="#sample-script" title="Permalink to this headline">¶</a></h2>
+<p>Below we present a Brian script, and a translation into pure Python to
+illustrate the basic principles of Brian simulations.</p>
+<div class="section" id="original-brian-script">
+<h3>Original Brian script<a class="headerlink" href="#original-brian-script" title="Permalink to this headline">¶</a></h3>
+<p>A script in Brian:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Very short example program.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+
+<span class="n">N</span><span class="o">=</span><span class="mi">10000</span>        <span class="c"># number of neurons</span>
+<span class="n">Ne</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">N</span><span class="o">*</span><span class="mf">0.8</span><span class="p">)</span> <span class="c"># excitatory neurons</span>
+<span class="n">Ni</span><span class="o">=</span><span class="n">N</span><span class="o">-</span><span class="n">Ne</span>       <span class="c"># inhibitory neurons</span>
+<span class="n">p</span><span class="o">=</span><span class="mf">80.</span><span class="o">/</span><span class="n">N</span>
+<span class="n">duration</span><span class="o">=</span><span class="mi">1000</span><span class="o">*</span><span class="n">ms</span>
+
+<span class="n">eqs</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">dv/dt = (ge+gi-(v+49*mV))/(20*ms) : volt</span>
+<span class="s">dge/dt = -ge/(5*ms) : volt</span>
+<span class="s">dgi/dt = -gi/(10*ms) : volt</span>
+<span class="s">&#39;&#39;&#39;</span>
+
+<span class="n">P</span><span class="o">=</span><span class="n">NeuronGroup</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="n">eqs</span><span class="p">,</span>
+              <span class="n">threshold</span><span class="o">=-</span><span class="mi">50</span><span class="o">*</span><span class="n">mV</span><span class="p">,</span><span class="n">reset</span><span class="o">=-</span><span class="mi">60</span><span class="o">*</span><span class="n">mV</span><span class="p">)</span>
+<span class="n">P</span><span class="o">.</span><span class="n">v</span><span class="o">=-</span><span class="mi">60</span><span class="o">*</span><span class="n">mV</span><span class="o">+</span><span class="mi">10</span><span class="o">*</span><span class="n">mV</span><span class="o">*</span><span class="n">rand</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">P</span><span class="p">))</span>
+<span class="n">Pe</span><span class="o">=</span><span class="n">P</span><span class="o">.</span><span class="n">subgroup</span><span class="p">(</span><span class="n">Ne</span><span class="p">)</span>
+<span class="n">Pi</span><span class="o">=</span><span class="n">P</span><span class="o">.</span><span class="n">subgroup</span><span class="p">(</span><span class="n">Ni</span><span class="p">)</span>
+
+<span class="n">Ce</span><span class="o">=</span><span class="n">Connection</span><span class="p">(</span><span class="n">Pe</span><span class="p">,</span><span class="n">P</span><span class="p">,</span><span class="s">&#39;ge&#39;</span><span class="p">,</span><span class="n">weight</span><span class="o">=</span><span class="mf">1.62</span><span class="o">*</span><span class="n">mV</span><span class="p">,</span><span class="n">sparseness</span><span class="o">=</span><span class="n">p</span><span class="p">)</span>
+<span class="n">Ci</span><span class="o">=</span><span class="n">Connection</span><span class="p">(</span><span class="n">Pi</span><span class="p">,</span><span class="n">P</span><span class="p">,</span><span class="s">&#39;gi&#39;</span><span class="p">,</span><span class="n">weight</span><span class="o">=-</span><span class="mi">9</span><span class="o">*</span><span class="n">mV</span><span class="p">,</span><span class="n">sparseness</span><span class="o">=</span><span class="n">p</span><span class="p">)</span>
+
+<span class="n">M</span><span class="o">=</span><span class="n">SpikeMonitor</span><span class="p">(</span><span class="n">P</span><span class="p">)</span>
+<span class="n">trace</span><span class="o">=</span><span class="n">StateMonitor</span><span class="p">(</span><span class="n">P</span><span class="p">,</span><span class="s">&#39;v&#39;</span><span class="p">,</span><span class="n">record</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">t1</span><span class="o">=</span><span class="n">time</span><span class="p">()</span>
+<span class="n">run</span><span class="p">(</span><span class="mi">1</span><span class="o">*</span><span class="n">second</span><span class="p">)</span>
+<span class="n">t2</span><span class="o">=</span><span class="n">time</span><span class="p">()</span>
+<span class="k">print</span> <span class="s">&quot;Simulated in&quot;</span><span class="p">,</span><span class="n">t2</span><span class="o">-</span><span class="n">t1</span><span class="p">,</span><span class="s">&quot;s&quot;</span>
+<span class="k">print</span> <span class="nb">len</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">spikes</span><span class="p">),</span><span class="s">&quot;spikes&quot;</span>
+
+<span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+<span class="n">raster_plot</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">trace</span><span class="o">.</span><span class="n">times</span><span class="o">/</span><span class="n">ms</span><span class="p">,</span><span class="n">trace</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">mV</span><span class="p">)</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="equivalent-in-pure-python">
+<h3>Equivalent in pure Python<a class="headerlink" href="#equivalent-in-pure-python" title="Permalink to this headline">¶</a></h3>
+<p>The script above translated into pure Python (no Brian):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">A pure Python version of the CUBA example, that reproduces basic Brian principles.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">sample</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">random</span> <span class="k">as</span> <span class="n">scirandom</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Parameters</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">N</span><span class="o">=</span><span class="mi">10000</span>        <span class="c"># number of neurons</span>
+<span class="n">Ne</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">N</span><span class="o">*</span><span class="mf">0.8</span><span class="p">)</span> <span class="c"># excitatory neurons</span>
+<span class="n">Ni</span><span class="o">=</span><span class="n">N</span><span class="o">-</span><span class="n">Ne</span>       <span class="c"># inhibitory neurons</span>
+<span class="n">mV</span><span class="o">=</span><span class="n">ms</span><span class="o">=</span><span class="mf">1e-3</span>    <span class="c"># units</span>
+<span class="n">dt</span><span class="o">=</span><span class="mf">0.1</span><span class="o">*</span><span class="n">ms</span>     <span class="c"># timestep</span>
+<span class="n">taum</span><span class="o">=</span><span class="mi">20</span><span class="o">*</span><span class="n">ms</span>    <span class="c"># membrane time constant</span>
+<span class="n">taue</span><span class="o">=</span><span class="mi">5</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">taui</span><span class="o">=</span><span class="mi">10</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">p</span><span class="o">=</span><span class="mf">80.0</span><span class="o">/</span><span class="n">N</span> <span class="c"># connection probability (80 synapses per neuron)</span>
+<span class="n">Vt</span><span class="o">=-</span><span class="mi">1</span><span class="o">*</span><span class="n">mV</span>      <span class="c"># threshold = -50+49</span>
+<span class="n">Vr</span><span class="o">=-</span><span class="mi">11</span><span class="o">*</span><span class="n">mV</span>     <span class="c"># reset = -60+49</span>
+<span class="n">we</span><span class="o">=</span><span class="mi">60</span><span class="o">*</span><span class="mf">0.27</span><span class="o">/</span><span class="mi">10</span> <span class="c"># excitatory weight</span>
+<span class="n">wi</span><span class="o">=-</span><span class="mi">20</span><span class="o">*</span><span class="mf">4.5</span><span class="o">/</span><span class="mi">10</span> <span class="c"># inhibitory weight</span>
+<span class="n">duration</span><span class="o">=</span><span class="mi">1000</span><span class="o">*</span><span class="n">ms</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Equations</span>
+<span class="sd">---------</span>
+<span class="sd">eqs=&#39;&#39;&#39;</span>
+<span class="sd">dv/dt = (ge+gi-(v+49*mV))/(20*ms) : volt</span>
+<span class="sd">dge/dt = -ge/(5*ms) : volt</span>
+<span class="sd">dgi/dt = -gi/(10*ms) : volt</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="sd">This is a linear system, so each update corresponds to</span>
+<span class="sd">multiplying the state matrix by a (3,3) &#39;update matrix&#39;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c"># Update matrix</span>
+<span class="n">A</span><span class="o">=</span><span class="n">array</span><span class="p">([[</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">dt</span><span class="o">/</span><span class="n">taum</span><span class="p">),</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+         <span class="p">[</span><span class="n">taue</span><span class="o">/</span><span class="p">(</span><span class="n">taum</span><span class="o">-</span><span class="n">taue</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">dt</span><span class="o">/</span><span class="n">taum</span><span class="p">)</span><span class="o">-</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">dt</span><span class="o">/</span><span class="n">taue</span><span class="p">)),</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">dt</span><span class="o">/</span><span class="n">taue</span><span class="p">),</span><span class="mi">0</span><span class="p">],</span>
+         <span class="p">[</span><span class="n">taui</span><span class="o">/</span><span class="p">(</span><span class="n">taum</span><span class="o">-</span><span class="n">taui</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">dt</span><span class="o">/</span><span class="n">taum</span><span class="p">)</span><span class="o">-</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">dt</span><span class="o">/</span><span class="n">taui</span><span class="p">)),</span><span class="mi">0</span><span class="p">,</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">dt</span><span class="o">/</span><span class="n">taui</span><span class="p">)]])</span><span class="o">.</span><span class="n">T</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">State variables</span>
+<span class="sd">---------------</span>
+<span class="sd">P=NeuronGroup(4000,model=eqs,</span>
+<span class="sd">              threshold=-50*mV,reset=-60*mV)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">S</span><span class="o">=</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="n">N</span><span class="p">))</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Initialisation</span>
+<span class="sd">--------------</span>
+<span class="sd">P.v=-60*mV+10*mV*rand(len(P))</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">S</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span><span class="o">=</span><span class="n">rand</span><span class="p">(</span><span class="n">N</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">Vt</span><span class="o">-</span><span class="n">Vr</span><span class="p">)</span><span class="o">+</span><span class="n">Vr</span> <span class="c"># Potential: uniform between reset and threshold</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Connectivity matrices</span>
+<span class="sd">---------------------</span>
+<span class="sd">Pe=P.subgroup(3200) # excitatory group</span>
+<span class="sd">Pi=P.subgroup(800)  # inhibitory group</span>
+<span class="sd">Ce=Connection(Pe,P,&#39;ge&#39;,weight=1.62*mV,sparseness=p)</span>
+<span class="sd">Ci=Connection(Pi,P,&#39;gi&#39;,weight=-9*mV,sparseness=p)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">We_target</span><span class="o">=</span><span class="p">[]</span>
+<span class="n">We_weight</span><span class="o">=</span><span class="p">[]</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Ne</span><span class="p">):</span>
+    <span class="n">k</span><span class="o">=</span><span class="n">scirandom</span><span class="o">.</span><span class="n">binomial</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">p</span><span class="p">,</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">target</span><span class="o">=</span><span class="n">sample</span><span class="p">(</span><span class="nb">xrange</span><span class="p">(</span><span class="n">N</span><span class="p">),</span><span class="n">k</span><span class="p">)</span>
+    <span class="n">target</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="n">We_target</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+    <span class="n">We_weight</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="mf">1.62</span><span class="o">*</span><span class="n">mV</span><span class="p">]</span><span class="o">*</span><span class="n">k</span><span class="p">)</span>
+<span class="n">Wi_target</span><span class="o">=</span><span class="p">[]</span>
+<span class="n">Wi_weight</span><span class="o">=</span><span class="p">[]</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Ni</span><span class="p">):</span>
+    <span class="n">k</span><span class="o">=</span><span class="n">scirandom</span><span class="o">.</span><span class="n">binomial</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">p</span><span class="p">,</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">target</span><span class="o">=</span><span class="n">sample</span><span class="p">(</span><span class="nb">xrange</span><span class="p">(</span><span class="n">N</span><span class="p">),</span><span class="n">k</span><span class="p">)</span>
+    <span class="n">target</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="n">Wi_target</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+    <span class="n">Wi_weight</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="o">-</span><span class="mi">9</span><span class="o">*</span><span class="n">mV</span><span class="p">]</span><span class="o">*</span><span class="n">k</span><span class="p">)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Spike monitor</span>
+<span class="sd">-------------</span>
+<span class="sd">M=SpikeMonitor(P)</span>
+
+<span class="sd">will contain a list of (i,t), where neuron i spiked at time t.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">spike_monitor</span><span class="o">=</span><span class="p">[]</span> <span class="c"># Empty list of spikes</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">State monitor</span>
+<span class="sd">-------------</span>
+<span class="sd">trace=StateMonitor(P,&#39;v&#39;,record=0) # record only neuron 0</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">trace</span><span class="o">=</span><span class="p">[]</span> <span class="c"># Will contain v(t) for each t (for neuron 0)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Simulation</span>
+<span class="sd">----------</span>
+<span class="sd">run(duration)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">t1</span><span class="o">=</span><span class="n">time</span><span class="p">()</span>
+<span class="n">t</span><span class="o">=</span><span class="mi">0</span><span class="o">*</span><span class="n">ms</span>
+<span class="k">while</span> <span class="n">t</span><span class="o">&lt;</span><span class="n">duration</span><span class="p">:</span>
+    <span class="c"># STATE UPDATES</span>
+    <span class="n">S</span><span class="p">[:]</span><span class="o">=</span><span class="n">dot</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">S</span><span class="p">)</span>
+
+    <span class="c"># Threshold</span>
+    <span class="n">all_spikes</span><span class="o">=</span><span class="p">(</span><span class="n">S</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span><span class="o">&gt;</span><span class="n">Vt</span><span class="p">)</span><span class="o">.</span><span class="n">nonzero</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>     <span class="c"># List of neurons that meet threshold condition</span>
+
+    <span class="c"># PROPAGATION OF SPIKES</span>
+    <span class="c"># Excitatory neurons</span>
+    <span class="n">spikes</span><span class="o">=</span><span class="p">(</span><span class="n">S</span><span class="p">[</span><span class="mi">0</span><span class="p">,:</span><span class="n">Ne</span><span class="p">]</span><span class="o">&gt;</span><span class="n">Vt</span><span class="p">)</span><span class="o">.</span><span class="n">nonzero</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>       <span class="c"># In Brian we actually use bisection to speed it up</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">spikes</span><span class="p">:</span>
+        <span class="n">S</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="n">We_target</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">+=</span><span class="n">We_weight</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="c"># Inhibitory neurons</span>
+    <span class="n">spikes</span><span class="o">=</span><span class="p">(</span><span class="n">S</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">Ne</span><span class="p">:</span><span class="n">N</span><span class="p">]</span><span class="o">&gt;</span><span class="n">Vt</span><span class="p">)</span><span class="o">.</span><span class="n">nonzero</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">spikes</span><span class="p">:</span>
+        <span class="n">S</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="n">Wi_target</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">+=</span><span class="n">Wi_weight</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="c"># Reset neurons after spiking</span>
+    <span class="n">S</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">all_spikes</span><span class="p">]</span><span class="o">=</span><span class="n">Vr</span>                       <span class="c"># Reset membrane potential</span>
+
+    <span class="c"># Spike monitor</span>
+    <span class="n">spike_monitor</span><span class="o">+=</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">all_spikes</span><span class="p">]</span>
+
+    <span class="c"># State monitor</span>
+    <span class="n">trace</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">S</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">t</span><span class="o">+=</span><span class="n">dt</span>
+
+<span class="n">t2</span><span class="o">=</span><span class="n">time</span><span class="p">()</span>
+<span class="k">print</span> <span class="s">&quot;Simulated in&quot;</span><span class="p">,</span><span class="n">t2</span><span class="o">-</span><span class="n">t1</span><span class="p">,</span><span class="s">&quot;s&quot;</span>
+<span class="k">print</span> <span class="nb">len</span><span class="p">(</span><span class="n">spike_monitor</span><span class="p">),</span><span class="s">&quot;spikes&quot;</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Plot</span>
+<span class="sd">----</span>
+<span class="sd">subplot(211)</span>
+<span class="sd">raster_plot(M)</span>
+<span class="sd">subplot(212)</span>
+<span class="sd">plot(trace.times/ms,trace[0]/mV)</span>
+<span class="sd">show()</span>
+
+<span class="sd">Here we cheat a little.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="n">raster_plot</span>
+<span class="k">class</span> <span class="nc">M</span><span class="p">:</span>
+    <span class="k">pass</span>
+<span class="n">M</span><span class="o">.</span><span class="n">spikes</span><span class="o">=</span><span class="n">spike_monitor</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+<span class="n">raster_plot</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">trace</span><span class="p">))</span><span class="o">*</span><span class="n">dt</span><span class="o">/</span><span class="n">ms</span><span class="p">,</span><span class="n">array</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span><span class="o">/</span><span class="n">mV</span><span class="p">)</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Simulation principles</a><ul>
+<li><a class="reference internal" href="#sample-script">Sample script</a><ul>
+<li><a class="reference internal" href="#original-brian-script">Original Brian script</a></li>
+<li><a class="reference internal" href="#equivalent-in-pure-python">Equivalent in pure Python</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="developer-guidelines.html"
+                        title="previous chapter">Guidelines</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="developer-codestructure.html"
+                        title="next chapter">Main code structure</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/developer-simulationprinciples.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="developer-codestructure.html" title="Main code structure"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="developer-guidelines.html" title="Guidelines"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="developer.html" >Developer&#8217;s guide</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

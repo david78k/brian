@@ -1,0 +1,148 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Realtime Connection Monitor &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Experimental features" href="experimental.html" />
+    <link rel="next" title="Automatic Model Documentation" href="experimental-modeldocumentation.html" />
+    <link rel="prev" title="Multilinear state updater" href="experimental-multilinearstateupdater.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="experimental-modeldocumentation.html" title="Automatic Model Documentation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="experimental-multilinearstateupdater.html" title="Multilinear state updater"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="experimental.html" accesskey="U">Experimental features</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="realtime-connection-monitor">
+<h1>Realtime Connection Monitor<a class="headerlink" href="#realtime-connection-monitor" title="Permalink to this headline">¶</a></h1>
+<p>You can visual weight matrices in realtime, using the
+<a class="reference external" href="http://www.pygame.org/">PyGame</a> package with the following class.</p>
+<dl class="class">
+<dt id="brian.experimental.realtime_monitor.RealtimeConnectionMonitor">
+<em class="property">class </em><tt class="descclassname">brian.experimental.realtime_monitor.</tt><tt class="descname">RealtimeConnectionMonitor</tt><big>(</big><em>C</em>, <em>size=None</em>, <em>scaling='fast'</em>, <em>wmin=None</em>, <em>wmax=None</em>, <em>clock=None</em>, <em>cmap=&lt;matplotlib.colors.LinearSegmentedColormap instance at 0x3cd7ea8&gt;</em><big>)</big><a class="headerlink" href="#brian.experimental.realtime_monitor.RealtimeConnectionMonitor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Realtime monitoring of weight matrix</p>
+<p>Short docs:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">C</span></tt></dt>
+<dd>Connection to monitor</dd>
+<dt><tt class="docutils literal"><span class="pre">size</span></tt></dt>
+<dd>Dimensions (width, height) of output window, leave as <tt class="docutils literal"><span class="pre">None</span></tt> to use
+<tt class="docutils literal"><span class="pre">C.W.shape</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">scaling</span></tt></dt>
+<dd>If output window dimensions are different to connection matrix, scaling
+is used, options are <tt class="docutils literal"><span class="pre">'fast'</span></tt> for no interpolation, or <tt class="docutils literal"><span class="pre">'smooth'</span></tt>
+for (slower) smooth interpolation.</dd>
+<dt><tt class="docutils literal"><span class="pre">wmin,</span> <span class="pre">wmax</span></tt></dt>
+<dd>Minimum and maximum weight matrix values, if left to <tt class="docutils literal"><span class="pre">None</span></tt> then the
+min/max of the weight matrix at each moment is used (and this scaling
+can change over time).</dd>
+<dt><tt class="docutils literal"><span class="pre">clock</span></tt></dt>
+<dd>Leave to <tt class="docutils literal"><span class="pre">None</span></tt> for an update every 100ms.</dd>
+<dt><tt class="docutils literal"><span class="pre">cmap</span></tt></dt>
+<dd>Colour map to use, black and white by default. Get other values from
+<tt class="docutils literal"><span class="pre">matplotlib.cm.*</span></tt>.</dd>
+</dl>
+<p>Note that this class uses PyGame and due to a limitation with pygame, there
+can be only one window using it. Other options are being considered.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="experimental-multilinearstateupdater.html"
+                        title="previous chapter">Multilinear state updater</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="experimental-modeldocumentation.html"
+                        title="next chapter">Automatic Model Documentation</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/experimental-realtimeconnectionmonitor.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="experimental-modeldocumentation.html" title="Automatic Model Documentation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="experimental-multilinearstateupdater.html" title="Multilinear state updater"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="experimental.html" >Experimental features</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

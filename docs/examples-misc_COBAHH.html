@@ -1,0 +1,199 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: COBAHH (misc) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: timed_array (misc)" href="examples-misc_timed_array.html" />
+    <link rel="prev" title="Example: I-F_curve (misc)" href="examples-misc_I-F_curve.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-misc_timed_array.html" title="Example: timed_array (misc)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-misc_I-F_curve.html" title="Example: I-F_curve (misc)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-cobahh-misc">
+<span id="example-misc-cobahh"></span><span id="index-0"></span><h1>Example: COBAHH (misc)<a class="headerlink" href="#example-cobahh-misc" title="Permalink to this headline">¶</a></h1>
+<p>This is an implementation of a benchmark described
+in the following review paper:</p>
+<p>Simulation of networks of spiking neurons: A review of tools and strategies (2006).
+Brette, Rudolph, Carnevale, Hines, Beeman, Bower, Diesmann, Goodman, Harris, Zirpe,
+NatschlAger, Pecevski, Ermentrout, Djurfeldt, Lansner, Rochel, Vibert, Alvarez, Muller,
+Davison, El Boustani and Destexhe.
+Journal of Computational Neuroscience</p>
+<p>Benchmark 3: random network of HH neurons with exponential synaptic conductances</p>
+<p>Clock-driven implementation
+(no spike time interpolation)</p>
+<ol class="upperalpha simple" start="18">
+<li>Brette - Dec 2007</li>
+</ol>
+<p>70s for dt=0.1 ms with exponential Euler</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="c"># Parameters</span>
+<span class="n">area</span> <span class="o">=</span> <span class="mi">20000</span> <span class="o">*</span> <span class="n">umetre</span> <span class="o">**</span> <span class="mi">2</span>
+<span class="n">Cm</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">ufarad</span> <span class="o">*</span> <span class="n">cm</span> <span class="o">**</span> <span class="o">-</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">area</span>
+<span class="n">gl</span> <span class="o">=</span> <span class="p">(</span><span class="mf">5e-5</span> <span class="o">*</span> <span class="n">siemens</span> <span class="o">*</span> <span class="n">cm</span> <span class="o">**</span> <span class="o">-</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">area</span>
+<span class="n">El</span> <span class="o">=</span> <span class="o">-</span><span class="mi">60</span> <span class="o">*</span> <span class="n">mV</span>
+<span class="n">EK</span> <span class="o">=</span> <span class="o">-</span><span class="mi">90</span> <span class="o">*</span> <span class="n">mV</span>
+<span class="n">ENa</span> <span class="o">=</span> <span class="mi">50</span> <span class="o">*</span> <span class="n">mV</span>
+<span class="n">g_na</span> <span class="o">=</span> <span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">msiemens</span> <span class="o">*</span> <span class="n">cm</span> <span class="o">**</span> <span class="o">-</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">area</span>
+<span class="n">g_kd</span> <span class="o">=</span> <span class="p">(</span><span class="mi">30</span> <span class="o">*</span> <span class="n">msiemens</span> <span class="o">*</span> <span class="n">cm</span> <span class="o">**</span> <span class="o">-</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">area</span>
+<span class="n">VT</span> <span class="o">=</span> <span class="o">-</span><span class="mi">63</span> <span class="o">*</span> <span class="n">mV</span>
+<span class="c"># Time constants</span>
+<span class="n">taue</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">ms</span>
+<span class="n">taui</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">ms</span>
+<span class="c"># Reversal potentials</span>
+<span class="n">Ee</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">mV</span>
+<span class="n">Ei</span> <span class="o">=</span> <span class="o">-</span><span class="mi">80</span> <span class="o">*</span> <span class="n">mV</span>
+<span class="n">we</span> <span class="o">=</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">nS</span> <span class="c"># excitatory synaptic weight (voltage)</span>
+<span class="n">wi</span> <span class="o">=</span> <span class="mi">67</span> <span class="o">*</span> <span class="n">nS</span> <span class="c"># inhibitory synaptic weight</span>
+
+<span class="c"># The model</span>
+<span class="n">eqs</span> <span class="o">=</span> <span class="n">Equations</span><span class="p">(</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">dv/dt = (gl*(El-v)+ge*(Ee-v)+gi*(Ei-v)-</span><span class="se">\</span>
+<span class="s">    g_na*(m*m*m)*h*(v-ENa)-</span><span class="se">\</span>
+<span class="s">    g_kd*(n*n*n*n)*(v-EK))/Cm : volt</span>
+<span class="s">dm/dt = alpham*(1-m)-betam*m : 1</span>
+<span class="s">dn/dt = alphan*(1-n)-betan*n : 1</span>
+<span class="s">dh/dt = alphah*(1-h)-betah*h : 1</span>
+<span class="s">dge/dt = -ge*(1./taue) : siemens</span>
+<span class="s">dgi/dt = -gi*(1./taui) : siemens</span>
+<span class="s">alpham = 0.32*(mV**-1)*(13*mV-v+VT)/ </span><span class="se">\</span>
+<span class="s">    (exp((13*mV-v+VT)/(4*mV))-1.)/ms : Hz</span>
+<span class="s">betam = 0.28*(mV**-1)*(v-VT-40*mV)/ </span><span class="se">\</span>
+<span class="s">    (exp((v-VT-40*mV)/(5*mV))-1)/ms : Hz</span>
+<span class="s">alphah = 0.128*exp((17*mV-v+VT)/(18*mV))/ms : Hz</span>
+<span class="s">betah = 4./(1+exp((40*mV-v+VT)/(5*mV)))/ms : Hz</span>
+<span class="s">alphan = 0.032*(mV**-1)*(15*mV-v+VT)/ </span><span class="se">\</span>
+<span class="s">    (exp((15*mV-v+VT)/(5*mV))-1.)/ms : Hz</span>
+<span class="s">betan = .5*exp((10*mV-v+VT)/(40*mV))/ms : Hz</span>
+<span class="s">&#39;&#39;&#39;</span><span class="p">)</span>
+
+<span class="n">P</span> <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="mi">4000</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">eqs</span><span class="p">,</span>
+    <span class="n">threshold</span><span class="o">=</span><span class="n">EmpiricalThreshold</span><span class="p">(</span><span class="n">threshold</span><span class="o">=</span> <span class="o">-</span><span class="mi">20</span> <span class="o">*</span> <span class="n">mV</span><span class="p">,</span>
+                                 <span class="n">refractory</span><span class="o">=</span><span class="mi">3</span> <span class="o">*</span> <span class="n">ms</span><span class="p">),</span>
+    <span class="n">implicit</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">freeze</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">Pe</span> <span class="o">=</span> <span class="n">P</span><span class="o">.</span><span class="n">subgroup</span><span class="p">(</span><span class="mi">3200</span><span class="p">)</span>
+<span class="n">Pi</span> <span class="o">=</span> <span class="n">P</span><span class="o">.</span><span class="n">subgroup</span><span class="p">(</span><span class="mi">800</span><span class="p">)</span>
+<span class="n">Ce</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">Pe</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="s">&#39;ge&#39;</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">we</span><span class="p">,</span> <span class="n">sparseness</span><span class="o">=</span><span class="mf">0.02</span><span class="p">)</span>
+<span class="n">Ci</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">Pi</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="s">&#39;gi&#39;</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">wi</span><span class="p">,</span> <span class="n">sparseness</span><span class="o">=</span><span class="mf">0.02</span><span class="p">)</span>
+<span class="c"># Initialization</span>
+<span class="n">P</span><span class="o">.</span><span class="n">v</span> <span class="o">=</span> <span class="n">El</span> <span class="o">+</span> <span class="p">(</span><span class="n">randn</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">P</span><span class="p">))</span> <span class="o">*</span> <span class="mi">5</span> <span class="o">-</span> <span class="mi">5</span><span class="p">)</span> <span class="o">*</span> <span class="n">mV</span>
+<span class="n">P</span><span class="o">.</span><span class="n">ge</span> <span class="o">=</span> <span class="p">(</span><span class="n">randn</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">P</span><span class="p">))</span> <span class="o">*</span> <span class="mf">1.5</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span> <span class="o">*</span> <span class="mf">10.</span> <span class="o">*</span> <span class="n">nS</span>
+<span class="n">P</span><span class="o">.</span><span class="n">gi</span> <span class="o">=</span> <span class="p">(</span><span class="n">randn</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">P</span><span class="p">))</span> <span class="o">*</span> <span class="mi">12</span> <span class="o">+</span> <span class="mi">20</span><span class="p">)</span> <span class="o">*</span> <span class="mf">10.</span> <span class="o">*</span> <span class="n">nS</span>
+
+<span class="c"># Record the number of spikes and a few traces</span>
+<span class="n">trace</span> <span class="o">=</span> <span class="n">StateMonitor</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="s">&#39;v&#39;</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">])</span>
+
+<span class="n">run</span><span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">second</span><span class="p">)</span>
+
+<span class="n">plot</span><span class="p">(</span><span class="n">trace</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">trace</span><span class="p">[</span><span class="mi">10</span><span class="p">])</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">trace</span><span class="p">[</span><span class="mi">100</span><span class="p">])</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-misc_I-F_curve.html"
+                        title="previous chapter">Example: I-F_curve (misc)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-misc_timed_array.html"
+                        title="next chapter">Example: timed_array (misc)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-misc_COBAHH.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-misc_timed_array.html" title="Example: timed_array (misc)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-misc_I-F_curve.html" title="Example: I-F_curve (misc)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

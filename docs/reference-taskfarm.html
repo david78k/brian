@@ -1,0 +1,183 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Task farming &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Reference" href="reference.html" />
+    <link rel="next" title="Remote control" href="reference-remotecontrol.html" />
+    <link rel="prev" title="Input/output" href="reference-io.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="reference-remotecontrol.html" title="Remote control"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="reference-io.html" title="Input/output"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="reference.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="task-farming">
+<h1>Task farming<a class="headerlink" href="#task-farming" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="brian.tools.taskfarm.run_tasks">
+<tt class="descclassname">brian.tools.taskfarm.</tt><tt class="descname">run_tasks</tt><big>(</big><em>dataman</em>, <em>task</em>, <em>items</em>, <em>gui=True</em>, <em>poolsize=0</em>, <em>initargs=None</em>, <em>initkwds=None</em>, <em>verbose=None</em>, <em>numitems=None</em><big>)</big><a class="headerlink" href="#brian.tools.taskfarm.run_tasks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run a series of tasks using multiple CPUs on a single computer.</p>
+<p>Initialised with arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">dataman</span></tt></dt>
+<dd>The <a class="reference internal" href="reference-io.html#brian.tools.datamanager.DataManager" title="brian.tools.datamanager.DataManager"><tt class="xref py py-class docutils literal"><span class="pre">DataManager</span></tt></a> object used to store
+the results in, see below.</dd>
+<dt><tt class="docutils literal"><span class="pre">task</span></tt></dt>
+<dd>The task function or class (see below).</dd>
+<dt><tt class="docutils literal"><span class="pre">items</span></tt></dt>
+<dd>A sequence (e.g. list or iterator) of arguments to be passed to the
+task.</dd>
+<dt><tt class="docutils literal"><span class="pre">gui=True</span></tt></dt>
+<dd>Whether or not to use a Tkinter based GUI to show progress and terminate
+the task run.</dd>
+<dt><tt class="docutils literal"><span class="pre">poolsize=0</span></tt></dt>
+<dd>The number of CPUs to use. If the value is 0, use all available CPUs,
+if it is -1 use all but one CPU, etc.</dd>
+<dt><tt class="docutils literal"><span class="pre">initargs</span></tt>, <tt class="docutils literal"><span class="pre">initkwds</span></tt></dt>
+<dd>If <tt class="docutils literal"><span class="pre">task</span></tt> is a class, these are the initialisation arguments and
+keywords for the class.</dd>
+<dt><tt class="docutils literal"><span class="pre">verbose=None</span></tt></dt>
+<dd>Specify True or False to print out every progress message (defaults to
+False if the GUI is used, or True if not).</dd>
+<dt><tt class="docutils literal"><span class="pre">numitems=None</span></tt></dt>
+<dd>For iterables (rather than fixed length sequences), if you specify the
+number of items, an estimate of the time remaining will be given.</dd>
+</dl>
+<p>The task (defined by a function or class, see below) will be called on each
+item in <tt class="docutils literal"><span class="pre">items</span></tt>, and the results saved to <tt class="docutils literal"><span class="pre">dataman</span></tt>. Results are stored
+in the format <tt class="docutils literal"><span class="pre">(key,</span> <span class="pre">val)</span></tt> where <tt class="docutils literal"><span class="pre">key</span></tt> is a unique but meaningless
+identifier. Results can be retrieved using <tt class="docutils literal"><span class="pre">dataman.values()</span></tt> or (for
+large data sets that should be iterated over) <tt class="docutils literal"><span class="pre">dataman.itervalues()</span></tt>.</p>
+<p>The task can either be a function or a class. If it is a function, it will
+be called for each item in <tt class="docutils literal"><span class="pre">items</span></tt>. If the items are tuples, the function
+will be called with those tuples as arguments (e.g. if the item is
+<tt class="docutils literal"><span class="pre">(1,2,3)</span></tt> the function will be called as <tt class="docutils literal"><span class="pre">task(1,</span> <span class="pre">2,</span> <span class="pre">3)</span></tt>). If the task
+is a class, it can have an <tt class="docutils literal"><span class="pre">__init__</span></tt> method that is called once for
+each process (each CPU) at the beginning of the task run. If the <tt class="docutils literal"><span class="pre">__init__</span></tt>
+method has a <tt class="docutils literal"><span class="pre">process_number</span></tt> argument, it will be passed an integer value
+from 0 to <tt class="docutils literal"><span class="pre">numprocesses-1</span></tt> giving the number of the process (note, this is
+not the process ID). The class should
+define a <tt class="docutils literal"><span class="pre">__call__</span></tt> method that behaves the same as above for <tt class="docutils literal"><span class="pre">task</span></tt>
+being a function. In both cases (function or class), if the arguments
+include a keyword <tt class="docutils literal"><span class="pre">report</span></tt> then it will be passed a value that can be
+passed as the <tt class="docutils literal"><span class="pre">report</span></tt> keyword in Brian&#8217;s <tt class="xref py py-func docutils literal"><span class="pre">run()</span></tt> function to give
+feedback on the simulation as it runs. A <tt class="docutils literal"><span class="pre">task</span></tt> function can also set
+<tt class="docutils literal"><span class="pre">self.taskname</span></tt> as a string that will be displayed on the GUI to give
+additional information.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p>On Windows, make sure that <a class="reference internal" href="#brian.tools.taskfarm.run_tasks" title="brian.tools.taskfarm.run_tasks"><tt class="xref py py-func docutils literal"><span class="pre">run_tasks()</span></tt></a> is only called from
+within a block such as:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span><span class="o">==</span><span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">run_tasks</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="last">Otherwise, the program will go into a recursive loop.</p>
+</div>
+<p>Note that this class only allows you to run tasks on a single computer, to
+distribute work over multiple computers, we suggest using
+<a class="reference external" href="http://code.google.com/p/playdoh/">Playdoh</a>.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="reference-io.html"
+                        title="previous chapter">Input/output</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="reference-remotecontrol.html"
+                        title="next chapter">Remote control</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/reference-taskfarm.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="reference-remotecontrol.html" title="Remote control"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="reference-io.html" title="Input/output"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="reference.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

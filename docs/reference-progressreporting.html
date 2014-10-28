@@ -1,0 +1,202 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Progress reporting &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Reference" href="reference.html" />
+    <link rel="next" title="Model fitting toolbox" href="reference-modelfitting.html" />
+    <link rel="prev" title="Remote control" href="reference-remotecontrol.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="reference-modelfitting.html" title="Model fitting toolbox"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="reference-remotecontrol.html" title="Remote control"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="reference.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="progress-reporting">
+<span id="index-0"></span><h1>Progress reporting<a class="headerlink" href="#progress-reporting" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="brian.utils.progressreporting.ProgressReporter">
+<em class="property">class </em><tt class="descclassname">brian.utils.progressreporting.</tt><tt class="descname">ProgressReporter</tt><big>(</big><em>report='stderr'</em>, <em>period=10.0</em>, <em>first_report=-1.0</em><big>)</big><a class="headerlink" href="#brian.utils.progressreporting.ProgressReporter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Standard text and graphical progress reports</p>
+<p>Initialised with arguments:</p>
+<p><tt class="docutils literal"><span class="pre">report</span></tt></p>
+<blockquote>
+<div><p>Can be one of the following strings:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">'print'</span></tt>, <tt class="docutils literal"><span class="pre">'text'</span></tt>, <tt class="docutils literal"><span class="pre">'stdout'</span></tt></dt>
+<dd>Reports progress to standard console.</dd>
+<dt><tt class="docutils literal"><span class="pre">'stderr'</span></tt></dt>
+<dd>Reports progress to error console.</dd>
+<dt><tt class="docutils literal"><span class="pre">'graphical'</span></tt>, <tt class="docutils literal"><span class="pre">'tkinter'</span></tt></dt>
+<dd>A simple graphical progress bar using Tkinter.</dd>
+</dl>
+<p>Alternatively, it can be any output stream in which
+case text reports will be sent to it, or a custom callback function
+<tt class="docutils literal"><span class="pre">report(elapsed,</span> <span class="pre">complete)</span></tt> taking arguments <tt class="docutils literal"><span class="pre">elapsed</span></tt>
+the amount of time that has passed and <tt class="docutils literal"><span class="pre">complete</span></tt> the fraction of
+the computation finished.</p>
+</div></blockquote>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">period</span></tt></dt>
+<dd>How often reports should be generated in seconds.</dd>
+<dt><tt class="docutils literal"><span class="pre">first_report</span></tt></dt>
+<dd>The time of the first report (nothing will be done before this amount
+of time has elapsed).</dd>
+</dl>
+<p>Methods:</p>
+<dl class="method">
+<dt id="brian.ProgressReporter.start">
+<tt class="descname">start</tt><big>(</big><big>)</big><a class="headerlink" href="#brian.ProgressReporter.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call at the beginning of a task to start timing it.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.ProgressReporter.finish">
+<tt class="descname">finish</tt><big>(</big><big>)</big><a class="headerlink" href="#brian.ProgressReporter.finish" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call at the end of a task to finish timing it. Note that
+with the Tkinter class, if you do not call this it will
+stop the Python script from finishing, stopping memory
+from being freed up.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.ProgressReporter.update">
+<tt class="descname">update</tt><big>(</big><em>complete</em><big>)</big><a class="headerlink" href="#brian.ProgressReporter.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call with the fraction of the task (or subtask if
+<tt class="docutils literal"><span class="pre">subtask()</span></tt> has been called) completed, between
+0 and 1.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.ProgressReporter.subtask">
+<tt class="descname">subtask</tt><big>(</big><em>complete</em>, <em>tasksize</em><big>)</big><a class="headerlink" href="#brian.ProgressReporter.subtask" title="Permalink to this definition">¶</a></dt>
+<dd><p>After calling <tt class="docutils literal"><span class="pre">subtask(complete,</span> <span class="pre">tasksize)</span></tt>,
+subsequent calls to update will report progress
+between a fraction <tt class="docutils literal"><span class="pre">complete</span></tt> and <tt class="docutils literal"><span class="pre">complete+tasksize</span></tt>
+of the total task. <tt class="docutils literal"><span class="pre">complete</span></tt> represents the amount
+of the total task completed at the beginning of the
+task, and <tt class="docutils literal"><span class="pre">tasksize</span></tt> the size of the subtask as a
+proportion of the whole task.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.ProgressReporter.equal_subtask">
+<tt class="descname">equal_subtask</tt><big>(</big><em>tasknum</em>, <em>numtasks</em><big>)</big><a class="headerlink" href="#brian.ProgressReporter.equal_subtask" title="Permalink to this definition">¶</a></dt>
+<dd><p>If a task can be divided into <tt class="docutils literal"><span class="pre">numtasks</span></tt> equally
+sized subtasks, you can use this method instead of
+<tt class="docutils literal"><span class="pre">subtask</span></tt>, where <tt class="docutils literal"><span class="pre">tasknum</span></tt> is the number of
+the subtask about to start.</p>
+</dd></dl>
+
+<p>Note that in Python 2.6+, this can be used as a context manager, and it
+will automatically call the <a class="reference internal" href="#brian.ProgressReporter.start" title="brian.ProgressReporter.start"><tt class="xref py py-meth docutils literal"><span class="pre">start()</span></tt></a> and <a class="reference internal" href="#brian.ProgressReporter.finish" title="brian.ProgressReporter.finish"><tt class="xref py py-meth docutils literal"><span class="pre">finish()</span></tt></a> methods at
+the beginning and end, e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">with</span> <span class="n">ProgressReporter</span><span class="p">(</span><span class="n">period</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span> <span class="k">as</span> <span class="n">progress</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">progress</span><span class="o">.</span><span class="n">update</span><span class="p">((</span><span class="n">i</span><span class="o">+</span><span class="mf">1.0</span><span class="p">)</span><span class="o">/</span><span class="mi">10</span><span class="p">)</span>    
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="reference-remotecontrol.html"
+                        title="previous chapter">Remote control</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="reference-modelfitting.html"
+                        title="next chapter">Model fitting toolbox</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/reference-progressreporting.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="reference-modelfitting.html" title="Model fitting toolbox"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="reference-remotecontrol.html" title="Remote control"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="reference.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

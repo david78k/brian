@@ -1,0 +1,152 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: cochlear_models (hears) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: approximate_gammatone (hears)" href="examples-hears_approximate_gammatone.html" />
+    <link rel="prev" title="Example: drnl (hears)" href="examples-hears_drnl.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-hears_approximate_gammatone.html" title="Example: approximate_gammatone (hears)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-hears_drnl.html" title="Example: drnl (hears)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-cochlear-models-hears">
+<span id="example-hears-cochlear-models"></span><span id="index-0"></span><h1>Example: cochlear_models (hears)<a class="headerlink" href="#example-cochlear-models-hears" title="Permalink to this headline">¶</a></h1>
+<p>Example of the use of the cochlear models (<a class="reference internal" href="reference-hears.html#brian.hears.DRNL" title="brian.hears.DRNL"><tt class="xref py py-class docutils literal"><span class="pre">DRNL</span></tt></a>,
+<a class="reference internal" href="reference-hears.html#brian.hears.DCGC" title="brian.hears.DCGC"><tt class="xref py py-class docutils literal"><span class="pre">DCGC</span></tt></a> and <a class="reference internal" href="reference-hears.html#brian.hears.TanCarney" title="brian.hears.TanCarney"><tt class="xref py py-class docutils literal"><span class="pre">TanCarney</span></tt></a>) available in the library.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">brian.hears</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">simulation_duration</span> <span class="o">=</span> <span class="mi">50</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">set_default_samplerate</span><span class="p">(</span><span class="mi">50</span><span class="o">*</span><span class="n">kHz</span><span class="p">)</span>
+<span class="n">sound</span> <span class="o">=</span> <span class="n">whitenoise</span><span class="p">(</span><span class="n">simulation_duration</span><span class="p">)</span>
+<span class="n">sound</span> <span class="o">=</span> <span class="n">sound</span><span class="o">.</span><span class="n">atlevel</span><span class="p">(</span><span class="mi">50</span><span class="o">*</span><span class="n">dB</span><span class="p">)</span> <span class="c"># level in rms dB SPL</span>
+<span class="n">cf</span> <span class="o">=</span> <span class="n">erbspace</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">Hz</span><span class="p">,</span> <span class="mi">1000</span><span class="o">*</span><span class="n">Hz</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span> <span class="c"># centre frequencies</span>
+<span class="n">interval</span> <span class="o">=</span> <span class="mi">16</span>  <span class="c">#update interval of the time varying filters</span>
+<span class="c">## DNRL</span>
+<span class="c">#param_drnl = {}</span>
+<span class="c">#param_drnl[&#39;lp_nl_cutoff_m&#39;] = 1.1</span>
+<span class="c">#drnl_filter=DRNL(sound, cf, type=&#39;human&#39;, param=param_drnl)</span>
+<span class="c">#out = drnl_filter.process()</span>
+
+<span class="c">## DCGC</span>
+<span class="c">#param_dcgc = {}</span>
+<span class="c">#param_dcgc[&#39;c1&#39;] = -2.96</span>
+
+<span class="c">#dcgc_filter = DCGC(sound, cf, interval, param=param_dcgc)</span>
+<span class="c">#out = dcgc_filter.process()</span>
+
+<span class="c">## Tan and Carney 2003</span>
+<span class="n">tan_filter</span> <span class="o">=</span> <span class="n">TanCarney</span><span class="p">(</span><span class="n">sound</span><span class="p">,</span> <span class="n">cf</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+<span class="n">out</span> <span class="o">=</span> <span class="n">tan_filter</span><span class="o">.</span><span class="n">process</span><span class="p">()</span>
+
+<span class="n">figure</span><span class="p">()</span>
+<span class="n">imshow</span><span class="p">(</span><span class="n">flipud</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">aspect</span><span class="o">=</span><span class="s">&#39;auto&#39;</span><span class="p">)</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-hears_drnl.html"
+                        title="previous chapter">Example: drnl (hears)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-hears_approximate_gammatone.html"
+                        title="next chapter">Example: approximate_gammatone (hears)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-hears_cochlear_models.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-hears_approximate_gammatone.html" title="Example: approximate_gammatone (hears)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-hears_drnl.html" title="Example: drnl (hears)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

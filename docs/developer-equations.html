@@ -1,0 +1,336 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Equations &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Developer’s guide" href="developer.html" />
+    <link rel="next" title="Code generation" href="developer-codegen.html" />
+    <link rel="prev" title="Main code structure" href="developer-codestructure.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="developer-codegen.html" title="Code generation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="developer-codestructure.html" title="Main code structure"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="developer.html" accesskey="U">Developer&#8217;s guide</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="equations">
+<h1>Equations<a class="headerlink" href="#equations" title="Permalink to this headline">¶</a></h1>
+<dl class="docutils">
+<dt>An Equation is a set of single lines in a string:</dt>
+<dd><ol class="first last arabic simple">
+<li><tt class="docutils literal"><span class="pre">dx/dt</span> <span class="pre">=</span> <span class="pre">f</span> <span class="pre">:</span> <span class="pre">unit</span></tt> (differential equation)</li>
+<li><tt class="docutils literal"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">f</span> <span class="pre">:</span> <span class="pre">unit</span></tt> (equation)</li>
+<li><tt class="docutils literal"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">y</span></tt> (alias)</li>
+<li><tt class="docutils literal"><span class="pre">x</span> <span class="pre">:</span> <span class="pre">unit</span></tt> (parameter)</li>
+</ol>
+</dd>
+</dl>
+<p>The equations may be defined on multiple lines with the character .
+Comments using # may also be included.</p>
+<p>Two special variables are defined: t (time) and xi (white noise).
+Ultimately, it should be possible (using Sympy) to define equations implicitly,
+e.g.: &#8216;tau*dv/dt=-v : unit&#8217; (although it makes unit specification ambiguous).</p>
+<p>An equation can be seen as a set of functions or code and a namespace to evaluate
+them. A key part of object construction is the construction of the namespace
+(after parsing).</p>
+<div class="section" id="namespace-construction">
+<h2>Namespace construction<a class="headerlink" href="#namespace-construction" title="Permalink to this headline">¶</a></h2>
+<p>The namespaces are stored in eq._namespace. Each equation (string) has a specific namespace.</p>
+<p>Proposition for a simplification: there could be just one namespace per Equation object rather
+than per string. Possible conflicts would be dealt with when equations are added (with prefix
+as when inserting static variables, see below).</p>
+<div class="section" id="variable-substitution">
+<h3>Variable substitution<a class="headerlink" href="#variable-substitution" title="Permalink to this headline">¶</a></h3>
+<p>These are simply string substitutions.</p>
+<ul class="simple">
+<li>Equation(&#8216;dv/dt=-v/tau:volt&#8217;,tau=&#8217;taum&#8217;)</li>
+</ul>
+<p>The name of the variable (tau) is changed in the string to taum.</p>
+<ul class="simple">
+<li>Equation(&#8216;dv/dt=-v/tau:volt&#8217;,tau=None)</li>
+</ul>
+<p>The name of the variable (tau) is changed in the string to a unique identifier.</p>
+</div>
+<div class="section" id="explicit-namespace">
+<h3>Explicit namespace<a class="headerlink" href="#explicit-namespace" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Equation(&#8216;dv/dt=-v/tau:volt&#8217;,tau=2*ms)</li>
+</ul>
+<p>The namespace is explicitly given: {&#8216;tau&#8217;:2*ms}. In this case, Brian does not try
+to build a namespace &#8220;magically&#8221;, so the namespace must be exhaustive.
+Units need not be passed.</p>
+</div>
+<div class="section" id="implicit-namespace">
+<h3>Implicit namespace<a class="headerlink" href="#implicit-namespace" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Equation(&#8216;dv/dt=-v/tau:volt&#8217;)</li>
+</ul>
+<p>The namespace is built from the globals and locals in the caller&#8217;s frame.
+For each identifier in the string, the name is looked up in:
+1) locals of caller,
+2) globals of caller,
+3) globals of equations.py module (typically units).
+Identifiers can be any Python object (for example functions).</p>
+</div>
+<div class="section" id="issues">
+<h3>Issues<a class="headerlink" href="#issues" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Special variables (xi and t) are not taken into account
+at this stage, i.e., they are integrated in the namespace if present.
+This should probably be fixed and a warning should be raised.
+A warning is raised for t at the preparation stage (see below).</li>
+<li>If identifiers are not found, then no error is raised. This is to allow
+equations to be built in several pieces, which is useful in particular for
+library objects.</li>
+<li>If an identifier is found whose name is the same as the name of a variable,
+then no error is raised here and it is included in the namespace. This is difficult
+to avoid in the case when equations are built in several pieces (e.g. the conflict
+appears only when the pieces are put together). A warning is issued at the
+preparation stage (see below).</li>
+</ul>
+</div>
+</div>
+<div class="section" id="attributes-after-initialisation">
+<h2>Attributes after initialisation<a class="headerlink" href="#attributes-after-initialisation" title="Permalink to this headline">¶</a></h2>
+<p>After initialisation, an Equation object contains:</p>
+<ul class="simple">
+<li>a namespace (_namespace)</li>
+<li>a dictionary of units for all variables (_units)</li>
+<li>a dictionary of strings corresponding to each variable (right hand side of each
+equation), including parameters and aliases (_string). Parameters are defined as differential
+equations with RHS 0*unit/second. All comments are removed and multiline strings are
+concatenated.</li>
+<li>a list of variables of non-differential equations (_eq_names)</li>
+<li>a list of variables of differential equations, including parameters (_diffeq_names)</li>
+<li>a list of variables of differential equations, excluding parameters (_diffeq_names_nonzero)</li>
+<li>a dictionary of aliases (_alias), mapping a variable name to its alias</li>
+</ul>
+<p>There is no explicit list of parameters, maybe it should be added.
+Nothing more is done at initialisation time (no units checking, etc).
+The reason is that the equation set might not be complete at this time, in the case when
+equations are built in several pieces. Various checks are done using the prepare() method.</p>
+</div>
+<div class="section" id="finalisation-prepare">
+<h2>Finalisation (prepare())<a class="headerlink" href="#finalisation-prepare" title="Permalink to this headline">¶</a></h2>
+<p>The Equation object is finalised by an explicit call to the prepare() method.</p>
+<div class="section" id="finding-vm">
+<h3>Finding Vm<a class="headerlink" href="#finding-vm" title="Permalink to this headline">¶</a></h3>
+<p>The first step is to find the name of the membrane potential variable (getVm()).
+This is useful when the variable name for threshold or reset is not given (e.g. threshold=10*mV).
+The method looks for one these names: &#8216;v&#8217;,&#8217;V&#8217;,&#8217;vm&#8217;,&#8217;Vm&#8217;. If one is present, it is the
+membrane potential variable. If none or more than one is present, no variable is found.
+If it is found, the corresponding variable is swapped with the first variable in the
+_diffeq_names list (note: not in the _diffeq_names_nonzero list). Otherwise, nothing happens.
+This way, the first variable in the list is the membrane potential.
+Possibly, a warning could be issued if it is not found. The problem it might issue
+warnings too often. A better way would be to issue warnings only when threshold and reset
+are used ambiguously (i.e., no Vm found and more than 1 variable).</p>
+</div>
+<div class="section" id="cleaning-the-namespace">
+<h3>Cleaning the namespace<a class="headerlink" href="#cleaning-the-namespace" title="Permalink to this headline">¶</a></h3>
+<p>Then variables and t are removed from the namespace if present (N.B.: xi does not appear to be
+removed), and warnings are issued using log_warn (method clean_namespace()).</p>
+</div>
+<div class="section" id="compiling-functions">
+<h3>Compiling functions<a class="headerlink" href="#compiling-functions" title="Permalink to this headline">¶</a></h3>
+<p>This is done by the compile_functions() method.
+Python functions are created from the string definition of equations.
+For each equation/differential equation, the list of identifiers is obtained from the string definition,
+then only those referring to variables are kept. A Python lambda function of these remaining identifiers is then
+compiled (using eval) and put in the _function dictionary.</p>
+<p>Compiled functions are used for:</p>
+<ul class="simple">
+<li>checking units</li>
+<li>obtaining the list of arguments (this could be done independently)</li>
+<li>state updates</li>
+</ul>
+<p>This step might be avoided and replaced by eval calls. It might actually be a little simpler because
+arguments would be replaced by namespace. It seems to be faster with the current implementation,
+but the string could be compiled with compile() (then evaluated in the relevant namespace).
+Besides, with the way it is currently evaluated in the Euler update: <tt class="docutils literal"><span class="pre">f(*[S[var]</span> <span class="pre">for</span> <span class="pre">var</span> <span class="pre">in</span> <span class="pre">f.func_code.co_varnames])</span></tt>,
+it is not faster than direct evaluation in the namespace.</p>
+</div>
+<div class="section" id="checking-units">
+<h3>Checking units<a class="headerlink" href="#checking-units" title="Permalink to this headline">¶</a></h3>
+<p>This is done by the check_units() method.
+First, the static equations are ordered (see next section).</p>
+<p>To check the units of a static equation, one calls the associated function (giving the RHS) where the
+arguments are units (e.g., 1*volt for v, etc.) and adds the units of the LHS. A dimension error is raised
+if it is not homogeneous. Currently, the message states &#8220;The differential equation is not homogeneous&#8221; but it
+should be adapted to non-differential equations. One problem with this way of checking units is that the RHS function
+may not be defined at the point it is checked.</p>
+<p>Differential equations are checked in the same way, with two specificities: the units of RHS should be the units
+of the variable divided by second (dx/dt), and noise (xi) has units of second**-.5 (this is put in the globals of
+the function, which might not be a very clean way to do it).</p>
+</div>
+<div class="section" id="ordering-static-variables">
+<h3>Ordering static variables<a class="headerlink" href="#ordering-static-variables" title="Permalink to this headline">¶</a></h3>
+<p>It seems that this method (set_eq_order()) is already called by check_units() and therefore it is probably
+not necessary to call it here.
+This method computes the dependency graph of (static) equations on other static variables,
+which must have no cycle (otherwise an error is raised). From that graph, an update list is built and
+put in _eq_names. Then for each variable (static or differential), the list of dependent static variables is built
+and sorted in update order. The result is put in the _dependencies dictionary.</p>
+<p>This is a necessary step to calculate the RHS of any equation: it gives the ordered list of static variables
+to calculate first before calculating the RHS.</p>
+</div>
+<div class="section" id="inserting-static-variables-into-differential-equations">
+<h3>Inserting static variables into differential equations<a class="headerlink" href="#inserting-static-variables-into-differential-equations" title="Permalink to this headline">¶</a></h3>
+<p>The value of static variables are then replaced by their string value (RHS) in all differential equations
+(substitute_eq()). The previous step (ordering) ensures that the result if correct and does not depend on
+static variables anymore.
+To avoid namespace conflicts, all identifiers in the namespace of a static variable is augmented by a
+prefix: name+&#8217;_&#8217; (e.g. &#8216;x_y&#8217; for identifier y in equation &#8216;x=2*y&#8217;). Then namespaces are merged.</p>
+<p>It might not be optimal to do it in this way, because some of calculations will be done several times in
+an update step. It might be better to keep the static variables separate.</p>
+</div>
+<div class="section" id="recompiling-functions">
+<h3>Recompiling functions<a class="headerlink" href="#recompiling-functions" title="Permalink to this headline">¶</a></h3>
+<p>Functions are then recompiled so that differential equations are now independent of static variables.</p>
+</div>
+<div class="section" id="checking-free-variables">
+<h3>Checking free variables<a class="headerlink" href="#checking-free-variables" title="Permalink to this headline">¶</a></h3>
+<p>Finally, the list of undefined identifiers is checked (free_variables()) and a warning is issued if
+any is found.</p>
+</div>
+</div>
+<div class="section" id="freezing">
+<h2>Freezing<a class="headerlink" href="#freezing" title="Permalink to this headline">¶</a></h2>
+<p>Freezing is done by calling compile_functions(freeze=True). Each string expression is then frozen
+with optimiser.freeze(), which replaces identifiers by their float value. This step does not necessarily
+succeed, in which case a warning (not an error) is issued.</p>
+</div>
+<div class="section" id="adding-equation-objects">
+<h2>Adding Equation objects<a class="headerlink" href="#adding-equation-objects" title="Permalink to this headline">¶</a></h2>
+<p>Adding equations consists simply in merging the lists/dictionaries of variables, namespaces, strings, units
+and functions. Conflicts raise an error.
+This step must precede preparation of the object.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Equations</a><ul>
+<li><a class="reference internal" href="#namespace-construction">Namespace construction</a><ul>
+<li><a class="reference internal" href="#variable-substitution">Variable substitution</a></li>
+<li><a class="reference internal" href="#explicit-namespace">Explicit namespace</a></li>
+<li><a class="reference internal" href="#implicit-namespace">Implicit namespace</a></li>
+<li><a class="reference internal" href="#issues">Issues</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#attributes-after-initialisation">Attributes after initialisation</a></li>
+<li><a class="reference internal" href="#finalisation-prepare">Finalisation (prepare())</a><ul>
+<li><a class="reference internal" href="#finding-vm">Finding Vm</a></li>
+<li><a class="reference internal" href="#cleaning-the-namespace">Cleaning the namespace</a></li>
+<li><a class="reference internal" href="#compiling-functions">Compiling functions</a></li>
+<li><a class="reference internal" href="#checking-units">Checking units</a></li>
+<li><a class="reference internal" href="#ordering-static-variables">Ordering static variables</a></li>
+<li><a class="reference internal" href="#inserting-static-variables-into-differential-equations">Inserting static variables into differential equations</a></li>
+<li><a class="reference internal" href="#recompiling-functions">Recompiling functions</a></li>
+<li><a class="reference internal" href="#checking-free-variables">Checking free variables</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#freezing">Freezing</a></li>
+<li><a class="reference internal" href="#adding-equation-objects">Adding Equation objects</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="developer-codestructure.html"
+                        title="previous chapter">Main code structure</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="developer-codegen.html"
+                        title="next chapter">Code generation</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/developer-equations.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="developer-codegen.html" title="Code generation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="developer-codestructure.html" title="Main code structure"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="developer.html" >Developer&#8217;s guide</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

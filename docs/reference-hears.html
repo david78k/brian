@@ -1,0 +1,2086 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Brian hears &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Reference" href="reference.html" />
+    <link rel="next" title="Magic in Brian" href="reference-magic.html" />
+    <link rel="prev" title="Electrode compensation" href="reference-electrodecompensation.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="reference-magic.html" title="Magic in Brian"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="reference-electrodecompensation.html" title="Electrode compensation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="reference.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="brian-hears">
+<span id="brian-hears-reference"></span><h1>Brian hears<a class="headerlink" href="#brian-hears" title="Permalink to this headline">¶</a></h1>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last">User guide for <a class="reference internal" href="hears.html#brianhears"><em>Brian hears</em></a>.</p>
+</div>
+<dl class="function">
+<dt id="brian.hears.set_default_samplerate">
+<tt class="descclassname">brian.hears.</tt><tt class="descname">set_default_samplerate</tt><big>(</big><em>samplerate</em><big>)</big><a class="headerlink" href="#brian.hears.set_default_samplerate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the default samplerate for Brian hears objects, by default 44.1 kHz.</p>
+</dd></dl>
+
+<div class="section" id="sounds">
+<h2>Sounds<a class="headerlink" href="#sounds" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="brian.hears.Sound">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">Sound</tt><a class="headerlink" href="#brian.hears.Sound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for working with sounds, including loading/saving, manipulating and playing.</p>
+<p>For an overview, see <a class="reference internal" href="hears.html#sounds-overview"><em>Sounds</em></a>.</p>
+<p><strong>Initialisation</strong></p>
+<p>The following arguments are used to initialise a sound object</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">data</span></tt></dt>
+<dd>Can be a filename, an array, a function or a sequence (list or tuple).
+If its a filename, the sound file (WAV or AIFF) will be loaded. If its
+an array, it should have shape <tt class="docutils literal"><span class="pre">(nsamples,</span> <span class="pre">nchannels)</span></tt>. If its a
+function, it should be a function f(t). If its a sequence, the items
+in the sequence can be filenames, functions, arrays or Sound objects.
+The output will be a multi-channel sound with channels the corresponding
+sound for each element of the sequence.</dd>
+<dt><tt class="docutils literal"><span class="pre">samplerate=None</span></tt></dt>
+<dd>The samplerate, if necessary, will use the default (for an array or
+function) or the samplerate of the data (for a filename).</dd>
+<dt><tt class="docutils literal"><span class="pre">duration=None</span></tt></dt>
+<dd>The duration of the sound, if initialising with a function.</dd>
+</dl>
+<p><strong>Loading, saving and playing</strong></p>
+<dl class="staticmethod">
+<dt id="brian.hears.Sound.load">
+<em class="property">static </em><tt class="descname">load</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#brian.hears.Sound.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the file given by filename and returns a Sound object. 
+Sound file can be either a .wav or a .aif file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.hears.Sound.save">
+<tt class="descname">save</tt><big>(</big><em>filename</em>, <em>normalise=False</em>, <em>samplewidth=2</em><big>)</big><a class="headerlink" href="#brian.hears.Sound.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the sound as a WAV.</p>
+<p>If the normalise keyword is set to True, the amplitude of the sound will be
+normalised to 1. The samplewidth keyword can be 1 or 2 to save the data as
+8 or 16 bit samples.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.hears.Sound.play">
+<tt class="descname">play</tt><big>(</big><em>normalise=False</em>, <em>sleep=False</em><big>)</big><a class="headerlink" href="#brian.hears.Sound.play" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plays the sound (normalised to avoid clipping if required). If
+sleep=True then the function will wait until the sound has finished
+playing before returning.</p>
+</dd></dl>
+
+<p><strong>Properties</strong></p>
+<dl class="attribute">
+<dt id="brian.hears.Sound.duration">
+<tt class="descname">duration</tt><a class="headerlink" href="#brian.hears.Sound.duration" title="Permalink to this definition">¶</a></dt>
+<dd><p>The length of the sound in seconds.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="brian.hears.Sound.nsamples">
+<tt class="descname">nsamples</tt><a class="headerlink" href="#brian.hears.Sound.nsamples" title="Permalink to this definition">¶</a></dt>
+<dd><p>The number of samples in the sound.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="brian.hears.Sound.nchannels">
+<tt class="descname">nchannels</tt><a class="headerlink" href="#brian.hears.Sound.nchannels" title="Permalink to this definition">¶</a></dt>
+<dd><p>The number of channels in the sound.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="brian.hears.Sound.times">
+<tt class="descname">times</tt><a class="headerlink" href="#brian.hears.Sound.times" title="Permalink to this definition">¶</a></dt>
+<dd><p>An array of times (in seconds) corresponding to each sample.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="brian.hears.Sound.left">
+<tt class="descname">left</tt><a class="headerlink" href="#brian.hears.Sound.left" title="Permalink to this definition">¶</a></dt>
+<dd><p>The left channel for a stereo sound.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="brian.hears.Sound.right">
+<tt class="descname">right</tt><a class="headerlink" href="#brian.hears.Sound.right" title="Permalink to this definition">¶</a></dt>
+<dd><p>The right channel for a stereo sound.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.hears.Sound.channel">
+<tt class="descname">channel</tt><big>(</big><em>n</em><big>)</big><a class="headerlink" href="#brian.hears.Sound.channel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the nth channel of the sound.</p>
+</dd></dl>
+
+<p><strong>Generating sounds</strong></p>
+<p>All sound generating methods can be used with durations arguments in samples (int) or units (e.g. 500*ms). One can also set the number of channels by setting the keyword argument nchannels to the desired value. Notice that for noise the channels will be generated independantly.</p>
+<dl class="staticmethod">
+<dt id="brian.hears.Sound.tone">
+<em class="property">static </em><tt class="descname">tone</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.Sound.tone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a pure tone at frequency for duration, using the default
+samplerate or the given one. The <tt class="docutils literal"><span class="pre">frequency</span></tt> and <tt class="docutils literal"><span class="pre">phase</span></tt> parameters
+can be single values, in which case multiple channels can be
+specified with the <tt class="docutils literal"><span class="pre">nchannels</span></tt> argument, or they can be sequences
+(lists/tuples/arrays) in which case there is one frequency or phase for
+each channel.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="brian.hears.Sound.whitenoise">
+<em class="property">static </em><tt class="descname">whitenoise</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.Sound.whitenoise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a white noise. If the samplerate is not specified, the global
+default value will be used.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="brian.hears.Sound.powerlawnoise">
+<em class="property">static </em><tt class="descname">powerlawnoise</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.Sound.powerlawnoise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a power-law noise for the given duration. Spectral density per unit of bandwidth scales as 1/(f**alpha).</p>
+<p>Sample usage:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">noise</span> <span class="o">=</span> <span class="n">powerlawnoise</span><span class="p">(</span><span class="mi">200</span><span class="o">*</span><span class="n">ms</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">samplerate</span><span class="o">=</span><span class="mi">44100</span><span class="o">*</span><span class="n">Hz</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">duration</span></tt> </dt>
+<dd>Duration of the desired output.</dd>
+<dt><tt class="docutils literal"><span class="pre">alpha</span></tt></dt>
+<dd>Power law exponent.</dd>
+<dt><tt class="docutils literal"><span class="pre">samplerate</span></tt></dt>
+<dd>Desired output samplerate</dd>
+</dl>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="brian.hears.Sound.brownnoise">
+<em class="property">static </em><tt class="descname">brownnoise</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.Sound.brownnoise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns brown noise, i.e <a class="reference internal" href="#brian.hears.powerlawnoise" title="brian.hears.powerlawnoise"><tt class="xref py py-func docutils literal"><span class="pre">powerlawnoise()</span></tt></a> with alpha=2</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="brian.hears.Sound.pinknoise">
+<em class="property">static </em><tt class="descname">pinknoise</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.Sound.pinknoise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns pink noise, i.e <a class="reference internal" href="#brian.hears.powerlawnoise" title="brian.hears.powerlawnoise"><tt class="xref py py-func docutils literal"><span class="pre">powerlawnoise()</span></tt></a> with alpha=1</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="brian.hears.Sound.silence">
+<em class="property">static </em><tt class="descname">silence</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.Sound.silence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a silent, zero sound for the given duration. Set nchannels to set the number of channels.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="brian.hears.Sound.click">
+<em class="property">static </em><tt class="descname">click</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.Sound.click" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a click of the given duration.</p>
+<p>If <tt class="docutils literal"><span class="pre">peak</span></tt> is not specified, the amplitude will be 1, otherwise
+<tt class="docutils literal"><span class="pre">peak</span></tt> refers to the peak dB SPL of the click, according to the
+formula <tt class="docutils literal"><span class="pre">28e-6*10**(peak/20.)</span></tt>.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="brian.hears.Sound.clicks">
+<em class="property">static </em><tt class="descname">clicks</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.Sound.clicks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a series of n clicks (see <a class="reference internal" href="#brian.hears.click" title="brian.hears.click"><tt class="xref py py-func docutils literal"><span class="pre">click()</span></tt></a>) separated by interval.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="brian.hears.Sound.harmoniccomplex">
+<em class="property">static </em><tt class="descname">harmoniccomplex</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.Sound.harmoniccomplex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a harmonic complex composed of pure tones at integer multiples
+of the fundamental frequency <tt class="docutils literal"><span class="pre">f0</span></tt>. 
+The <tt class="docutils literal"><span class="pre">amplitude</span></tt> and
+<tt class="docutils literal"><span class="pre">phase</span></tt> keywords can be set to either a single value or an
+array of values. In the former case the value is set for all
+harmonics, and harmonics up to the sampling frequency are
+generated. In the latter each harmonic parameter is set
+separately, and the number of harmonics generated corresponds
+to the length of the array.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="brian.hears.Sound.vowel">
+<em class="property">static </em><tt class="descname">vowel</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.Sound.vowel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an artifically created spoken vowel sound (following the 
+source-filter model of speech production) with a given <tt class="docutils literal"><span class="pre">pitch</span></tt>.</p>
+<p>The vowel can be specified by either providing <tt class="docutils literal"><span class="pre">vowel</span></tt> as a string
+(&#8216;a&#8217;, &#8216;i&#8217; or &#8216;u&#8217;) or by setting <tt class="docutils literal"><span class="pre">formants</span></tt> to a sequence of formant
+frequencies.</p>
+<p>The returned sound is normalized to a maximum amplitude of 1.</p>
+<p>The implementation is based on the MakeVowel function written by Richard
+O. Duda, part of the Auditory Toolbox for Matlab by Malcolm Slaney:
+<a class="reference external" href="http://cobweb.ecn.purdue.edu/~malcolm/interval/1998-010/">http://cobweb.ecn.purdue.edu/~malcolm/interval/1998-010/</a></p>
+</dd></dl>
+
+<p><strong>Timing and sequencing</strong></p>
+<dl class="staticmethod">
+<dt id="brian.hears.Sound.sequence">
+<em class="property">static </em><tt class="descname">sequence</tt><big>(</big><em>*sounds</em>, <em>samplerate=None</em><big>)</big><a class="headerlink" href="#brian.hears.Sound.sequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the sequence of sounds in the list sounds joined together</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.hears.Sound.repeat">
+<tt class="descname">repeat</tt><big>(</big><em>n</em><big>)</big><a class="headerlink" href="#brian.hears.Sound.repeat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Repeats the sound n times</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.hears.Sound.extended">
+<tt class="descname">extended</tt><big>(</big><em>duration</em><big>)</big><a class="headerlink" href="#brian.hears.Sound.extended" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the Sound with length extended by the given duration, which
+can be the number of samples or a length of time in seconds.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.hears.Sound.shifted">
+<tt class="descname">shifted</tt><big>(</big><em>duration</em>, <em>fractional=False</em>, <em>filter_length=2048</em><big>)</big><a class="headerlink" href="#brian.hears.Sound.shifted" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the sound delayed by duration, which can be the number of
+samples or a length of time in seconds. Normally, only integer
+numbers of samples will be used, but if <tt class="docutils literal"><span class="pre">fractional=True</span></tt> then
+the filtering method from
+<a class="reference external" href="http://www.labbookpages.co.uk/audio/beamforming/fractionalDelay.html">http://www.labbookpages.co.uk/audio/beamforming/fractionalDelay.html</a>
+will be used (introducing some small numerical errors). With this
+method, you can specify the <tt class="docutils literal"><span class="pre">filter_length</span></tt>, larger values are
+slower but more accurate, especially at higher frequencies. The large
+default value of 2048 samples provides good accuracy for sounds with
+frequencies above 20 Hz, but not for lower frequency sounds. If you are
+restricted to high frequency sounds, a smaller value will be more
+efficient. Note that if <tt class="docutils literal"><span class="pre">fractional=True</span></tt> then
+<tt class="docutils literal"><span class="pre">duration</span></tt> is assumed to be a time not a number of samples.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.hears.Sound.resized">
+<tt class="descname">resized</tt><big>(</big><em>L</em><big>)</big><a class="headerlink" href="#brian.hears.Sound.resized" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the Sound with length extended (or contracted) to have L samples.</p>
+</dd></dl>
+
+<p><strong>Slicing</strong></p>
+<p>One can slice sound objects in various ways, for example <tt class="docutils literal"><span class="pre">sound[100*ms:200*ms]</span></tt>
+returns the part of the sound between 100 ms and 200 ms (not including the
+right hand end point). If the sound is less than 200 ms long it will be
+zero padded. You can also set values using slicing, e.g.
+<tt class="docutils literal"><span class="pre">sound[:50*ms]</span> <span class="pre">=</span> <span class="pre">0</span></tt> will silence the first 50 ms of the sound. The syntax
+is the same as usual for Python slicing. In addition, you can select a
+subset of the channels by doing, for example, <tt class="docutils literal"><span class="pre">sound[:,</span> <span class="pre">-5:]</span></tt> would be
+the last 5 channels. For time indices, either times or samples can be given,
+e.g. <tt class="docutils literal"><span class="pre">sound[:100]</span></tt> gives the first 100 samples. In addition, steps can
+be used for example to reverse a sound as <tt class="docutils literal"><span class="pre">sound[::-1]</span></tt>.</p>
+<p><strong>Arithmetic operations</strong></p>
+<p>Standard arithemetical operations and numpy functions work as you would
+expect with sounds, e.g. <tt class="docutils literal"><span class="pre">sound1+sound2</span></tt>, <tt class="docutils literal"><span class="pre">3*sound</span></tt> or <tt class="docutils literal"><span class="pre">abs(sound)</span></tt>.</p>
+<p><strong>Level</strong></p>
+<dl class="attribute">
+<dt id="brian.hears.Sound.level">
+<tt class="descname">level</tt><a class="headerlink" href="#brian.hears.Sound.level" title="Permalink to this definition">¶</a></dt>
+<dd><p>Can be used to get or set the level of a sound, which should be in dB.
+For single channel sounds a value in dB is used, for multiple channel
+sounds a value in dB can be used for setting the level (all channels
+will be set to the same level), or a list/tuple/array of levels. It
+is assumed that the unit of the sound is Pascals.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.hears.Sound.atlevel">
+<tt class="descname">atlevel</tt><big>(</big><em>level</em><big>)</big><a class="headerlink" href="#brian.hears.Sound.atlevel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the sound at the given level in dB SPL (RMS) assuming array is
+in Pascals. <tt class="docutils literal"><span class="pre">level</span></tt> should be a value in dB, or a tuple of levels,
+one for each channel.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="brian.hears.Sound.maxlevel">
+<tt class="descname">maxlevel</tt><a class="headerlink" href="#brian.hears.Sound.maxlevel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Can be used to set or get the maximum level of a sound. For mono
+sounds, this is the same as the level, but for multichannel sounds
+it is the maximum level across the channels. Relative level differences
+will be preserved. The specified level should be a value in dB, and it
+is assumed that the unit of the sound is Pascals.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.hears.Sound.atmaxlevel">
+<tt class="descname">atmaxlevel</tt><big>(</big><em>level</em><big>)</big><a class="headerlink" href="#brian.hears.Sound.atmaxlevel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the sound with the maximum level across channels set to the
+given level. Relative level differences will be preserved. The specified
+level should be a value in dB and it is assumed that the unit of the
+sound is Pascals.</p>
+</dd></dl>
+
+<p><strong>Ramping</strong></p>
+<dl class="method">
+<dt id="brian.hears.Sound.ramp">
+<tt class="descname">ramp</tt><big>(</big><em>when='onset'</em>, <em>duration=10.0 * msecond</em>, <em>envelope=None</em>, <em>inplace=True</em><big>)</big><a class="headerlink" href="#brian.hears.Sound.ramp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a ramp on/off to the sound</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">when='onset'</span></tt></dt>
+<dd>Can take values &#8216;onset&#8217;, &#8216;offset&#8217; or &#8216;both&#8217;</dd>
+<dt><tt class="docutils literal"><span class="pre">duration=10*ms</span></tt></dt>
+<dd>The time over which the ramping happens</dd>
+<dt><tt class="docutils literal"><span class="pre">envelope</span></tt></dt>
+<dd>A ramping function, if not specified uses <tt class="docutils literal"><span class="pre">sin(pi*t/2)**2</span></tt>. The
+function should be a function of one variable <tt class="docutils literal"><span class="pre">t</span></tt> ranging from
+0 to 1, and should increase from <tt class="docutils literal"><span class="pre">f(0)=0</span></tt> to <tt class="docutils literal"><span class="pre">f(0)=1</span></tt>. The
+reverse is applied for the offset ramp.</dd>
+<dt><tt class="docutils literal"><span class="pre">inplace</span></tt></dt>
+<dd>Whether to apply ramping to current sound or return a new array.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.hears.Sound.ramped">
+<tt class="descname">ramped</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.Sound.ramped" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a ramped version of the sound (see <a class="reference internal" href="#brian.hears.Sound.ramp" title="brian.hears.Sound.ramp"><tt class="xref py py-meth docutils literal"><span class="pre">Sound.ramp()</span></tt></a>).</p>
+</dd></dl>
+
+<p><strong>Plotting</strong></p>
+<dl class="method">
+<dt id="brian.hears.Sound.spectrogram">
+<tt class="descname">spectrogram</tt><big>(</big><em>low=None</em>, <em>high=None</em>, <em>log_power=True</em>, <em>other=None</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.Sound.spectrogram" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots a spectrogram of the sound</p>
+<p>Arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">low=None</span></tt>, <tt class="docutils literal"><span class="pre">high=None</span></tt></dt>
+<dd>If these are left unspecified, it shows the full spectrogram,
+otherwise it shows only between <tt class="docutils literal"><span class="pre">low</span></tt> and <tt class="docutils literal"><span class="pre">high</span></tt> in Hz.</dd>
+<dt><tt class="docutils literal"><span class="pre">log_power=True</span></tt></dt>
+<dd>If True the colour represents the log of the power.</dd>
+<dt><tt class="docutils literal"><span class="pre">**kwds</span></tt></dt>
+<dd>Are passed to Pylab&#8217;s <tt class="docutils literal"><span class="pre">specgram</span></tt> command.</dd>
+</dl>
+<p>Returns the values returned by pylab&#8217;s <tt class="docutils literal"><span class="pre">specgram</span></tt>, namely
+<tt class="docutils literal"><span class="pre">(pxx,</span> <span class="pre">freqs,</span> <span class="pre">bins,</span> <span class="pre">im)</span></tt> where <tt class="docutils literal"><span class="pre">pxx</span></tt> is a 2D array of powers,
+<tt class="docutils literal"><span class="pre">freqs</span></tt> is the corresponding frequencies, <tt class="docutils literal"><span class="pre">bins</span></tt> are the time bins,
+and <tt class="docutils literal"><span class="pre">im</span></tt> is the image axis.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.hears.Sound.spectrum">
+<tt class="descname">spectrum</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.Sound.spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the spectrum of the sound and optionally plots it.</p>
+<p>Arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">low</span></tt>, <tt class="docutils literal"><span class="pre">high</span></tt> </dt>
+<dd>If these are left unspecified, it shows the full spectrum,
+otherwise it shows only between <tt class="docutils literal"><span class="pre">low</span></tt> and <tt class="docutils literal"><span class="pre">high</span></tt> in Hz.</dd>
+<dt><tt class="docutils literal"><span class="pre">log_power=True</span></tt></dt>
+<dd>If True it returns the log of the power.</dd>
+<dt><tt class="docutils literal"><span class="pre">display=False</span></tt></dt>
+<dd>Whether to plot the output.</dd>
+</dl>
+<p>Returns <tt class="docutils literal"><span class="pre">(Z,</span> <span class="pre">freqs,</span> <span class="pre">phase)</span></tt>
+where <tt class="docutils literal"><span class="pre">Z</span></tt> is a 1D array of powers, <tt class="docutils literal"><span class="pre">freqs</span></tt> is the corresponding
+frequencies, <tt class="docutils literal"><span class="pre">phase</span></tt> is the unwrapped phase of spectrum.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.hears.savesound">
+<tt class="descclassname">brian.hears.</tt><tt class="descname">savesound</tt><big>(</big><em>sound</em>, <em>filename</em>, <em>normalise=False</em>, <em>samplewidth=2</em><big>)</big><a class="headerlink" href="#brian.hears.savesound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the sound as a WAV.</p>
+<p>If the normalise keyword is set to True, the amplitude of the sound will be
+normalised to 1. The samplewidth keyword can be 1 or 2 to save the data as
+8 or 16 bit samples.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.hears.loadsound">
+<tt class="descclassname">brian.hears.</tt><tt class="descname">loadsound</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#brian.hears.loadsound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the file given by filename and returns a Sound object. 
+Sound file can be either a .wav or a .aif file.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.hears.play">
+<tt class="descclassname">brian.hears.</tt><tt class="descname">play</tt><big>(</big><em>*sounds</em>, <em>normalise=False</em>, <em>sleep=False</em><big>)</big><a class="headerlink" href="#brian.hears.play" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plays the sound (normalised to avoid clipping if required). If
+sleep=True then the function will wait until the sound has finished
+playing before returning.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.hears.whitenoise">
+<tt class="descclassname">brian.hears.</tt><tt class="descname">whitenoise</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.whitenoise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a white noise. If the samplerate is not specified, the global
+default value will be used.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.hears.powerlawnoise">
+<tt class="descclassname">brian.hears.</tt><tt class="descname">powerlawnoise</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.powerlawnoise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a power-law noise for the given duration. Spectral density per unit of bandwidth scales as 1/(f**alpha).</p>
+<p>Sample usage:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">noise</span> <span class="o">=</span> <span class="n">powerlawnoise</span><span class="p">(</span><span class="mi">200</span><span class="o">*</span><span class="n">ms</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">samplerate</span><span class="o">=</span><span class="mi">44100</span><span class="o">*</span><span class="n">Hz</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">duration</span></tt> </dt>
+<dd>Duration of the desired output.</dd>
+<dt><tt class="docutils literal"><span class="pre">alpha</span></tt></dt>
+<dd>Power law exponent.</dd>
+<dt><tt class="docutils literal"><span class="pre">samplerate</span></tt></dt>
+<dd>Desired output samplerate</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.hears.brownnoise">
+<tt class="descclassname">brian.hears.</tt><tt class="descname">brownnoise</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.brownnoise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns brown noise, i.e <a class="reference internal" href="#brian.hears.powerlawnoise" title="brian.hears.powerlawnoise"><tt class="xref py py-func docutils literal"><span class="pre">powerlawnoise()</span></tt></a> with alpha=2</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.hears.pinknoise">
+<tt class="descclassname">brian.hears.</tt><tt class="descname">pinknoise</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.pinknoise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns pink noise, i.e <a class="reference internal" href="#brian.hears.powerlawnoise" title="brian.hears.powerlawnoise"><tt class="xref py py-func docutils literal"><span class="pre">powerlawnoise()</span></tt></a> with alpha=1</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.hears.irns">
+<tt class="descclassname">brian.hears.</tt><tt class="descname">irns</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.irns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an IRN_S noise. The iterated ripple noise is obtained trough
+a cascade of gain and delay filtering. 
+For more details: see Yost 1996 or chapter 15 in Hartman Sound Signal Sensation.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.hears.irno">
+<tt class="descclassname">brian.hears.</tt><tt class="descname">irno</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.irno" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an IRN_O noise. The iterated ripple noise is obtained many attenuated and
+delayed version of the original broadband noise. 
+For more details: see Yost 1996 or chapter 15 in Hartman Sound Signal Sensation.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.hears.tone">
+<tt class="descclassname">brian.hears.</tt><tt class="descname">tone</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.tone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a pure tone at frequency for duration, using the default
+samplerate or the given one. The <tt class="docutils literal"><span class="pre">frequency</span></tt> and <tt class="docutils literal"><span class="pre">phase</span></tt> parameters
+can be single values, in which case multiple channels can be
+specified with the <tt class="docutils literal"><span class="pre">nchannels</span></tt> argument, or they can be sequences
+(lists/tuples/arrays) in which case there is one frequency or phase for
+each channel.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.hears.click">
+<tt class="descclassname">brian.hears.</tt><tt class="descname">click</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.click" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a click of the given duration.</p>
+<p>If <tt class="docutils literal"><span class="pre">peak</span></tt> is not specified, the amplitude will be 1, otherwise
+<tt class="docutils literal"><span class="pre">peak</span></tt> refers to the peak dB SPL of the click, according to the
+formula <tt class="docutils literal"><span class="pre">28e-6*10**(peak/20.)</span></tt>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.hears.clicks">
+<tt class="descclassname">brian.hears.</tt><tt class="descname">clicks</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.clicks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a series of n clicks (see <a class="reference internal" href="#brian.hears.click" title="brian.hears.click"><tt class="xref py py-func docutils literal"><span class="pre">click()</span></tt></a>) separated by interval.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.hears.harmoniccomplex">
+<tt class="descclassname">brian.hears.</tt><tt class="descname">harmoniccomplex</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.harmoniccomplex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a harmonic complex composed of pure tones at integer multiples
+of the fundamental frequency <tt class="docutils literal"><span class="pre">f0</span></tt>. 
+The <tt class="docutils literal"><span class="pre">amplitude</span></tt> and
+<tt class="docutils literal"><span class="pre">phase</span></tt> keywords can be set to either a single value or an
+array of values. In the former case the value is set for all
+harmonics, and harmonics up to the sampling frequency are
+generated. In the latter each harmonic parameter is set
+separately, and the number of harmonics generated corresponds
+to the length of the array.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.hears.silence">
+<tt class="descclassname">brian.hears.</tt><tt class="descname">silence</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.silence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a silent, zero sound for the given duration. Set nchannels to set the number of channels.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.hears.sequence">
+<tt class="descclassname">brian.hears.</tt><tt class="descname">sequence</tt><big>(</big><em>*sounds</em>, <em>samplerate=None</em><big>)</big><a class="headerlink" href="#brian.hears.sequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the sequence of sounds in the list sounds joined together</p>
+</dd></dl>
+
+<div class="section" id="db">
+<span id="index-0"></span><span id="id1"></span><h3>dB<a class="headerlink" href="#db" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="brian.hears.dB_type">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">dB_type</tt><a class="headerlink" href="#brian.hears.dB_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>The type of values in dB.</p>
+<p>dB values are assumed to be RMS dB SPL assuming that the sound source is
+measured in Pascals.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.dB_error">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">dB_error</tt><a class="headerlink" href="#brian.hears.dB_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Error raised when values in dB are used inconsistently with other units.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="filterbanks">
+<h2>Filterbanks<a class="headerlink" href="#filterbanks" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="brian.hears.LinearFilterbank">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">LinearFilterbank</tt><big>(</big><em>source</em>, <em>b</em>, <em>a</em><big>)</big><a class="headerlink" href="#brian.hears.LinearFilterbank" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generalised linear filterbank</p>
+<p>Initialisation arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">source</span></tt></dt>
+<dd>The input to the filterbank, must have the same number of channels or
+just a single channel. In the latter case, the channels will be
+replicated.</dd>
+<dt><tt class="docutils literal"><span class="pre">b</span></tt>, <tt class="docutils literal"><span class="pre">a</span></tt></dt>
+<dd>The coeffs b, a must be of shape <tt class="docutils literal"><span class="pre">(nchannels,</span> <span class="pre">m)</span></tt> or
+<tt class="docutils literal"><span class="pre">(nchannels,</span> <span class="pre">m,</span> <span class="pre">p)</span></tt>. Here <tt class="docutils literal"><span class="pre">m</span></tt> is
+the order of the filters, and <tt class="docutils literal"><span class="pre">p</span></tt> is the number of filters in a
+chain (first you apply <tt class="docutils literal"><span class="pre">[:,</span> <span class="pre">:,</span> <span class="pre">0]</span></tt>, then <tt class="docutils literal"><span class="pre">[:,</span> <span class="pre">:,</span> <span class="pre">1]</span></tt>, etc.).</dd>
+</dl>
+<p>The filter parameters are stored in the modifiable attributes <tt class="docutils literal"><span class="pre">filt_b</span></tt>,
+<tt class="docutils literal"><span class="pre">filt_a</span></tt> and <tt class="docutils literal"><span class="pre">filt_state</span></tt> (the variable <tt class="docutils literal"><span class="pre">z</span></tt> in the section below).</p>
+<p>Has one method:</p>
+<dl class="method">
+<dt id="brian.hears.LinearFilterbank.decascade">
+<tt class="descname">decascade</tt><big>(</big><em>ncascade=1</em><big>)</big><a class="headerlink" href="#brian.hears.LinearFilterbank.decascade" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reduces cascades of low order filters into smaller cascades of high order filters.</p>
+<p><tt class="docutils literal"><span class="pre">ncascade</span></tt> is the number of cascaded filters to use, which should be
+a divisor of the original number.</p>
+<p>Note that higher order filters are often numerically unstable.</p>
+</dd></dl>
+
+<p><strong>Notes</strong></p>
+<p>These notes adapted from scipy&#8217;s <tt class="xref py py-func docutils literal"><span class="pre">lfilter()</span></tt> function.</p>
+<p>The filterbank is implemented as a direct II transposed structure.
+This means that for a single channel and element of the filter cascade,
+the output y for an input x is defined by:</p>
+<div class="highlight-python"><pre>a[0]*y[m] = b[0]*x[m] + b[1]*x[m-1] + ... + b[m]*x[0]
+                      - a[1]*y[m-1] - ... - a[m]*y[0]</pre>
+</div>
+<p>using the following difference equations:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">z</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+<span class="o">...</span>
+<span class="n">z</span><span class="p">[</span><span class="n">m</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="n">m</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">z</span><span class="p">[</span><span class="n">m</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="n">m</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+<span class="n">z</span><span class="p">[</span><span class="n">m</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>where i is the output sample number.</p>
+<p>The rational transfer function describing this filter in the
+z-transform domain is:</p>
+<div class="highlight-python"><pre>                    -1              -nb
+        b[0] + b[1]z  + ... + b[m] z
+Y(z) = --------------------------------- X(z)
+                    -1              -na
+        a[0] + a[1]z  + ... + a[m] z</pre>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.FIRFilterbank">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">FIRFilterbank</tt><big>(</big><em>source</em>, <em>impulse_response</em>, <em>use_linearfilterbank=False</em>, <em>minimum_buffer_size=None</em><big>)</big><a class="headerlink" href="#brian.hears.FIRFilterbank" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finite impulse response filterbank</p>
+<p>Initialisation parameters:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">source</span></tt></dt>
+<dd>Source sound or filterbank.</dd>
+<dt><tt class="docutils literal"><span class="pre">impulse_response</span></tt></dt>
+<dd>Either a 1D array providing a single impulse response applied to every
+input channel, or a 2D array of shape <tt class="docutils literal"><span class="pre">(nchannels,</span> <span class="pre">ir_length)</span></tt> for
+<tt class="docutils literal"><span class="pre">ir_length</span></tt> the number of samples in the impulse response. Note that
+if you are using a multichannel sound <tt class="docutils literal"><span class="pre">x</span></tt> as a set of impulse responses,
+the array should be <tt class="docutils literal"><span class="pre">impulse_response=array(x.T)</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">minimum_buffer_size=None</span></tt></dt>
+<dd>If specified, gives a minimum size to the buffer. By default, for the
+FFT convolution based implementation of <tt class="docutils literal"><span class="pre">FIRFilterbank</span></tt>, the minimum
+buffer size will be <tt class="docutils literal"><span class="pre">3*ir_length</span></tt>. For maximum efficiency with FFTs,
+<tt class="docutils literal"><span class="pre">buffer_size+ir_length</span></tt> should be a power of 2 (otherwise there will
+be some zero padding), and <tt class="docutils literal"><span class="pre">buffer_size</span></tt> should be as large as
+possible.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.RestructureFilterbank">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">RestructureFilterbank</tt><big>(</big><em>source</em>, <em>numrepeat=1</em>, <em>type='serial'</em>, <em>numtile=1</em>, <em>indexmapping=None</em><big>)</big><a class="headerlink" href="#brian.hears.RestructureFilterbank" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filterbank used to restructure channels, including repeating and interleaving.</p>
+<p><strong>Standard forms of usage:</strong></p>
+<p>Repeat mono source N times:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">RestructureFilterbank</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For a stereo source, N copies of the left channel followed by N copies of
+the right channel:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">RestructureFilterbank</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For a stereo source, N copies of the channels tiled as LRLRLR...LR:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">RestructureFilterbank</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">numtile</span><span class="o">=</span><span class="n">N</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For two stereo sources AB and CD, join them together in serial to form the
+output channels in order ABCD:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">RestructureFilterbank</span><span class="p">((</span><span class="n">AB</span><span class="p">,</span> <span class="n">CD</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>For two stereo sources AB and CD, join them together interleaved to form
+the output channels in order ACBD:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">RestructureFilterbank</span><span class="p">((</span><span class="n">AB</span><span class="p">,</span> <span class="n">CD</span><span class="p">),</span> <span class="nb">type</span><span class="o">=</span><span class="s">&#39;interleave&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>These arguments can also be combined together, for example to AB and CD
+into output channels AABBCCDDAABBCCDDAABBCCDD:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">RestructureFilterbank</span><span class="p">((</span><span class="n">AB</span><span class="p">,</span> <span class="n">CD</span><span class="p">),</span> <span class="mi">2</span><span class="p">,</span> <span class="s">&#39;serial&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The three arguments are the number of repeats before joining, the joining
+type (&#8216;serial&#8217; or &#8216;interleave&#8217;) and the number of tilings after joining.
+See below for details.</p>
+<p><strong>Initialise arguments:</strong></p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">source</span></tt></dt>
+<dd>Input source or list of sources.</dd>
+<dt><tt class="docutils literal"><span class="pre">numrepeat=1</span></tt></dt>
+<dd>Number of times each channel in each of the input sources is repeated
+before mixing the source channels. For example, with repeat=2 an input
+source with channels <tt class="docutils literal"><span class="pre">AB</span></tt> will be repeated to form <tt class="docutils literal"><span class="pre">AABB</span></tt></dd>
+<dt><tt class="docutils literal"><span class="pre">type='serial'</span></tt></dt>
+<dd>The method for joining the source channels, the options are <tt class="docutils literal"><span class="pre">'serial'</span></tt>
+to join the channels in series, or <tt class="docutils literal"><span class="pre">'interleave'</span></tt> to interleave them.
+In the case of <tt class="docutils literal"><span class="pre">'interleave'</span></tt>, each source must have the same number
+of channels. An example of serial, if the input sources are <tt class="docutils literal"><span class="pre">abc</span></tt>
+and <tt class="docutils literal"><span class="pre">def</span></tt> the output would be <tt class="docutils literal"><span class="pre">abcdef</span></tt>. For interleave, the output
+would be <tt class="docutils literal"><span class="pre">adbecf</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">numtile=1</span></tt></dt>
+<dd>The number of times the joined channels are tiled, so if the joined
+channels are <tt class="docutils literal"><span class="pre">ABC</span></tt> and <tt class="docutils literal"><span class="pre">numtile=3</span></tt> the output will be <tt class="docutils literal"><span class="pre">ABCABCABC</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">indexmapping=None</span></tt></dt>
+<dd>Instead of specifying the restructuring via <tt class="docutils literal"><span class="pre">numrepeat,</span> <span class="pre">type,</span> <span class="pre">numtile</span></tt>
+you can directly give the mapping of input indices to output indices.
+So for a single stereo source input, <tt class="docutils literal"><span class="pre">indexmapping=[1,0]</span></tt> would
+reverse left and right. Similarly, with two mono sources,
+<tt class="docutils literal"><span class="pre">indexmapping=[1,0]</span></tt> would have channel 0 of the output correspond to
+source 1 and channel 1 of the output corresponding to source 0. This is
+because the indices are counted in order of channels starting from the
+first source and continuing to the last. For example, suppose you had
+two sources, each consisting of a stereo sound, say source 0 was
+<tt class="docutils literal"><span class="pre">AB</span></tt> and source 1 was <tt class="docutils literal"><span class="pre">CD</span></tt> then <tt class="docutils literal"><span class="pre">indexmapping=[1,</span> <span class="pre">0,</span> <span class="pre">3,</span> <span class="pre">2]</span></tt> would
+swap the left and right of each source, but leave the order of the
+sources the same, i.e. the output would be <tt class="docutils literal"><span class="pre">BADC</span></tt>.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.Join">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">Join</tt><big>(</big><em>*sources</em><big>)</big><a class="headerlink" href="#brian.hears.Join" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filterbank that joins the channels of its inputs in series, e.g. with two
+input sources with channels AB and CD respectively, the output would have
+channels ABCD. You can initialise with multiple sources separated by
+commas, or by passing a list of sources.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.Interleave">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">Interleave</tt><big>(</big><em>*sources</em><big>)</big><a class="headerlink" href="#brian.hears.Interleave" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filterbank that interleaves the channels of its inputs, e.g. with two
+input sources with channels AB and CD respectively, the output would have
+channels ACBD. You can initialise with multiple sources separated by
+commas, or by passing a list of sources.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.Repeat">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">Repeat</tt><big>(</big><em>source</em>, <em>numrepeat</em><big>)</big><a class="headerlink" href="#brian.hears.Repeat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filterbank that repeats each channel from its input, e.g. with 3 repeats
+channels ABC would map to AAABBBCCC.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.Tile">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">Tile</tt><big>(</big><em>source</em>, <em>numtile</em><big>)</big><a class="headerlink" href="#brian.hears.Tile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filterbank that tiles the channels from its input, e.g. with 3 tiles
+channels ABC would map to ABCABCABC.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.FunctionFilterbank">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">FunctionFilterbank</tt><big>(</big><em>source</em>, <em>func</em>, <em>nchannels=None</em>, <em>**params</em><big>)</big><a class="headerlink" href="#brian.hears.FunctionFilterbank" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filterbank that just applies a given function. The function should take
+as many arguments as there are sources.</p>
+<p>For example, to half-wave rectify inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">FunctionFilterbank</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">clip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Inf</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>The syntax <tt class="docutils literal"><span class="pre">lambda</span> <span class="pre">x:</span> <span class="pre">clip(x,</span> <span class="pre">0,</span> <span class="pre">Inf)</span></tt> defines a function object that
+takes a single argument <tt class="docutils literal"><span class="pre">x</span></tt> and returns <tt class="docutils literal"><span class="pre">clip(x,</span> <span class="pre">0,</span> <span class="pre">Inf)</span></tt>. The numpy
+function <tt class="docutils literal"><span class="pre">clip(x,</span> <span class="pre">low,</span> <span class="pre">high)</span></tt> returns the values of <tt class="docutils literal"><span class="pre">x</span></tt> clipped between
+<tt class="docutils literal"><span class="pre">low</span></tt> and <tt class="docutils literal"><span class="pre">high</span></tt> (so if <tt class="docutils literal"><span class="pre">x&lt;low</span></tt> it returns <tt class="docutils literal"><span class="pre">low</span></tt>, if <tt class="docutils literal"><span class="pre">x&gt;high</span></tt> it
+returns <tt class="docutils literal"><span class="pre">high</span></tt>, otherwise it returns <tt class="docutils literal"><span class="pre">x</span></tt>). The symbol <tt class="docutils literal"><span class="pre">Inf</span></tt> means
+infinity, i.e. no clipping of positive values.</p>
+<p><strong>Technical details</strong></p>
+<p>Note that functions should operate on arrays, in particular on 2D buffered
+segments, which are arrays of shape <tt class="docutils literal"><span class="pre">(bufsize,</span> <span class="pre">nchannels)</span></tt>. Typically,
+most standard functions from numpy will work element-wise.</p>
+<p>If you want a filterbank that changes the shape of the input (e.g. changes
+the number of channels), set the <tt class="docutils literal"><span class="pre">nchannels</span></tt> keyword argument to the
+number of output channels.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.SumFilterbank">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">SumFilterbank</tt><big>(</big><em>source</em>, <em>weights=None</em><big>)</big><a class="headerlink" href="#brian.hears.SumFilterbank" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sum filterbanks together with given weight vectors.</p>
+<p>For example, to take the sum of two filterbanks:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">SumFilterbank</span><span class="p">((</span><span class="n">fb1</span><span class="p">,</span> <span class="n">fb2</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>To take the difference:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">SumFilterbank</span><span class="p">((</span><span class="n">fb1</span><span class="p">,</span> <span class="n">fb2</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.DoNothingFilterbank">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">DoNothingFilterbank</tt><big>(</big><em>source</em><big>)</big><a class="headerlink" href="#brian.hears.DoNothingFilterbank" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filterbank that does nothing to its input.</p>
+<p>Useful for removing a set of filters without having to rewrite your code.
+Can also be used for simply writing compound derived classes. For example,
+if you want a compound Filterbank that does AFilterbank and then
+BFilterbank, but you want to encapsulate that into a single class, you
+could do:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">ABFilterbank</span><span class="p">(</span><span class="n">DoNothingFilterbank</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">):</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">AFilterbank</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">BFilterbank</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+        <span class="n">DoNothingFilterbank</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>However, a more general way of writing compound filterbanks is to use
+<a class="reference internal" href="#brian.hears.CombinedFilterbank" title="brian.hears.CombinedFilterbank"><tt class="xref py py-class docutils literal"><span class="pre">CombinedFilterbank</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.ControlFilterbank">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">ControlFilterbank</tt><big>(</big><em>source</em>, <em>inputs</em>, <em>targets</em>, <em>updater</em>, <em>max_interval=None</em><big>)</big><a class="headerlink" href="#brian.hears.ControlFilterbank" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filterbank that can be used for controlling behaviour at runtime</p>
+<p>Typically, this class is used to implement a control path in an auditory
+model, modifying some filterbank parameters based on the output of other
+filterbanks (or the same ones).</p>
+<p>The controller has a set of input filterbanks whose output values are used
+to modify a set of output filterbanks. The update is done by a user specified
+function or class which is passed these output values. The controller should
+be inserted as the last bank in a chain.</p>
+<p>Initialisation arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">source</span></tt></dt>
+<dd>The source filterbank, the values from this are used unmodified as the
+output of this filterbank.</dd>
+<dt><tt class="docutils literal"><span class="pre">inputs</span></tt></dt>
+<dd>Either a single filterbank, or sequence of filterbanks which are used
+as inputs to the <tt class="docutils literal"><span class="pre">updater</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">targets</span></tt></dt>
+<dd>The filterbank or sequence of filterbanks that are modified by the
+updater.</dd>
+<dt><tt class="docutils literal"><span class="pre">updater</span></tt></dt>
+<dd>The function or class which does the updating, see below.</dd>
+<dt><tt class="docutils literal"><span class="pre">max_interval</span></tt></dt>
+<dd>If specified, ensures that the updater is called at least as often
+as this interval (but it may be called more often). Can be specified
+as a time or a number of samples.</dd>
+</dl>
+<p><strong>The updater</strong></p>
+<p>The <tt class="docutils literal"><span class="pre">updater</span></tt> argument can be either a function or class instance. If it
+is a function, it should have a form like:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># A single input</span>
+<span class="k">def</span> <span class="nf">updater</span><span class="p">(</span><span class="nb">input</span><span class="p">):</span>
+    <span class="o">...</span>
+
+<span class="c"># Two inputs</span>
+<span class="k">def</span> <span class="nf">updater</span><span class="p">(</span><span class="n">input1</span><span class="p">,</span> <span class="n">input2</span><span class="p">):</span>
+    <span class="o">...</span>
+
+<span class="c"># Arbitrary number of inputs</span>
+<span class="k">def</span> <span class="nf">updater</span><span class="p">(</span><span class="o">*</span><span class="n">inputs</span><span class="p">):</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>Each argument <tt class="docutils literal"><span class="pre">input</span></tt> to the function is a numpy array of shape
+<tt class="docutils literal"><span class="pre">(numsamples,</span> <span class="pre">numchannels)</span></tt> where <tt class="docutils literal"><span class="pre">numsamples</span></tt> is the number of samples
+just computed, and <tt class="docutils literal"><span class="pre">numchannels</span></tt> is the number of channels in the
+corresponding filterbank. The function is not restricted in what it can
+do with these inputs.</p>
+<p>Functions can be used to implement relatively simple controllers, but for
+more complicated situations you may want to maintain some state variables
+for example, and in this case you can use a class. The object <tt class="docutils literal"><span class="pre">updater</span></tt>
+should be an instance of a class that defines the <tt class="docutils literal"><span class="pre">__call__</span></tt> method
+(with the same syntax as above for functions). In addition, you can
+define a reinitialisation method <tt class="docutils literal"><span class="pre">reinit()</span></tt> which will be called when
+the <tt class="docutils literal"><span class="pre">buffer_init()</span></tt> method is called on the filterbank, although this is
+entirely optional.</p>
+<p><strong>Example</strong></p>
+<p>The following will do a simple form of gain control, where the gain
+parameter will drift exponentially towards target_rms/rms with a given time
+constant:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># This class implements the gain (see Filterbank for details)</span>
+<span class="k">class</span> <span class="nc">GainFilterbank</span><span class="p">(</span><span class="n">Filterbank</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">gain</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+        <span class="n">Filterbank</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gain</span> <span class="o">=</span> <span class="n">gain</span>
+    <span class="k">def</span> <span class="nf">buffer_apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gain</span><span class="o">*</span><span class="nb">input</span>
+
+<span class="c"># This is the class for the updater object</span>
+<span class="k">class</span> <span class="nc">GainController</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">target_rms</span><span class="p">,</span> <span class="n">time_constant</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_rms</span> <span class="o">=</span> <span class="n">target_rms</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_constant</span> <span class="o">=</span> <span class="n">time_constant</span>
+    <span class="k">def</span> <span class="nf">reinit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sumsquare</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numsamples</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="nb">input</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">samplerate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sumsquare</span> <span class="o">+=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">input</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numsamples</span> <span class="o">+=</span> <span class="nb">input</span><span class="o">.</span><span class="n">size</span>
+        <span class="n">rms</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sumsquare</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">numsamples</span><span class="p">)</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">gain</span>
+        <span class="n">g_tgt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_rms</span><span class="o">/</span><span class="n">rms</span>
+        <span class="n">tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_constant</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">gain</span> <span class="o">=</span> <span class="n">g_tgt</span><span class="o">+</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">T</span><span class="o">/</span><span class="n">tau</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">g</span><span class="o">-</span><span class="n">g_tgt</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>And an example of using this with an input <tt class="docutils literal"><span class="pre">source</span></tt>, a target RMS of 0.2
+and a time constant of 50 ms, updating every 10 ms:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">gain_fb</span> <span class="o">=</span> <span class="n">GainFilterbank</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+<span class="n">updater</span> <span class="o">=</span> <span class="n">GainController</span><span class="p">(</span><span class="n">gain_fb</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mi">50</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+<span class="n">control</span> <span class="o">=</span> <span class="n">ControlFilterbank</span><span class="p">(</span><span class="n">gain_fb</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">gain_fb</span><span class="p">,</span> <span class="n">updater</span><span class="p">,</span> <span class="mi">10</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>            
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.CombinedFilterbank">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">CombinedFilterbank</tt><big>(</big><em>source</em><big>)</big><a class="headerlink" href="#brian.hears.CombinedFilterbank" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filterbank that encapsulates a chain of filterbanks internally.</p>
+<p>This class should mostly be used by people writing extensions to Brian hears
+rather than by users directly. The purpose is to take an existing chain of
+filterbanks and wrap them up so they appear to the user as a single
+filterbank which can be used exactly as any other filterbank.</p>
+<p>In order to do this, derive from this class and in your initialisation
+follow this pattern:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">RectifiedGammatone</span><span class="p">(</span><span class="n">CombinedFilterbank</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">cf</span><span class="p">):</span>
+        <span class="n">CombinedFilterbank</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_modified_source</span><span class="p">()</span>
+        <span class="c"># At this point, insert your chain of filterbanks acting on</span>
+        <span class="c"># the modified source object</span>
+        <span class="n">gfb</span> <span class="o">=</span> <span class="n">Gammatone</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">cf</span><span class="p">)</span>
+        <span class="n">rectified</span> <span class="o">=</span> <span class="n">FunctionFilterbank</span><span class="p">(</span><span class="n">gfb</span><span class="p">,</span>
+                        <span class="k">lambda</span> <span class="nb">input</span><span class="p">:</span> <span class="n">clip</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Inf</span><span class="p">))</span>
+        <span class="c"># Finally, set the output filterbank to be the last in your chain</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_output</span><span class="p">(</span><span class="n">fb</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This combination of a <a class="reference internal" href="#brian.hears.Gammatone" title="brian.hears.Gammatone"><tt class="xref py py-class docutils literal"><span class="pre">Gammatone</span></tt></a> and a rectification via a
+<a class="reference internal" href="#brian.hears.FunctionFilterbank" title="brian.hears.FunctionFilterbank"><tt class="xref py py-class docutils literal"><span class="pre">FunctionFilterbank</span></tt></a> can now be used as a single filterbank, for
+example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">x</span> <span class="o">=</span> <span class="n">whitenoise</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+<span class="n">fb</span> <span class="o">=</span> <span class="n">RectifiedGammatone</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="o">*</span><span class="n">kHz</span><span class="p">,</span> <span class="mf">1.5</span><span class="o">*</span><span class="n">kHz</span><span class="p">])</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">fb</span><span class="o">.</span><span class="n">process</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><strong>Details</strong></p>
+<p>The reason for the <tt class="docutils literal"><span class="pre">get_modified_source()</span></tt> call is that the source
+attribute of a filterbank can be changed after creation. The modified source
+provides a buffer (in fact, a <a class="reference internal" href="#brian.hears.DoNothingFilterbank" title="brian.hears.DoNothingFilterbank"><tt class="xref py py-class docutils literal"><span class="pre">DoNothingFilterbank</span></tt></a>) so that the
+input to the chain of filters defined by the derived class doesn&#8217;t need to
+be changed.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="filterbank-library">
+<h2>Filterbank library<a class="headerlink" href="#filterbank-library" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="brian.hears.Gammatone">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">Gammatone</tt><big>(</big><em>source</em>, <em>cf</em>, <em>b=1.019</em>, <em>erb_order=1</em>, <em>ear_Q=9.26449</em>, <em>min_bw=24.7</em><big>)</big><a class="headerlink" href="#brian.hears.Gammatone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bank of gammatone filters.</p>
+<p>They are implemented as cascades of four 2nd-order IIR filters (this
+8th-order digital filter corresponds to a 4th-order gammatone filter).</p>
+<p>The approximated impulse response <img class="math" src="_images/math/f840ba73c6ca23bd7adf3c1541dc317311a801e8.png" alt="\mathrm{IR}"/> is defined as follow
+<img class="math" src="_images/math/18ba3453fdaaa13948c0010b65618d9db398171e.png" alt="\mathrm{IR}(t)=t^3\exp(-2\pi b \mathrm{ERB}(f)t)\cos(2\pi f t)"/>
+where <img class="math" src="_images/math/2aab6ff8cc839bc6507d1d1fd4fae84fb5ff4405.png" alt="\mathrm{ERB}(f)=24.7+0.108 f"/> [Hz] is the equivalent
+rectangular bandwidth of the filter centered at <img class="math" src="_images/math/bb2c93730dbb48558bb3c4738c956c4e8f816437.png" alt="f"/>.</p>
+<p>It comes from Slaney&#8217;s exact gammatone implementation (Slaney, M., 1993,
+&#8220;An Efficient Implementation of the Patterson-Holdsworth 
+Auditory Filter Bank&#8221;. Apple Computer Technical Report #35). The code is
+based on
+<a class="reference external" href="http://cobweb.ecn.purdue.edu/~malcolm/interval/1998-010/">Slaney&#8217;s Matlab implementation</a>.</p>
+<p>Initialised with arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">source</span></tt></dt>
+<dd>Source of the filterbank.</dd>
+<dt><tt class="docutils literal"><span class="pre">cf</span></tt></dt>
+<dd>List or array of center frequencies.</dd>
+<dt><tt class="docutils literal"><span class="pre">b=1.019</span></tt></dt>
+<dd>parameter which determines the bandwidth of the filters (and
+reciprocally the duration of its impulse response). In particular, the
+bandwidth = b.ERB(cf), where ERB(cf) is the equivalent bandwidth at
+frequency <tt class="docutils literal"><span class="pre">cf</span></tt>. The default value of <tt class="docutils literal"><span class="pre">b</span></tt> to a best fit
+(Patterson et al., 1992). <tt class="docutils literal"><span class="pre">b</span></tt> can either be a scalar and will be the
+same for every channel or an array of the same length as <tt class="docutils literal"><span class="pre">cf</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">erb_order=1</span></tt>, <tt class="docutils literal"><span class="pre">ear_Q=9.26449</span></tt>, <tt class="docutils literal"><span class="pre">min_bw=24.7</span></tt></dt>
+<dd>Parameters used to compute the ERB bandwidth.
+<img class="math" src="_images/math/c9919b5c0227ce7d734c042a4eb0d179e011740c.png" alt="\mathrm{ERB} = ((\mathrm{cf}/\mathrm{ear\_Q})^{\mathrm{erb}\_\mathrm{order}} + \mathrm{min\_bw}^{\mathrm{erb}\_\mathrm{order}})^{(1/\mathrm{erb}\_\mathrm{order})}"/>.
+Their default values are the ones recommended in
+Glasberg and Moore, 1990.</dd>
+<dt><tt class="docutils literal"><span class="pre">cascade=None</span></tt></dt>
+<dd>Specify 1 or 2 to use a cascade of 1 or 2 order 8 or 4 filters instead
+of 4 2nd order filters. Note that this is more efficient but may
+induce numerical stability issues.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.ApproximateGammatone">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">ApproximateGammatone</tt><big>(</big><em>source</em>, <em>cf</em>, <em>bandwidth</em>, <em>order=4</em><big>)</big><a class="headerlink" href="#brian.hears.ApproximateGammatone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bank of approximate gammatone filters implemented as a cascade of <tt class="docutils literal"><span class="pre">order</span></tt> IIR gammatone filters.</p>
+<p>The filter is derived from the sampled version of the complex analog
+gammatone impulse response
+<img class="math" src="_images/math/6620d34158148bc6af6caa93b53f65f28d1aa9ec.png" alt="g_{\gamma}(t)=t^{\gamma-1} (\lambda e^{i \eta t})^{\gamma}"/> 
+where <img class="math" src="_images/math/66981fa3920210c6ad8dbe5e968783d5dd7520c3.png" alt="\gamma"/> corresponds to <tt class="docutils literal"><span class="pre">order</span></tt>, <img class="math" src="_images/math/03a45952f8115322d2879f7d090126f059757ba0.png" alt="\eta"/> defines the
+oscillation frequency <tt class="docutils literal"><span class="pre">cf</span></tt>, and <img class="math" src="_images/math/ce4588fd900d02afcbd260bc07f54cce49a7dc4a.png" alt="\lambda"/> defines the bandwidth
+parameter.</p>
+<p>The design is based on the Hohmann implementation as described in
+Hohmann, V., 2002, &#8220;Frequency analysis and synthesis using a Gammatone
+filterbank&#8221;, Acta Acustica United with Acustica. The code is based on the
+Matlab gammatone implementation from
+<a class="reference external" href="http://www.essex.ac.uk/psychology/psy/PEOPLE/meddis/webFolder08/WebIntro.htm">Meddis&#8217; toolbox</a>.</p>
+<p>Initialised with arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">source</span></tt></dt>
+<dd>Source of the filterbank.</dd>
+<dt><tt class="docutils literal"><span class="pre">cf</span></tt></dt>
+<dd>List or array of center frequencies.</dd>
+<dt><tt class="docutils literal"><span class="pre">bandwidth</span></tt></dt>
+<dd>List or array of filters bandwidth corresponding, one for each cf.</dd>
+<dt><tt class="docutils literal"><span class="pre">order=4</span></tt></dt>
+<dd>The number of 1st-order gammatone filters put in cascade, and therefore
+the order the resulting gammatone filters.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.LogGammachirp">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">LogGammachirp</tt><big>(</big><em>source</em>, <em>f</em>, <em>b=1.019</em>, <em>c=1</em>, <em>ncascades=4</em><big>)</big><a class="headerlink" href="#brian.hears.LogGammachirp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bank of gammachirp filters with a logarithmic frequency sweep.</p>
+<p>The approximated impulse response <img class="math" src="_images/math/f840ba73c6ca23bd7adf3c1541dc317311a801e8.png" alt="\mathrm{IR}"/> is defined as follows:
+<img class="math" src="_images/math/b85b940c4ccf53665c42ca32212767e083cefa97.png" alt="\mathrm{IR}(t)=t^3e^{-2\pi b \mathrm{ERB}(f)t}\cos(2\pi (f t +c\cdot\ln(t))"/>
+where <img class="math" src="_images/math/2aab6ff8cc839bc6507d1d1fd4fae84fb5ff4405.png" alt="\mathrm{ERB}(f)=24.7+0.108 f"/> [Hz] is the equivalent
+rectangular bandwidth of the filter centered at <img class="math" src="_images/math/bb2c93730dbb48558bb3c4738c956c4e8f816437.png" alt="f"/>.</p>
+<p>The implementation is a cascade of 4 2nd-order IIR gammatone filters 
+followed by a cascade of ncascades 2nd-order asymmetric compensation filters
+as introduced in Unoki et al. 2001, &#8220;Improvement of an IIR asymmetric 
+compensation gammachirp filter&#8221;.</p>
+<p>Initialisation parameters:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">source</span></tt></dt>
+<dd>Source sound or filterbank.</dd>
+<dt><tt class="docutils literal"><span class="pre">f</span></tt></dt>
+<dd>List or array of the sweep ending frequencies
+(<img class="math" src="_images/math/9c295b5e6997b195a34fa882b13b5306d5472356.png" alt="f_{\mathrm{instantaneous}}=f+c/t"/>).</dd>
+<dt><tt class="docutils literal"><span class="pre">b=1.019</span></tt></dt>
+<dd>Parameters which determine the duration of the impulse response.
+<tt class="docutils literal"><span class="pre">b</span></tt> can either be a scalar and will be the same for every channel or
+an array with the same length as <tt class="docutils literal"><span class="pre">f</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">c=1</span></tt></dt>
+<dd>The glide slope (or sweep rate) given in Hz/second. The trajectory of
+the instantaneous frequency towards f is an upchirp when c&lt;0 and a 
+downchirp when c&gt;0.
+<tt class="docutils literal"><span class="pre">c</span></tt> can either be a scalar and will be the same for every channel or
+an array with the same length as <tt class="docutils literal"><span class="pre">f</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">ncascades=4</span></tt></dt>
+<dd>Number of times the asymmetric compensation filter is put in cascade.
+The default value comes from Unoki et al. 2001.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.LinearGammachirp">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">LinearGammachirp</tt><big>(</big><em>source</em>, <em>f</em>, <em>time_constant</em>, <em>c</em>, <em>phase=0</em><big>)</big><a class="headerlink" href="#brian.hears.LinearGammachirp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bank of gammachirp filters with linear frequency sweeps and gamma envelope
+as described in Wagner et al. 2009, &#8220;Auditory responses in the barn owl&#8217;s
+nucleus laminaris to clicks: impulse response and signal analysis of
+neurophonic potential&#8221;, J. Neurophysiol.</p>
+<p>The impulse response <img class="math" src="_images/math/f840ba73c6ca23bd7adf3c1541dc317311a801e8.png" alt="\mathrm{IR}"/> is defined as follow
+<img class="math" src="_images/math/4067299d3528f51cc5e581c4f6298a7dfaf8d233.png" alt="\mathrm{IR}(t)=t^3e^{-t/\sigma}\cos(2\pi (f t +c/2 t^2)+\phi)"/>
+where <img class="math" src="_images/math/fa35d9fc104207e09a712110ac81612c5b279a6c.png" alt="\sigma"/> corresponds to <tt class="docutils literal"><span class="pre">time_constant</span></tt> and <img class="math" src="_images/math/2c175f60eecef1de7560c3bdea495d69f26f719d.png" alt="\phi"/> to
+<tt class="docutils literal"><span class="pre">phase</span></tt> (see definition of parameters).</p>
+<p>Those filters are implemented as FIR filters using truncated time
+representations of gammachirp functions as the impulse response. The impulse
+responses, which need to have the same length for every channel, have a
+duration of 15 times the biggest time constant. The length of the impulse
+response is therefore <tt class="docutils literal"><span class="pre">15*max(time_constant)*sampling_rate</span></tt>.  The impulse
+responses are normalized with respect to the transmitted power, i.e.
+the rms of the filter taps is 1.</p>
+<p>Initialisation parameters:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">source</span></tt></dt>
+<dd>Source sound or filterbank.</dd>
+<dt><tt class="docutils literal"><span class="pre">f</span></tt></dt>
+<dd>List or array of the sweep starting frequencies
+(<img class="math" src="_images/math/f5b36086aa267d69c2448eed90c52e1b7adc7db6.png" alt="f_{\mathrm{instantaneous}}=f+ct"/>).</dd>
+<dt><tt class="docutils literal"><span class="pre">time_constant</span></tt></dt>
+<dd>Determines the duration of the envelope and consequently the length of
+the impulse response.</dd>
+<dt><tt class="docutils literal"><span class="pre">c=1</span></tt></dt>
+<dd>The glide slope (or sweep rate) given in Hz/second. The time-dependent
+instantaneous frequency is <tt class="docutils literal"><span class="pre">f+c*t</span></tt> and is therefore going upward when
+c&gt;0 and downward when c&lt;0. <tt class="docutils literal"><span class="pre">c</span></tt> can either be a scalar and will be the
+same for every channel or an array with the same length as <tt class="docutils literal"><span class="pre">f</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">phase=0</span></tt></dt>
+<dd>Phase shift of the carrier.</dd>
+</dl>
+<p>Has attributes:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">length_impulse_response</span></tt> </dt>
+<dd>Number of samples in the impulse responses.</dd>
+<dt><tt class="docutils literal"><span class="pre">impulse_response</span></tt></dt>
+<dd>Array of shape <tt class="docutils literal"><span class="pre">(nchannels,</span> <span class="pre">length_impulse_response)</span></tt> with each row
+being an impulse response for the corresponding channel.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.LinearGaborchirp">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">LinearGaborchirp</tt><big>(</big><em>source</em>, <em>f</em>, <em>time_constant</em>, <em>c</em>, <em>phase=0</em><big>)</big><a class="headerlink" href="#brian.hears.LinearGaborchirp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bank of gammachirp filters with linear frequency sweeps and gaussian envelope
+as described in Wagner et al. 2009, &#8220;Auditory responses in the barn owl&#8217;s 
+nucleus laminaris to clicks: impulse response and signal analysis of
+neurophonic potential&#8221;, J. Neurophysiol.</p>
+<p>The impulse response <img class="math" src="_images/math/f840ba73c6ca23bd7adf3c1541dc317311a801e8.png" alt="\mathrm{IR}"/> is defined as follows:
+<img class="math" src="_images/math/2302f659d0447c66c6d023c5f9a4cfc2ec07de9f.png" alt="\mathrm{IR}(t)=e^{-t/2\sigma^2}\cos(2\pi (f t +c/2 t^2)+\phi)"/>,
+where <img class="math" src="_images/math/fa35d9fc104207e09a712110ac81612c5b279a6c.png" alt="\sigma"/> corresponds to <tt class="docutils literal"><span class="pre">time_constant</span></tt> and <img class="math" src="_images/math/2c175f60eecef1de7560c3bdea495d69f26f719d.png" alt="\phi"/> to
+<tt class="docutils literal"><span class="pre">phase</span></tt> (see definition of parameters).</p>
+<p>These filters are implemented as FIR filters using truncated time
+representations of gammachirp functions as the impulse response. The impulse
+responses, which need to have the same length for every channel, have a
+duration of 12 times the biggest time constant. The length of the impulse
+response is therefore <tt class="docutils literal"><span class="pre">12*max(time_constant)*sampling_rate</span></tt>. The envelope
+is a gaussian function (Gabor filter).  The impulse responses are normalized
+with respect to the transmitted  power, i.e. the rms of the filter taps is
+1.</p>
+<p>Initialisation parameters:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">source</span></tt></dt>
+<dd>Source sound or filterbank.</dd>
+<dt><tt class="docutils literal"><span class="pre">f</span></tt></dt>
+<dd>List or array of the sweep starting frequencies
+(<img class="math" src="_images/math/885a4cac7ed354cf7187a3563376228313bd8c75.png" alt="f_{\mathrm{instantaneous}}=f+c*t"/>).</dd>
+<dt><tt class="docutils literal"><span class="pre">time_constant</span></tt></dt>
+<dd>Determines the duration of the envelope and consequently the length of
+the impluse response.</dd>
+<dt><tt class="docutils literal"><span class="pre">c=1</span></tt></dt>
+<dd>The glide slope (or sweep rate) given ins Hz/second. The time-dependent
+instantaneous frequency is <tt class="docutils literal"><span class="pre">f+c*t</span></tt> and is therefore going upward when
+c&gt;0 and downward when c&lt;0. <tt class="docutils literal"><span class="pre">c</span></tt> can either be a scalar and will be the
+same for every channel or an array with the same length as <tt class="docutils literal"><span class="pre">f</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">phase=0</span></tt></dt>
+<dd>Phase shift of the carrier.</dd>
+</dl>
+<p>Has attributes:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">length_impulse_response</span></tt> </dt>
+<dd>Number of sample in the impulse responses.</dd>
+<dt><tt class="docutils literal"><span class="pre">impulse_response</span></tt></dt>
+<dd>Array of shape <tt class="docutils literal"><span class="pre">(nchannels,</span> <span class="pre">length_impulse_response)</span></tt> with each row
+being an impulse response for the corresponding channel.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.IIRFilterbank">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">IIRFilterbank</tt><big>(</big><em>source</em>, <em>nchannels</em>, <em>passband</em>, <em>stopband</em>, <em>gpass</em>, <em>gstop</em>, <em>btype</em>, <em>ftype</em><big>)</big><a class="headerlink" href="#brian.hears.IIRFilterbank" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filterbank of IIR filters. The filters can be low, high, bandstop or
+bandpass and be of type Elliptic, Butterworth, Chebyshev etc. The
+<tt class="docutils literal"><span class="pre">passband</span></tt>  and <tt class="docutils literal"><span class="pre">stopband</span></tt> can be scalars (for low or high pass) or
+pairs of parameters (for stopband and passband) yielding similar filters for
+every channel. They can also be arrays of shape <tt class="docutils literal"><span class="pre">(1,</span> <span class="pre">nchannels)</span></tt> for low
+and high pass or <tt class="docutils literal"><span class="pre">(2,</span> <span class="pre">nchannels)</span></tt> for stopband and passband yielding
+different filters along channels. This class uses the scipy iirdesign
+function to generate filter coefficients for every channel.</p>
+<p>See the documentation for scipy.signal.iirdesign for more details.</p>
+<p>Initialisation parameters:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">samplerate</span></tt></dt>
+<dd>The sample rate in Hz.</dd>
+<dt><tt class="docutils literal"><span class="pre">nchannels</span></tt></dt>
+<dd>The number of channels in the bank</dd>
+<dt><tt class="docutils literal"><span class="pre">passband</span></tt>, <tt class="docutils literal"><span class="pre">stopband</span></tt></dt>
+<dd>The edges of the pass and stop bands in Hz. For lowpass and highpass
+filters, in the case of similar filters for each channel, they are
+scalars and passband&lt;stopband for low pass or stopband&gt;passband for a
+highpass. For a bandpass or bandstop filter, in the case of similar
+filters for each channel, make passband and stopband a list with two
+elements, e.g. for a bandpass have <tt class="docutils literal"><span class="pre">passband=[200*Hz,</span> <span class="pre">500*Hz]</span></tt> and
+<tt class="docutils literal"><span class="pre">stopband=[100*Hz,</span> <span class="pre">600*Hz]</span></tt>. <tt class="docutils literal"><span class="pre">passband</span></tt> and <tt class="docutils literal"><span class="pre">stopband</span></tt> can also be
+arrays of shape <tt class="docutils literal"><span class="pre">(1,</span> <span class="pre">nchannels)</span></tt> for low and high pass or
+<tt class="docutils literal"><span class="pre">(2,</span> <span class="pre">nchannels)</span></tt> for stopband and passband yielding different filters
+along channels.</dd>
+<dt><tt class="docutils literal"><span class="pre">gpass</span></tt></dt>
+<dd>The maximum loss in the passband in dB. Can be a scalar or an array of
+length <tt class="docutils literal"><span class="pre">nchannels</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">gstop</span></tt></dt>
+<dd>The minimum attenuation in the stopband in dB. Can be a scalar or an
+array of length <tt class="docutils literal"><span class="pre">nchannels</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">btype</span></tt></dt>
+<dd>One of &#8216;low&#8217;, &#8216;high&#8217;, &#8216;bandpass&#8217; or &#8216;bandstop&#8217;.</dd>
+<dt><tt class="docutils literal"><span class="pre">ftype</span></tt></dt>
+<dd>The type of IIR filter to design:
+&#8216;ellip&#8217; (elliptic),
+&#8216;butter&#8217; (Butterworth),
+&#8216;cheby1&#8217; (Chebyshev I),
+&#8216;cheby2&#8217; (Chebyshev II),
+&#8216;bessel&#8217; (Bessel).</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.Butterworth">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">Butterworth</tt><big>(</big><em>source</em>, <em>nchannels</em>, <em>order</em>, <em>fc</em>, <em>btype='low'</em><big>)</big><a class="headerlink" href="#brian.hears.Butterworth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filterbank of  low, high, bandstop or bandpass  Butterworth filters. 
+The cut-off frequencies or the band frequencies can either be the same for
+each channel or different along channels.</p>
+<p>Initialisation parameters:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">samplerate</span></tt></dt>
+<dd>Sample rate.</dd>
+<dt><tt class="docutils literal"><span class="pre">nchannels</span></tt></dt>
+<dd>Number of filters in the bank.</dd>
+<dt><tt class="docutils literal"><span class="pre">order</span></tt></dt>
+<dd>Order of the filters.</dd>
+<dt><tt class="docutils literal"><span class="pre">fc</span></tt></dt>
+<dd>Cutoff parameter(s) in Hz. For the case of a lowpass or highpass
+filterbank, <tt class="docutils literal"><span class="pre">fc</span></tt> is either a scalar (thus the same value for all of
+the channels) or an array  of length <tt class="docutils literal"><span class="pre">nchannels</span></tt>. For the case of a
+bandpass or bandstop, <tt class="docutils literal"><span class="pre">fc</span></tt> is either a pair of scalar defining the
+bandpass or bandstop (thus the same values for all of the channels) or
+an array of shape <tt class="docutils literal"><span class="pre">(2,</span> <span class="pre">nchannels)</span></tt> to define a pair for every channel.</dd>
+<dt><tt class="docutils literal"><span class="pre">btype</span></tt></dt>
+<dd>One of &#8216;low&#8217;, &#8216;high&#8217;, &#8216;bandpass&#8217; or &#8216;bandstop&#8217;.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.Cascade">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">Cascade</tt><big>(</big><em>source</em>, <em>filterbank</em>, <em>n</em><big>)</big><a class="headerlink" href="#brian.hears.Cascade" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cascade of <tt class="docutils literal"><span class="pre">n</span></tt> times a linear filterbank.</p>
+<p>Initialised with arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">source</span></tt></dt>
+<dd>Source of the new filterbank.</dd>
+<dt><tt class="docutils literal"><span class="pre">filterbank</span></tt></dt>
+<dd>Filterbank object to be put in cascade</dd>
+<dt><tt class="docutils literal"><span class="pre">n</span></tt></dt>
+<dd>Number of cascades</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.LowPass">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">LowPass</tt><big>(</big><em>source</em>, <em>fc</em><big>)</big><a class="headerlink" href="#brian.hears.LowPass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bank of 1st-order lowpass filters</p>
+<p>The code is based on the code found in the
+<a class="reference external" href="http://www.essex.ac.uk/psychology/psy/PEOPLE/meddis/webFolder08/WebIntro.htm">Meddis toolbox</a>. 
+It was implemented here to be used in the DRNL cochlear model implementation.</p>
+<p>Initialised with arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">source</span></tt></dt>
+<dd>Source of the filterbank.</dd>
+<dt><tt class="docutils literal"><span class="pre">fc</span></tt></dt>
+<dd>Value, list or array (with length = number of channels) of cutoff
+frequencies.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.AsymmetricCompensation">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">AsymmetricCompensation</tt><big>(</big><em>source</em>, <em>f</em>, <em>b=1.019</em>, <em>c=1</em>, <em>ncascades=4</em><big>)</big><a class="headerlink" href="#brian.hears.AsymmetricCompensation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bank of asymmetric compensation filters.</p>
+<p>Those filters are meant to be used in cascade with gammatone filters to
+approximate gammachirp filters (Unoki et al., 2001, Improvement of
+an IIR asymmetric compensation gammachirp filter, Acoust. Sci. &amp; Tech.).
+They are implemented a a cascade of low order filters. The code 
+is based on the implementation found in the
+<a class="reference external" href="http://www.pdn.cam.ac.uk/groups/cnbh/aimmanual/index.html">AIM-MAT toolbox</a>.</p>
+<p>Initialised with arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">source</span></tt></dt>
+<dd>Source of the filterbank.</dd>
+<dt><tt class="docutils literal"><span class="pre">f</span></tt></dt>
+<dd>List or array of the cut off frequencies.</dd>
+<dt><tt class="docutils literal"><span class="pre">b=1.019</span></tt></dt>
+<dd>Determines the duration of the impulse response.
+Can either be a scalar and will be the same for every channel or
+an array with the same length as <tt class="docutils literal"><span class="pre">cf</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">c=1</span></tt></dt>
+<dd>The glide slope when this filter is used to implement a gammachirp.
+Can either be a scalar and will be the same for every channel or
+an array with the same length as <tt class="docutils literal"><span class="pre">cf</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">ncascades=4</span></tt></dt>
+<dd>The number of time the basic filter is put in cascade.</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="auditory-model-library">
+<h2>Auditory model library<a class="headerlink" href="#auditory-model-library" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="brian.hears.DRNL">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">DRNL</tt><big>(</big><em>source</em>, <em>cf</em>, <em>type='human'</em>, <em>param={}</em><big>)</big><a class="headerlink" href="#brian.hears.DRNL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implementation of the dual resonance nonlinear (DRNL) filter
+as described in Lopez-Paveda, E. and Meddis, R.,
+&#8220;A human nonlinear cochlear filterbank&#8221;, JASA 2001.</p>
+<p>The entire pathway consists of the sum of a linear and a nonlinear pathway.</p>
+<p>The linear path consists of a bank of bandpass filters (second order
+gammatone), a low pass function, and a gain/attenuation factor, g, in a
+cascade.</p>
+<p>The nonlinear path is a cascade consisting of a bank of gammatone filters, a
+compression function, a second bank of gammatone filters, and a low
+pass function, in that order.</p>
+<p>Initialised with arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">source</span></tt></dt>
+<dd>Source of the cochlear model.</dd>
+<dt><tt class="docutils literal"><span class="pre">cf</span></tt></dt>
+<dd>List or array of center frequencies.</dd>
+<dt><tt class="docutils literal"><span class="pre">type</span></tt></dt>
+<dd><p class="first">defines the parameters set corresponding to a certain fit. It can be
+either:</p>
+<dl class="last docutils">
+<dt><tt class="docutils literal"><span class="pre">type='human'</span></tt> </dt>
+<dd>The parameters come from Lopez-Paveda, E. and Meddis, R.., &#8220;A human
+nonlinear cochlear filterbank&#8221;, JASA 2001.</dd>
+<dt><tt class="docutils literal"><span class="pre">type</span> <span class="pre">='guinea</span> <span class="pre">pig'</span></tt></dt>
+<dd>The parameters come from Summer et al., &#8220;A nonlinear filter-bank
+model of the guinea-pig cochlear nerve: Rate responses&#8221;, JASA 2003.</dd>
+</dl>
+</dd>
+<dt><tt class="docutils literal"><span class="pre">param</span></tt></dt>
+<dd>Dictionary used to overwrite the default parameters given in the
+original papers.</dd>
+</dl>
+<p>The possible parameters to change and their default values for humans (see 
+Lopez-Paveda, E. and Meddis, R.,&#8221;A human nonlinear cochlear filterbank&#8221;,
+JASA 2001. for notation) are:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">param</span><span class="p">[</span><span class="s">&#39;stape_scale&#39;</span><span class="p">]</span><span class="o">=</span><span class="mf">0.00014</span> 
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;order_linear&#39;</span><span class="p">]</span><span class="o">=</span><span class="mi">3</span> 
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;order_nonlinear&#39;</span><span class="p">]</span><span class="o">=</span><span class="mi">3</span> 
+</pre></div>
+</div>
+<p>from there on the parameters are given in the form
+<img class="math" src="_images/math/fd47b7f3eef082b988858ea4d2c6532ea74905ae.png" alt="x=10^{\mathrm{p0}+m\log_{10}(\mathrm{cf})}"/> where
+<tt class="docutils literal"><span class="pre">cf</span></tt> is the center frequency:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">param</span><span class="p">[</span><span class="s">&#39;cf_lin_p0&#39;</span><span class="p">]</span><span class="o">=-</span><span class="mf">0.067</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;cf_lin_m&#39;</span><span class="p">]</span><span class="o">=</span><span class="mf">1.016</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;bw_lin_p0&#39;</span><span class="p">]</span><span class="o">=</span><span class="mf">0.037</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;bw_lin_m&#39;</span><span class="p">]</span><span class="o">=</span><span class="mf">0.785</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;cf_nl_p0&#39;</span><span class="p">]</span><span class="o">=-</span><span class="mf">0.052</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;cf_nl_m&#39;</span><span class="p">]</span><span class="o">=</span><span class="mf">1.016</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;bw_nl_p0&#39;</span><span class="p">]</span><span class="o">=-</span><span class="mf">0.031</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;bw_nl_m&#39;</span><span class="p">]</span><span class="o">=</span><span class="mf">0.774</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;a_p0&#39;</span><span class="p">]</span><span class="o">=</span><span class="mf">1.402</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;a_m&#39;</span><span class="p">]</span><span class="o">=</span><span class="mf">0.819</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;b_p0&#39;</span><span class="p">]</span><span class="o">=</span><span class="mf">1.619</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;b_m&#39;</span><span class="p">]</span><span class="o">=-</span><span class="mf">0.818</span>  
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;c_p0&#39;</span><span class="p">]</span><span class="o">=-</span><span class="mf">0.602</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;c_m&#39;</span><span class="p">]</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;g_p0&#39;</span><span class="p">]</span><span class="o">=</span><span class="mf">4.2</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;g_m&#39;</span><span class="p">]</span><span class="o">=</span><span class="mf">0.48</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;lp_lin_cutoff_p0&#39;</span><span class="p">]</span><span class="o">=-</span><span class="mf">0.067</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;lp_lin_cutoff_m&#39;</span><span class="p">]</span><span class="o">=</span><span class="mf">1.016</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;lp_nl_cutoff_p0&#39;</span><span class="p">]</span><span class="o">=-</span><span class="mf">0.052</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;lp_nl_cutoff_m&#39;</span><span class="p">]</span><span class="o">=</span><span class="mf">1.016</span>   
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.DCGC">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">DCGC</tt><big>(</big><em>source</em>, <em>cf</em>, <em>update_interval=1</em>, <em>param={}</em><big>)</big><a class="headerlink" href="#brian.hears.DCGC" title="Permalink to this definition">¶</a></dt>
+<dd><p>The compressive gammachirp auditory filter as described in Irino, T. and
+Patterson R., &#8220;A compressive gammachirp auditory filter for both
+physiological and psychophysical data&#8221;, JASA 2001.</p>
+<p>Technical implementation details and notation can be found in Irino, T. and
+Patterson R., &#8220;A Dynamic Compressive Gammachirp Auditory Filterbank&#8221;,
+IEEE Trans Audio Speech Lang Processing.</p>
+<p>The model consists of a control pathway and a signal pathway in parallel.</p>
+<p>The control pathway consists of a bank of bandpass filters followed by a
+bank of highpass filters (this chain yields a bank of gammachirp filters).</p>
+<p>The signal pathway consist of a bank of fix bandpass filters followed by a
+bank of highpass filters with variable cutoff frequencies  (this chain
+yields a bank of gammachirp filters with a level-dependent bandwidth). The
+highpass filters of the signal pathway are controlled 
+by the output levels of the two stages of the control pathway.</p>
+<p>Initialised with arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">source</span></tt></dt>
+<dd>Source of the cochlear model.</dd>
+<dt><tt class="docutils literal"><span class="pre">cf</span></tt></dt>
+<dd>List or array of center frequencies.</dd>
+<dt><tt class="docutils literal"><span class="pre">update_interval</span></tt></dt>
+<dd>Interval in samples controlling how often the band pass filter of the
+signal pathway is updated. Smaller values are more accurate, but give
+longer computation times.</dd>
+<dt><tt class="docutils literal"><span class="pre">param</span></tt></dt>
+<dd>Dictionary used to overwrite the default parameters given in the
+original paper.</dd>
+</dl>
+<p>The possible parameters to change and their default values (see Irino, T.
+and Patterson R., &#8220;A Dynamic Compressive Gammachirp 
+Auditory Filterbank&#8221;, IEEE Trans Audio Speech Lang Processing) are:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">param</span><span class="p">[</span><span class="s">&#39;b1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.81</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;c1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.96</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;b2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2.17</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;c2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2.2</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;decay_tcst&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">.</span><span class="mi">5</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;lev_weight&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">.</span><span class="mi">5</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;level_ref&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">50.</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;level_pwr1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.5</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;level_pwr2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">.</span><span class="mi">5</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;RMStoSPL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">30.</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;frat0&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">.</span><span class="mi">2330</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;frat1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">.</span><span class="mo">005</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;lct_ERB&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.5</span>  <span class="c">#value of the shift in ERB frequencies</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;frat_control&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.08</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;order_gc&#39;</span><span class="p">]</span><span class="o">=</span><span class="mi">4</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;ERBrate&#39;</span><span class="p">]</span><span class="o">=</span> <span class="mf">21.4</span><span class="o">*</span><span class="n">log10</span><span class="p">(</span><span class="mf">4.37</span><span class="o">*</span><span class="n">cf</span><span class="o">/</span><span class="mi">1000</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="c"># cf is the center frequency</span>
+<span class="n">param</span><span class="p">[</span><span class="s">&#39;ERBwidth&#39;</span><span class="p">]</span><span class="o">=</span> <span class="mf">24.7</span><span class="o">*</span><span class="p">(</span><span class="mf">4.37</span><span class="o">*</span><span class="n">cf</span><span class="o">/</span><span class="mi">1000</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.MiddleEar">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">MiddleEar</tt><big>(</big><em>source</em>, <em>gain=1</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.MiddleEar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implements the middle ear model from Tan &amp; Carney (2003) (linear filter
+with two pole pairs and one double zero). The gain is normalized for the
+response of the analog filter at 1000Hz as in the model of Tan &amp; Carney
+(their actual C code does however result in a slightly different
+normalization, the difference in overall level is about 0.33dB (to get
+exactly the same output as in their model, set the <cite>gain</cite> parameter to
+0.962512703689).</p>
+<p>Tan, Q., and L. H. Carney.
+&#8220;A Phenomenological Model for the Responses of Auditory-nerve Fibers.
+II. Nonlinear Tuning with a Frequency Glide&#8221;.
+The Journal of the Acoustical Society of America 114 (2003): 2007.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.TanCarney">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">TanCarney</tt><big>(</big><em>source</em>, <em>cf</em>, <em>update_interval=1</em>, <em>param=None</em><big>)</big><a class="headerlink" href="#brian.hears.TanCarney" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class implementing the nonlinear auditory filterbank model as described in
+Tan, G. and Carney, L., 
+&#8220;A phenomenological model for the responses of auditory-nerve
+fibers. II. Nonlinear tuning with a frequency glide&#8221;, JASA 2003.</p>
+<p>The model consists of a control path and a signal path. The control path
+controls both its own bandwidth via a feedback
+loop and also the bandwidth of the signal path.</p>
+<p>Initialised with arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">source</span></tt></dt>
+<dd>Source of the cochlear model.</dd>
+<dt><tt class="docutils literal"><span class="pre">cf</span></tt></dt>
+<dd>List or array of center frequencies.</dd>
+<dt><tt class="docutils literal"><span class="pre">update_interval</span></tt></dt>
+<dd>Interval in samples controlling how often the band pass filter of the
+signal pathway is updated. Smaller values are more accurate but
+increase the computation time.</dd>
+<dt><tt class="docutils literal"><span class="pre">param</span></tt></dt>
+<dd>Dictionary used to overwrite the default parameters given in the
+original paper.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.ZhangSynapse">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">ZhangSynapse</tt><big>(</big><em>source</em>, <em>CF</em>, <em>n_per_channel=1</em>, <em>params=None</em><big>)</big><a class="headerlink" href="#brian.hears.ZhangSynapse" title="Permalink to this definition">¶</a></dt>
+<dd><p>A <cite>FilterbankGroup</cite> that represents an IHC-AN synapse according to the
+Zhang et al. (2001) model. The <cite>source</cite> should be a filterbank, producing
+V_ihc (e.g. <cite>TanCarney</cite>). <cite>CF</cite> specifies the characteristic frequencies of
+the AN fibers. <cite>params</cite> overwrites any parameters values given in the
+publication.</p>
+<p>The group emits spikes according to a time-varying Poisson process with
+absolute and relative refractoriness (probability of spiking is given by
+state variable <tt class="docutils literal"><span class="pre">R</span></tt>). The continuous probability of spiking without
+refractoriness is available in the state variable <tt class="docutils literal"><span class="pre">s</span></tt>.</p>
+<p>The <cite>n_per_channel</cite> argument can be used to generate multiple spike trains
+for every channel.</p>
+<p>If all you need is the state variable <tt class="docutils literal"><span class="pre">s</span></tt>, you can use the class
+<cite>ZhangSynapseRate</cite> instead which does not simulate the spike-generating
+Poisson process.</p>
+<p>For details see:
+Zhang, X., M. G. Heinz, I. C. Bruce, and L. H. Carney.
+&#8220;A Phenomenological Model for the Responses of Auditory-nerve Fibers:
+I. Nonlinear Tuning with Compression and Suppression&#8221;.
+The Journal of the Acoustical Society of America 109 (2001): 648.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="filterbank-group">
+<h2>Filterbank group<a class="headerlink" href="#filterbank-group" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="brian.hears.FilterbankGroup">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">FilterbankGroup</tt><big>(</big><em>filterbank</em>, <em>targetvar</em>, <em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.FilterbankGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allows a Filterbank object to be used as a NeuronGroup</p>
+<p>Initialised as a standard <tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt> object, but with two
+additional arguments at the beginning, and no <tt class="docutils literal"><span class="pre">N</span></tt> (number of neurons)
+argument.  The number of neurons in the group will be the number of
+channels in the filterbank. (TODO: add reference to interleave/serial
+channel stuff here.)</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">filterbank</span></tt></dt>
+<dd>The Filterbank object to be used by the group. In fact, any Bufferable
+object can be used.</dd>
+<dt><tt class="docutils literal"><span class="pre">targetvar</span></tt></dt>
+<dd>The target variable to put the filterbank output into.</dd>
+</dl>
+<p>One additional keyword is available beyond that of <tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt>:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">buffersize=32</span></tt></dt>
+<dd>The size of the buffered segments to fetch each time. The efficiency
+depends on this in an unpredictable way, larger values mean more time
+spent in optimised code, but are worse for the cache. In many cases,
+the default value is a good tradeoff. Values can be given as a number
+of samples, or a length of time in seconds.</dd>
+</dl>
+<p>Note that if you specify your own <tt class="xref py py-class docutils literal"><span class="pre">Clock</span></tt>, it should have
+1/dt=samplerate.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="brian.hears.erbspace">
+<tt class="descclassname">brian.hears.</tt><tt class="descname">erbspace</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.erbspace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the centre frequencies on an ERB scale.</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">low</span></tt>, <tt class="docutils literal"><span class="pre">high</span></tt></dt>
+<dd>Lower and upper frequencies</dd>
+<dt><tt class="docutils literal"><span class="pre">N</span></tt></dt>
+<dd>Number of channels</dd>
+<dt><tt class="docutils literal"><span class="pre">earQ=9.26449</span></tt>, <tt class="docutils literal"><span class="pre">minBW=24.7</span></tt>, <tt class="docutils literal"><span class="pre">order=1</span></tt></dt>
+<dd>Default Glasberg and Moore parameters.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.hears.asymmetric_compensation_coeffs">
+<tt class="descclassname">brian.hears.</tt><tt class="descname">asymmetric_compensation_coeffs</tt><big>(</big><em>samplerate</em>, <em>fr</em>, <em>filt_b</em>, <em>filt_a</em>, <em>b</em>, <em>c</em>, <em>p0</em>, <em>p1</em>, <em>p2</em>, <em>p3</em>, <em>p4</em><big>)</big><a class="headerlink" href="#brian.hears.asymmetric_compensation_coeffs" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is used to generated the coefficient of the asymmetric
+compensation filter used for the gammachirp implementation.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="plotting">
+<h2>Plotting<a class="headerlink" href="#plotting" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="brian.hears.log_frequency_xaxis_labels">
+<tt class="descclassname">brian.hears.</tt><tt class="descname">log_frequency_xaxis_labels</tt><big>(</big><em>ax=None</em>, <em>freqs=None</em><big>)</big><a class="headerlink" href="#brian.hears.log_frequency_xaxis_labels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets tick positions for log-scale frequency x-axis at sensible locations.</p>
+<p>Also uses scalar representation rather than exponential (i.e. 100 rather
+than 10^2).</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">ax=None</span></tt></dt>
+<dd>The axis to set, or uses <tt class="docutils literal"><span class="pre">gca()</span></tt> if <tt class="docutils literal"><span class="pre">None</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">freqs=None</span></tt></dt>
+<dd>Override the default frequency locations with your preferred tick
+locations.</dd>
+</dl>
+<p>See also: <a class="reference internal" href="#brian.hears.log_frequency_yaxis_labels" title="brian.hears.log_frequency_yaxis_labels"><tt class="xref py py-func docutils literal"><span class="pre">log_frequency_yaxis_labels()</span></tt></a>.</p>
+<p>Note: with log scaled axes, it can be useful to call <tt class="docutils literal"><span class="pre">axis('tight')</span></tt>
+before setting the ticks.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.hears.log_frequency_yaxis_labels">
+<tt class="descclassname">brian.hears.</tt><tt class="descname">log_frequency_yaxis_labels</tt><big>(</big><em>ax=None</em>, <em>freqs=None</em><big>)</big><a class="headerlink" href="#brian.hears.log_frequency_yaxis_labels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets tick positions for log-scale frequency x-axis at sensible locations.</p>
+<p>Also uses scalar representation rather than exponential (i.e. 100 rather
+than 10^2).</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">ax=None</span></tt></dt>
+<dd>The axis to set, or uses <tt class="docutils literal"><span class="pre">gca()</span></tt> if <tt class="docutils literal"><span class="pre">None</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">freqs=None</span></tt></dt>
+<dd>Override the default frequency locations with your preferred tick
+locations.</dd>
+</dl>
+<p>See also: <a class="reference internal" href="#brian.hears.log_frequency_yaxis_labels" title="brian.hears.log_frequency_yaxis_labels"><tt class="xref py py-func docutils literal"><span class="pre">log_frequency_yaxis_labels()</span></tt></a>.</p>
+<p>Note: with log scaled axes, it can be useful to call <tt class="docutils literal"><span class="pre">axis('tight')</span></tt>
+before setting the ticks.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="hrtfs">
+<h2>HRTFs<a class="headerlink" href="#hrtfs" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="brian.hears.HRTF">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">HRTF</tt><big>(</big><em>hrir_l</em>, <em>hrir_r=None</em><big>)</big><a class="headerlink" href="#brian.hears.HRTF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Head related transfer function.</p>
+<p><strong>Attributes</strong></p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">impulse_response</span></tt></dt>
+<dd>The pair of impulse responses (as stereo <a class="reference internal" href="#brian.hears.Sound" title="brian.hears.Sound"><tt class="xref py py-class docutils literal"><span class="pre">Sound</span></tt></a> objects)</dd>
+<dt><tt class="docutils literal"><span class="pre">fir</span></tt></dt>
+<dd>The impulse responses in a format suitable for using with
+<a class="reference internal" href="#brian.hears.FIRFilterbank" title="brian.hears.FIRFilterbank"><tt class="xref py py-class docutils literal"><span class="pre">FIRFilterbank</span></tt></a> (the transpose of <tt class="docutils literal"><span class="pre">impulse_response</span></tt>).</dd>
+<dt><tt class="docutils literal"><span class="pre">left</span></tt>, <tt class="docutils literal"><span class="pre">right</span></tt></dt>
+<dd>The two HRTFs (mono <a class="reference internal" href="#brian.hears.Sound" title="brian.hears.Sound"><tt class="xref py py-class docutils literal"><span class="pre">Sound</span></tt></a> objects)</dd>
+<dt><tt class="docutils literal"><span class="pre">samplerate</span></tt></dt>
+<dd>The sample rate of the HRTFs.</dd>
+</dl>
+<p><strong>Methods</strong></p>
+<dl class="method">
+<dt id="brian.hears.HRTF.apply">
+<tt class="descname">apply</tt><big>(</big><em>sound</em><big>)</big><a class="headerlink" href="#brian.hears.HRTF.apply" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a stereo <a class="reference internal" href="#brian.hears.Sound" title="brian.hears.Sound"><tt class="xref py py-class docutils literal"><span class="pre">Sound</span></tt></a> object formed by applying the pair of
+HRTFs to the mono <tt class="docutils literal"><span class="pre">sound</span></tt> input. Equivalently, you can write
+<tt class="docutils literal"><span class="pre">hrtf(sound)</span></tt> for <tt class="docutils literal"><span class="pre">hrtf</span></tt> an <a class="reference internal" href="#brian.hears.HRTF" title="brian.hears.HRTF"><tt class="xref py py-class docutils literal"><span class="pre">HRTF</span></tt></a> object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.hears.HRTF.filterbank">
+<tt class="descname">filterbank</tt><big>(</big><em>source</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.HRTF.filterbank" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an <a class="reference internal" href="#brian.hears.FIRFilterbank" title="brian.hears.FIRFilterbank"><tt class="xref py py-class docutils literal"><span class="pre">FIRFilterbank</span></tt></a> object that can be used to apply
+the HRTF as part of a chain of filterbanks.</p>
+</dd></dl>
+
+<p>You can get the number of samples in the impulse response with <tt class="docutils literal"><span class="pre">len(hrtf)</span></tt>.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.HRTFSet">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">HRTFSet</tt><big>(</big><em>data</em>, <em>samplerate</em>, <em>coordinates</em><big>)</big><a class="headerlink" href="#brian.hears.HRTFSet" title="Permalink to this definition">¶</a></dt>
+<dd><p>A collection of HRTFs, typically for a single individual.</p>
+<p>Normally this object is created automatically by an <a class="reference internal" href="#brian.hears.HRTFDatabase" title="brian.hears.HRTFDatabase"><tt class="xref py py-class docutils literal"><span class="pre">HRTFDatabase</span></tt></a>.</p>
+<p><strong>Attributes</strong></p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">hrtf</span></tt></dt>
+<dd>A list of <tt class="docutils literal"><span class="pre">HRTF</span></tt> objects for each index.</dd>
+<dt><tt class="docutils literal"><span class="pre">num_indices</span></tt></dt>
+<dd>The number of HRTF locations. You can also use <tt class="docutils literal"><span class="pre">len(hrtfset)</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">num_samples</span></tt></dt>
+<dd>The sample length of each HRTF.</dd>
+<dt><tt class="docutils literal"><span class="pre">fir_serial</span></tt>, <tt class="docutils literal"><span class="pre">fir_interleaved</span></tt></dt>
+<dd>The impulse responses in a format suitable for using with
+<a class="reference internal" href="#brian.hears.FIRFilterbank" title="brian.hears.FIRFilterbank"><tt class="xref py py-class docutils literal"><span class="pre">FIRFilterbank</span></tt></a>, in serial (LLLLL...RRRRR....) or interleaved
+(LRLRLR...).</dd>
+</dl>
+<p><strong>Methods</strong></p>
+<dl class="method">
+<dt id="brian.hears.HRTFSet.subset">
+<tt class="descname">subset</tt><big>(</big><em>condition</em><big>)</big><a class="headerlink" href="#brian.hears.HRTFSet.subset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates the subset of the set of HRTFs whose coordinates satisfy
+the <tt class="docutils literal"><span class="pre">condition</span></tt>. This should be one of: a boolean array of
+length the number of HRTFs in the set, with values
+of True/False to indicate if the corresponding HRTF should be included
+or not; an integer array with the indices of the HRTFs to keep; or a
+function whose argument names are
+names of the parameters of the coordinate system, e.g.
+<tt class="docutils literal"><span class="pre">condition=lambda</span> <span class="pre">azim:azim&lt;pi/2</span></tt>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.hears.HRTFSet.filterbank">
+<tt class="descname">filterbank</tt><big>(</big><em>source</em>, <em>interleaved=False</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.HRTFSet.filterbank" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an <a class="reference internal" href="#brian.hears.FIRFilterbank" title="brian.hears.FIRFilterbank"><tt class="xref py py-class docutils literal"><span class="pre">FIRFilterbank</span></tt></a> object which applies all of the HRTFs
+in the set. If <tt class="docutils literal"><span class="pre">interleaved=False</span></tt> then
+the channels are arranged in the order LLLL...RRRR..., otherwise they
+are arranged in the order LRLRLR....</p>
+</dd></dl>
+
+<p>You can access an HRTF by index via <tt class="docutils literal"><span class="pre">hrtfset[index]</span></tt>, or
+by its coordinates via <tt class="docutils literal"><span class="pre">hrtfset(coord1=val1,</span> <span class="pre">coord2=val2)</span></tt>.</p>
+<p><strong>Initialisation</strong></p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">data</span></tt></dt>
+<dd>An array of shape (2, num_indices, num_samples) where data[0,:,:] is
+the left ear and data[1,:,:] is the right ear, num_indices is the number
+of HRTFs for each ear, and num_samples is the length of the HRTF.</dd>
+<dt><tt class="docutils literal"><span class="pre">samplerate</span></tt></dt>
+<dd>The sample rate for the HRTFs (should have units of Hz).</dd>
+<dt><tt class="docutils literal"><span class="pre">coordinates</span></tt></dt>
+<dd>A record array of length <tt class="docutils literal"><span class="pre">num_indices</span></tt> giving the coordinates of each
+HRTF. You can use <a class="reference internal" href="#brian.hears.make_coordinates" title="brian.hears.make_coordinates"><tt class="xref py py-func docutils literal"><span class="pre">make_coordinates()</span></tt></a> to help with this.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.HRTFDatabase">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">HRTFDatabase</tt><big>(</big><em>samplerate=None</em><big>)</big><a class="headerlink" href="#brian.hears.HRTFDatabase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for databases of HRTFs</p>
+<p>Should have an attribute &#8216;subjects&#8217; giving a list of available subjects,
+and a method <tt class="docutils literal"><span class="pre">load_subject(subject)</span></tt> which returns an <tt class="docutils literal"><span class="pre">HRTFSet</span></tt> for that
+subject.</p>
+<p>The initialiser should take (optional) keywords:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">samplerate</span></tt></dt>
+<dd>The intended samplerate (resampling will be used if it is wrong). If
+left unset, the natural samplerate of the data set will be used.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.hears.make_coordinates">
+<tt class="descclassname">brian.hears.</tt><tt class="descname">make_coordinates</tt><big>(</big><em>**kwds</em><big>)</big><a class="headerlink" href="#brian.hears.make_coordinates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a numpy record array from the keywords passed to the function.
+Each keyword/value pair should be the name of the coordinate the array of
+values of that coordinate for each location.
+Returns a numpy record array. For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">coords</span> <span class="o">=</span> <span class="n">make_coordinates</span><span class="p">(</span><span class="n">azimuth</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">60</span><span class="p">],</span>
+                          <span class="n">elevation</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">30</span><span class="p">])</span>
+<span class="k">print</span> <span class="n">coords</span><span class="p">[</span><span class="s">&#39;azimuth&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.IRCAM_LISTEN">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">IRCAM_LISTEN</tt><big>(</big><em>basedir</em>, <em>compensated=False</em>, <em>samplerate=None</em><big>)</big><a class="headerlink" href="#brian.hears.IRCAM_LISTEN" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#brian.hears.HRTFDatabase" title="brian.hears.HRTFDatabase"><tt class="xref py py-class docutils literal"><span class="pre">HRTFDatabase</span></tt></a> for the IRCAM LISTEN public HRTF database.</p>
+<p>For details on the database, see the
+<a class="reference external" href="http://recherche.ircam.fr/equipes/salles/listen/">website</a>.</p>
+<p>The database object can be initialised with the following arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">basedir</span></tt></dt>
+<dd>The directory where the database has been downloaded and extracted,
+e.g. <tt class="docutils literal"><span class="pre">r'D:\HRTF\IRCAM'</span></tt>. Multiple directories in a list can be provided as well (e.g IRCAM and IRCAM New).</dd>
+<dt><tt class="docutils literal"><span class="pre">compensated=False</span></tt></dt>
+<dd>Whether to use the raw or compensated impulse responses.</dd>
+<dt><tt class="docutils literal"><span class="pre">samplerate=None</span></tt></dt>
+<dd>If specified, you can resample the impulse responses to a different
+samplerate, otherwise uses the default 44.1 kHz.</dd>
+</dl>
+<p>The coordinates are pairs <tt class="docutils literal"><span class="pre">(azim,</span> <span class="pre">elev)</span></tt> where <tt class="docutils literal"><span class="pre">azim</span></tt> ranges from 0
+to 345 degrees in steps of 15 degrees, and elev ranges from -45 to 90 in
+steps of 15 degrees. After loading the database, the attribute &#8216;subjects&#8217; gives all the subjects number that were detected as installed.</p>
+<p><strong>Obtaining the database</strong></p>
+<p>The database can be downloaded
+<a class="reference external" href="http://recherche.ircam.fr/equipes/salles/listen/download.html">here</a>.
+Each subject archive should be extracted to a folder (e.g. IRCAM) with the
+names of the subject, e.g. IRCAM/IRC_1002, etc.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.HeadlessDatabase">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">HeadlessDatabase</tt><big>(</big><em>n=None</em>, <em>azim_max=1.5707963267948966</em>, <em>diameter=0.22308 * metre</em>, <em>itd=None</em>, <em>samplerate=None</em>, <em>fractional_itds=False</em><big>)</big><a class="headerlink" href="#brian.hears.HeadlessDatabase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Database for creating HRTFSet with artificial interaural time-differences</p>
+<p>Initialisation keywords:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">n</span></tt>, <tt class="docutils literal"><span class="pre">azim_max</span></tt>, <tt class="docutils literal"><span class="pre">diameter</span></tt></dt>
+<dd>Specify the ITDs for two ears separated by distance <tt class="docutils literal"><span class="pre">diameter</span></tt> with
+no head. ITDs corresponding to <tt class="docutils literal"><span class="pre">n</span></tt> angles equally spaced between
+<tt class="docutils literal"><span class="pre">-azim_max</span></tt> and <tt class="docutils literal"><span class="pre">azim_max</span></tt> are used. The default diameter is that
+which gives the maximum ITD as 650 microseconds. The ITDs are computed
+with the formula <tt class="docutils literal"><span class="pre">diameter*sin(azim)/speed_of_sound_in_air</span></tt>. In this
+case, the generated <a class="reference internal" href="#brian.hears.HRTFSet" title="brian.hears.HRTFSet"><tt class="xref py py-class docutils literal"><span class="pre">HRTFSet</span></tt></a> will have coordinates of <tt class="docutils literal"><span class="pre">azim</span></tt>
+and <tt class="docutils literal"><span class="pre">itd</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">itd</span></tt></dt>
+<dd>Instead of specifying the keywords above, just give the ITDs directly.
+In this case, the generated <a class="reference internal" href="#brian.hears.HRTFSet" title="brian.hears.HRTFSet"><tt class="xref py py-class docutils literal"><span class="pre">HRTFSet</span></tt></a> will have coordinates of
+<tt class="docutils literal"><span class="pre">itd</span></tt> only.</dd>
+<dt><tt class="docutils literal"><span class="pre">fractional_itds=False</span></tt></dt>
+<dd>Set this to <tt class="docutils literal"><span class="pre">True</span></tt> to allow ITDs with a fractional multiple of the
+timestep <tt class="docutils literal"><span class="pre">1/samplerate</span></tt>. Note that the filters used to do this are
+not perfect and so this will introduce a small amount of numerical
+error, and so shouldn&#8217;t be used unless this level of timing precision
+is required. See <tt class="xref py py-class docutils literal"><span class="pre">FractionalDelay</span></tt> for more details.</dd>
+</dl>
+<p>To get the HRTFSet, the simplest thing to do is just:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">hrtfset</span> <span class="o">=</span> <span class="n">HeadlessDatabase</span><span class="p">(</span><span class="mi">13</span><span class="p">)</span><span class="o">.</span><span class="n">load_subject</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The generated ITDs can be returned using the <tt class="docutils literal"><span class="pre">itd</span></tt> attribute of the
+<a class="reference internal" href="#brian.hears.HeadlessDatabase" title="brian.hears.HeadlessDatabase"><tt class="xref py py-class docutils literal"><span class="pre">HeadlessDatabase</span></tt></a> object.</p>
+<p>If <tt class="docutils literal"><span class="pre">fractional_itds=False</span></tt> then    
+Note that the delays induced in the left and right channels are not
+symmetric as making them so wastes half the samplerate (if the delay to
+the left channel is itd/2 and the delay to the right channel is -itd/2).
+Instead, for each channel either the left channel delay is 0 and the right
+channel delay is -itd (if itd&lt;0) or the left channel delay is itd and the
+right channel delay is 0 (if itd&gt;0).</p>
+<p>If <tt class="docutils literal"><span class="pre">fractional_itds=True</span></tt> then delays in the left and right channels will
+be symmetric around a global offset of <tt class="docutils literal"><span class="pre">delay_offset</span></tt>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="base-classes">
+<h2>Base classes<a class="headerlink" href="#base-classes" title="Permalink to this headline">¶</a></h2>
+<p>Useful for understanding more about the internals.</p>
+<dl class="class">
+<dt id="brian.hears.Bufferable">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">Bufferable</tt><a class="headerlink" href="#brian.hears.Bufferable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for Brian.hears classes</p>
+<p>Defines a buffering interface of two methods:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">buffer_init()</span></tt></dt>
+<dd>Initialise the buffer, should set the time pointer to zero and do
+any other initialisation that the object needs.</dd>
+<dt><tt class="docutils literal"><span class="pre">buffer_fetch(start,</span> <span class="pre">end)</span></tt></dt>
+<dd>Fetch the next samples <tt class="docutils literal"><span class="pre">start:end</span></tt> from the buffer. Value returned
+should be an array of shape <tt class="docutils literal"><span class="pre">(end-start,</span> <span class="pre">nchannels)</span></tt>. Can throw an
+<tt class="docutils literal"><span class="pre">IndexError</span></tt> exception if it is outside the possible range.</dd>
+</dl>
+<p>In addition, bufferable objects should define attributes:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">nchannels</span></tt></dt>
+<dd>The number of channels in the buffer.</dd>
+<dt><tt class="docutils literal"><span class="pre">samplerate</span></tt></dt>
+<dd>The sample rate in Hz.</dd>
+</dl>
+<p>By default, the class will define a default buffering mechanism which can
+easily be extended. To extend the default buffering mechanism, simply
+implement the method:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">buffer_fetch_next(samples)</span></tt></dt>
+<dd>Returns the next <tt class="docutils literal"><span class="pre">samples</span></tt> from the buffer.</dd>
+</dl>
+<p>The default methods for <tt class="docutils literal"><span class="pre">buffer_init()</span></tt> and <tt class="docutils literal"><span class="pre">buffer_fetch()</span></tt> will
+define a buffer cache which will get larger if it needs to to accommodate
+a <tt class="docutils literal"><span class="pre">buffer_fetch(start,</span> <span class="pre">end)</span></tt> where <tt class="docutils literal"><span class="pre">end-start</span></tt> is larger than the
+current cache. If the filterbank has a <tt class="docutils literal"><span class="pre">minimum_buffer_size</span></tt> attribute,
+the internal cache will always have at least this size, and the
+<tt class="docutils literal"><span class="pre">buffer_fetch_next(samples)</span></tt> method will always get called with
+<tt class="docutils literal"><span class="pre">samples&gt;=minimum_buffer_size</span></tt>. This can be useful to ensure that the
+buffering is done efficiently internally, even if the user request
+buffered chunks that are too small. If the filterbank has a
+<tt class="docutils literal"><span class="pre">maximum_buffer_size</span></tt> attribute then <tt class="docutils literal"><span class="pre">buffer_fetch_next(samples)</span></tt> will
+always be called with <tt class="docutils literal"><span class="pre">samples&lt;=maximum_buffer_size</span></tt> - this can be useful
+for either memory consumption reasons or for implementing time varying
+filters that need to update on a shorter time window than the overall
+buffer size.</p>
+<p>The following attributes will automatically be maintained:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">self.cached_buffer_start</span></tt>, <tt class="docutils literal"><span class="pre">self.cached_buffer_end</span></tt></dt>
+<dd>The start and end of the cached segment of the buffer</dd>
+<dt><tt class="docutils literal"><span class="pre">self.cached_buffer_output</span></tt></dt>
+<dd>An array of shape <tt class="docutils literal"><span class="pre">((cached_buffer_end-cached_buffer_start,</span> <span class="pre">nchannels)</span></tt>
+with the current cached segment of the buffer. Note that this array can
+change size.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.Filterbank">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">Filterbank</tt><big>(</big><em>source</em><big>)</big><a class="headerlink" href="#brian.hears.Filterbank" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generalised filterbank object</p>
+<p><strong>Documentation common to all filterbanks</strong></p>
+<p>Filterbanks all share a few basic attributes:</p>
+<dl class="attribute">
+<dt id="brian.hears.Filterbank.source">
+<tt class="descname">source</tt><a class="headerlink" href="#brian.hears.Filterbank.source" title="Permalink to this definition">¶</a></dt>
+<dd><p>The source of the filterbank, a <a class="reference internal" href="#brian.hears.Bufferable" title="brian.hears.Bufferable"><tt class="xref py py-class docutils literal"><span class="pre">Bufferable</span></tt></a> object, e.g. another
+<a class="reference internal" href="#brian.hears.Filterbank" title="brian.hears.Filterbank"><tt class="xref py py-class docutils literal"><span class="pre">Filterbank</span></tt></a> or a <a class="reference internal" href="#brian.hears.Sound" title="brian.hears.Sound"><tt class="xref py py-class docutils literal"><span class="pre">Sound</span></tt></a>. It can also be a tuple of 
+sources. Can be changed after the object
+is created, although note that for some filterbanks this may cause
+problems if they do make assumptions about the input based on the first
+source object they were passed. If this is causing problems, you can
+insert a dummy filterbank (<a class="reference internal" href="#brian.hears.DoNothingFilterbank" title="brian.hears.DoNothingFilterbank"><tt class="xref py py-class docutils literal"><span class="pre">DoNothingFilterbank</span></tt></a>) which is
+guaranteed to work if you change the source.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="brian.hears.Filterbank.nchannels">
+<tt class="descname">nchannels</tt><a class="headerlink" href="#brian.hears.Filterbank.nchannels" title="Permalink to this definition">¶</a></dt>
+<dd><p>The number of channels.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="brian.hears.Filterbank.samplerate">
+<tt class="descname">samplerate</tt><a class="headerlink" href="#brian.hears.Filterbank.samplerate" title="Permalink to this definition">¶</a></dt>
+<dd><p>The sample rate.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="brian.hears.Filterbank.duration">
+<tt class="descname">duration</tt><a class="headerlink" href="#brian.hears.Filterbank.duration" title="Permalink to this definition">¶</a></dt>
+<dd><p>The duration of the filterbank. If it is not specified by the user, it
+is computed by finding the maximum of its source durations. If these are
+not specified a <tt class="xref py py-class docutils literal"><span class="pre">KeyError</span></tt> will be raised (for example, using
+<a class="reference internal" href="#brian.hears.OnlineSound" title="brian.hears.OnlineSound"><tt class="xref py py-class docutils literal"><span class="pre">OnlineSound</span></tt></a> as a source).</p>
+</dd></dl>
+
+<p>To process the output of a filterbank, the following method can be used:</p>
+<dl class="method">
+<dt id="brian.hears.Filterbank.process">
+<tt class="descname">process</tt><big>(</big><em>func=None</em>, <em>duration=None</em>, <em>buffersize=32</em><big>)</big><a class="headerlink" href="#brian.hears.Filterbank.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the output of the filterbank for the given duration.</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">func</span></tt></dt>
+<dd>If a function is specified, it should be a function of one or two
+arguments that will be called on each filtered buffered segment
+(of shape <tt class="docutils literal"><span class="pre">(buffersize,</span> <span class="pre">nchannels)</span></tt> in order. If the function has
+one argument, the argument should be buffered segment. If it has
+two arguments, the second argument is the value returned by the
+previous application of the function (or 0 for the first
+application). In this case, the method will return the final
+value returned by the function. See example below.</dd>
+<dt><tt class="docutils literal"><span class="pre">duration=None</span></tt></dt>
+<dd>The length of time (in seconds) or number of samples to process.
+If no <tt class="docutils literal"><span class="pre">func</span></tt> is specified, the method will return an array of shape
+<tt class="docutils literal"><span class="pre">(duration,</span> <span class="pre">nchannels)</span></tt> with the filtered outputs. Note that in
+many cases, this will be too large to fit in memory, in which you
+will want to process the filtered outputs online, by providing
+a function <tt class="docutils literal"><span class="pre">func</span></tt> (see example below). If no duration is specified,
+the maximum duration of the inputs to the filterbank will be used,
+or an error raised if they do not have durations (e.g. in the case
+of <a class="reference internal" href="#brian.hears.OnlineSound" title="brian.hears.OnlineSound"><tt class="xref py py-class docutils literal"><span class="pre">OnlineSound</span></tt></a>).</dd>
+<dt><tt class="docutils literal"><span class="pre">buffersize=32</span></tt></dt>
+<dd>The size of the buffered segments to fetch, as a length of time or
+number of samples. 32 samples typically gives reasonably good
+performance.</dd>
+</dl>
+<p>For example, to compute the RMS of each channel in a filterbank, you
+would do:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">sum_of_squares</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">running_sum_of_squares</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">running_sum_of_squares</span><span class="o">+</span><span class="nb">sum</span><span class="p">(</span><span class="nb">input</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">rms</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">fb</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">sum_of_squares</span><span class="p">)</span><span class="o">/</span><span class="n">nsamples</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<p>Alternatively, the buffer interface can be used, which is described in
+more detail below.</p>
+<p>Filterbank also defines arithmetical operations for +, -, <tt class="docutils literal"><span class="pre">*</span></tt>, / where the other
+operand can be a filterbank or scalar.</p>
+<p><strong>Details on the class</strong></p>
+<p>This class is a base class not designed to be instantiated. A Filterbank
+object should define the interface of <a class="reference internal" href="#brian.hears.Bufferable" title="brian.hears.Bufferable"><tt class="xref py py-class docutils literal"><span class="pre">Bufferable</span></tt></a>, as well as
+defining a <tt class="docutils literal"><span class="pre">source</span></tt> attribute. This is normally a <a class="reference internal" href="#brian.hears.Bufferable" title="brian.hears.Bufferable"><tt class="xref py py-class docutils literal"><span class="pre">Bufferable</span></tt></a>
+object, but could be an iterable of sources (for example, for filterbanks
+that mix or add multiple inputs).</p>
+<p>The <tt class="docutils literal"><span class="pre">buffer_fetch_next(samples)</span></tt> method has a default implementation
+that fetches the next input, and calls the <tt class="docutils literal"><span class="pre">buffer_apply(input)</span></tt>
+method on it, which can be overridden by a derived class. This is typically
+the easiest way to implement a new filterbank. Filterbanks with multiple
+sources will need to override this default implementation.</p>
+<p>There is a default <tt class="docutils literal"><span class="pre">__init__</span></tt> method that can be called by a derived class
+that sets the <tt class="docutils literal"><span class="pre">source</span></tt>, <tt class="docutils literal"><span class="pre">nchannels</span></tt> and <tt class="docutils literal"><span class="pre">samplerate</span></tt> from that of the
+<tt class="docutils literal"><span class="pre">source</span></tt> object. For multiple sources, the default implementation will
+check that each source has the same number of channels and samplerate and
+will raise an error if not.</p>
+<p>There is a default <tt class="docutils literal"><span class="pre">buffer_init()</span></tt> method that calls <tt class="docutils literal"><span class="pre">buffer_init()</span></tt> on
+the <tt class="docutils literal"><span class="pre">source</span></tt> (or list of sources).</p>
+<p><strong>Example of deriving a class</strong></p>
+<p>The following class takes N input channels and sums them to a single output
+channel:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">AccumulateFilterbank</span><span class="p">(</span><span class="n">Filterbank</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">):</span>
+        <span class="n">Filterbank</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nchannels</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">def</span> <span class="nf">buffer_apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">reshape</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="nb">input</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Note that the default <tt class="docutils literal"><span class="pre">Filterbank.__init__</span></tt> will set the number of
+channels equal to the number of source channels, but we want to change it
+to have a single output channel. We use the <tt class="docutils literal"><span class="pre">buffer_apply</span></tt> method which
+automatically handles the efficient cacheing of the buffer for us. The
+method receives the array <tt class="docutils literal"><span class="pre">input</span></tt> which has shape <tt class="docutils literal"><span class="pre">(bufsize,</span> <span class="pre">nchannels)</span></tt>
+and sums over the channels (<tt class="docutils literal"><span class="pre">axis=1</span></tt>). It&#8217;s important to reshape the
+output so that it has shape <tt class="docutils literal"><span class="pre">(bufsize,</span> <span class="pre">outputnchannels)</span></tt> so that it can
+be used as the input to subsequent filterbanks.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.BaseSound">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">BaseSound</tt><a class="headerlink" href="#brian.hears.BaseSound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for Sound and OnlineSound</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.hears.OnlineSound">
+<em class="property">class </em><tt class="descclassname">brian.hears.</tt><tt class="descname">OnlineSound</tt><a class="headerlink" href="#brian.hears.OnlineSound" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="options">
+<span id="brian-hears-class-diagram"></span><h2>Options<a class="headerlink" href="#options" title="Permalink to this headline">¶</a></h2>
+<p>There are several relevant global options for Brian hears. In particular,
+activating scipy Weave support with the <tt class="docutils literal"><span class="pre">useweave=True</span></tt> will give considerably
+faster linear filtering. See <a class="reference internal" href="reference-preferences.html#preferences"><em>Preferences</em></a> and <a class="reference internal" href="compiledcode.html#compiled-code"><em>Compiled code</em></a> for
+more details.</p>
+</div>
+<div class="section" id="class-diagram">
+<h2>Class diagram<a class="headerlink" href="#class-diagram" title="Permalink to this headline">¶</a></h2>
+<p class="graphviz">
+<img src="_images/inheritance-7f3d1130fddff8adb213c95801e3b5d86cce3385.png" alt="Inheritance diagram of Sound, OnlineSound, Filterbank, LinearFilterbank, Gammatone, ApproximateGammatone, LogGammachirp, LinearGammachirp, LinearGaborchirp, Cascade, IIRFilterbank, Butterworth, LowPass, FIRFilterbank, RestructureFilterbank, Join, Interleave, Repeat, Tile, FunctionFilterbank, SumFilterbank, DoNothingFilterbank, ControlFilterbank, CombinedFilterbank, DRNL, DCGC, TanCarney, AsymmetricCompensation, HRTFDatabase, IRCAM_LISTEN, HeadlessDatabase" usemap="#inheritance2be6dda92e" class="inheritance"/>
+<map id="inheritance2be6dda92e" name="inheritance2be6dda92e">
+<area shape="rect" id="node1" title="Generalised linear filterbank" alt="" coords="148,43,180,50"/>
+<area shape="rect" id="node13" title="Bank of 1st&#45;order lowpass filters" alt="" coords="1,63,21,71"/>
+<area shape="rect" id="node15" title="Bank of approximate gammatone filters implemented as a cascade of ``order`` IIR gammatone filters." alt="" coords="28,63,77,71"/>
+<area shape="rect" id="node17" title="Filterbank of &#160;low, high, bandstop or bandpass &#160;Butterworth filters. " alt="" coords="83,63,109,71"/>
+<area shape="rect" id="node29" title="Filterbank of IIR filters. The filters can be low, high, bandstop or" alt="" coords="115,63,140,71"/>
+<area shape="rect" id="node40" title="Bank of gammachirp filters with a logarithmic frequency sweep." alt="" coords="147,63,181,71"/>
+<area shape="rect" id="node51" title="Bank of asymmetric compensation filters." alt="" coords="187,63,238,71"/>
+<area shape="rect" id="node53" title="Cascade of ``n`` times a linear filterbank. " alt="" coords="245,63,265,71"/>
+<area shape="rect" id="node61" title="Bank of gammatone filters." alt="" coords="272,63,299,71"/>
+<area shape="rect" id="node2" title="Generalised filterbank object" alt="" coords="505,22,527,30"/>
+<area shape="rect" id="node5" title="Finite impulse response filterbank" alt="" coords="352,43,379,50"/>
+<area shape="rect" id="node11" title="Filterbank that encapsulates a chain of filterbanks internally." alt="" coords="417,43,456,50"/>
+<area shape="rect" id="node23" title="Filterbank used to restructure channels, including repeating and interleaving." alt="" coords="474,43,515,50"/>
+<area shape="rect" id="node38" title="Filterbank that just applies a given function. The function should take" alt="" coords="521,43,557,50"/>
+<area shape="rect" id="node47" title="Filterbank that can be used for controlling behaviour at runtime" alt="" coords="564,43,598,50"/>
+<area shape="rect" id="node59" title="Filterbank that does nothing to its input." alt="" coords="604,43,644,50"/>
+<area shape="rect" id="node4" title="Bank of gammachirp filters with linear frequency sweeps and gaussian envelope" alt="" coords="305,63,340,71"/>
+<area shape="rect" id="node20" title="Bank of gammachirp filters with linear frequency sweeps and gamma envelope" alt="" coords="346,63,385,71"/>
+<area shape="rect" id="node7" title="Base class for Sound and OnlineSound" alt="" coords="662,22,686,30"/>
+<area shape="rect" id="node32" title="Class for working with sounds, including loading/saving, manipulating and playing." alt="" coords="650,43,669,50"/>
+<area shape="rect" id="node8" title="Base class for Brian.hears classes" alt="" coords="588,2,610,9"/>
+<area shape="rect" id="node10" title="Implementation of the dual resonance nonlinear (DRNL) filter" alt="" coords="391,63,410,71"/>
+<area shape="rect" id="node63" title="The compressive gammachirp auditory filter as described in Irino, T. and" alt="" coords="416,63,436,71"/>
+<area shape="rect" id="node65" title="Class implementing the nonlinear auditory filterbank model as described in" alt="" coords="442,63,465,71"/>
+<area shape="rect" id="node22" title="Filterbank that tiles the channels from its input, e.g. with 3 tiles" alt="" coords="472,63,491,71"/>
+<area shape="rect" id="node36" title="Filterbank that repeats each channel from its input, e.g. with 3 repeats" alt="" coords="497,63,516,71"/>
+<area shape="rect" id="node45" title="Filterbank that interleaves the channels of its inputs, e.g. with two" alt="" coords="523,63,546,71"/>
+<area shape="rect" id="node55" title="Filterbank that joins the channels of its inputs in series, e.g. with two" alt="" coords="552,63,571,71"/>
+<area shape="rect" id="node25" title="Database for creating HRTFSet with artificial interaural time&#45;differences" alt="" coords="693,22,730,30"/>
+<area shape="rect" id="node26" title="Base class for databases of HRTFs" alt="" coords="716,2,747,9"/>
+<area shape="rect" id="node42" title=":class:`HRTFDatabase` for the IRCAM LISTEN public HRTF database." alt="" coords="737,22,767,30"/>
+<area shape="rect" id="node34" title="ndarray(shape, dtype=float, buffer=None, offset=0," alt="" coords="636,22,655,30"/>
+<area shape="rect" id="node49" title="Sum filterbanks together with given weight vectors." alt="" coords="578,63,607,71"/>
+</map>
+</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Brian hears</a><ul>
+<li><a class="reference internal" href="#sounds">Sounds</a><ul>
+<li><a class="reference internal" href="#db">dB</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#filterbanks">Filterbanks</a></li>
+<li><a class="reference internal" href="#filterbank-library">Filterbank library</a></li>
+<li><a class="reference internal" href="#auditory-model-library">Auditory model library</a></li>
+<li><a class="reference internal" href="#filterbank-group">Filterbank group</a></li>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+<li><a class="reference internal" href="#plotting">Plotting</a></li>
+<li><a class="reference internal" href="#hrtfs">HRTFs</a></li>
+<li><a class="reference internal" href="#base-classes">Base classes</a></li>
+<li><a class="reference internal" href="#options">Options</a></li>
+<li><a class="reference internal" href="#class-diagram">Class diagram</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="reference-electrodecompensation.html"
+                        title="previous chapter">Electrode compensation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="reference-magic.html"
+                        title="next chapter">Magic in Brian</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/reference-hears.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="reference-magic.html" title="Magic in Brian"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="reference-electrodecompensation.html" title="Electrode compensation"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="reference.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

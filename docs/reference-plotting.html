@@ -1,0 +1,217 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Plotting &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Reference" href="reference.html" />
+    <link rel="next" title="Variable updating" href="reference-variableupdating.html" />
+    <link rel="prev" title="Monitors" href="reference-monitors.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="reference-variableupdating.html" title="Variable updating"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="reference-monitors.html" title="Monitors"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="reference.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="plotting">
+<span id="index-0"></span><h1>Plotting<a class="headerlink" href="#plotting" title="Permalink to this headline">¶</a></h1>
+<p id="index-1">Most plotting should be done with the PyLab commands, all of
+which are loaded when you import Brian. See:</p>
+<blockquote>
+<div><a class="reference external" href="http://matplotlib.sourceforge.net/matplotlib.pylab.html">http://matplotlib.sourceforge.net/matplotlib.pylab.html</a></div></blockquote>
+<p>for help on PyLab.</p>
+<p>Brian currently defines just two plotting functions of its own,
+<a class="reference internal" href="#brian.raster_plot" title="brian.raster_plot"><tt class="xref py py-func docutils literal"><span class="pre">raster_plot()</span></tt></a> and <a class="reference internal" href="#brian.hist_plot" title="brian.hist_plot"><tt class="xref py py-func docutils literal"><span class="pre">hist_plot()</span></tt></a>.</p>
+<span class="target" id="index-2"></span><dl class="function">
+<dt id="brian.raster_plot">
+<tt class="descclassname">brian.</tt><tt class="descname">raster_plot</tt><big>(</big><em>*monitors</em>, <em>**additionalplotoptions</em><big>)</big><a class="headerlink" href="#brian.raster_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raster plot of a <a class="reference internal" href="reference-monitors.html#brian.SpikeMonitor" title="brian.SpikeMonitor"><tt class="xref py py-class docutils literal"><span class="pre">SpikeMonitor</span></tt></a></p>
+<p><strong>Usage</strong></p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">raster_plot(monitor,options...)</span></tt></dt>
+<dd>Plots the spike times of the monitor
+on the x-axis, and the neuron number on the y-axis</dd>
+<dt><tt class="docutils literal"><span class="pre">raster_plot(monitor0,monitor1,...,options...)</span></tt></dt>
+<dd>Plots the spike times
+for all the monitors given, with y-axis defined by placing a spike
+from neuron n of m in monitor i at position i+n/m</dd>
+<dt><tt class="docutils literal"><span class="pre">raster_plot(options...)</span></tt></dt>
+<dd>Guesses the monitors to plot automagically</dd>
+</dl>
+<p><strong>Options</strong></p>
+<p>Any of PyLab options for the <tt class="docutils literal"><span class="pre">plot</span></tt> command can be given, as well as:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">showplot=False</span></tt></dt>
+<dd>set to <tt class="docutils literal"><span class="pre">True</span></tt> to run pylab&#8217;s <tt class="docutils literal"><span class="pre">show()</span></tt> function</dd>
+<dt><tt class="docutils literal"><span class="pre">newfigure=False</span></tt></dt>
+<dd>set to <tt class="docutils literal"><span class="pre">True</span></tt> to create a new figure with pylab&#8217;s <tt class="docutils literal"><span class="pre">figure()</span></tt> function</dd>
+<dt><tt class="docutils literal"><span class="pre">xlabel</span></tt></dt>
+<dd>label for the x-axis</dd>
+<dt><tt class="docutils literal"><span class="pre">ylabel</span></tt></dt>
+<dd>label for the y-axis</dd>
+<dt><tt class="docutils literal"><span class="pre">title</span></tt></dt>
+<dd>title for the plot</dd>
+<dt><tt class="docutils literal"><span class="pre">showgrouplines=False</span></tt></dt>
+<dd>set to <tt class="docutils literal"><span class="pre">True</span></tt> to show a line between each monitor</dd>
+<dt><tt class="docutils literal"><span class="pre">grouplinecol</span></tt></dt>
+<dd>colour for group lines</dd>
+<dt><tt class="docutils literal"><span class="pre">spacebetweengroups</span></tt></dt>
+<dd>value between 0 and 1 to insert a space between
+each group on the y-axis</dd>
+<dt><tt class="docutils literal"><span class="pre">refresh</span></tt></dt>
+<dd>Specify how often (in simulation time) you would like the plot to
+refresh. Note that this will only work if pylab is in interactive mode,
+to ensure this call the pylab <tt class="docutils literal"><span class="pre">ion()</span></tt> command.</dd>
+<dt><tt class="docutils literal"><span class="pre">showlast</span></tt></dt>
+<dd>If you are using the <tt class="docutils literal"><span class="pre">refresh</span></tt> option above, plots are much quicker
+if you specify a fixed time window to display (e.g. the last 100ms).</dd>
+<dt><tt class="docutils literal"><span class="pre">redraw</span></tt></dt>
+<dd>If you are using more than one realtime monitor, only one of them needs
+to issue a redraw command, therefore set this to <tt class="docutils literal"><span class="pre">False</span></tt> for all but
+one of them.</dd>
+</dl>
+<p>Note that with some IDEs, interactive plotting will not work with the
+default matplotlib backend, try doing something like this at the
+beginning of your script (before importing brian):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s">&#39;WXAgg&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You may need to experiment, try WXAgg, GTKAgg, QTAgg, TkAgg.</p>
+</dd></dl>
+
+<span class="target" id="index-3"></span><dl class="function">
+<dt id="brian.hist_plot">
+<tt class="descclassname">brian.</tt><tt class="descname">hist_plot</tt><big>(</big><em>histmon=None</em>, <em>**plotoptions</em><big>)</big><a class="headerlink" href="#brian.hist_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot a histogram</p>
+<p><strong>Usage</strong></p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">hist_plot(histmon,options...)</span></tt></dt>
+<dd>Plot the given histogram monitor</dd>
+<dt><tt class="docutils literal"><span class="pre">hist_plot(options...)</span></tt></dt>
+<dd>Guesses which histogram monitor to use</dd>
+</dl>
+<p>with argument:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">histmon</span></tt></dt>
+<dd>is a monitor of histogram type</dd>
+</dl>
+<p><strong>Notes</strong></p>
+<p>Plots only the first n-1 of n bars in the histogram, because
+the nth bar is for the interval (-,infinity).</p>
+<p><strong>Options</strong></p>
+<p>Any of PyLab options for bar can be given, as well as:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">showplot=False</span></tt></dt>
+<dd>set to <tt class="docutils literal"><span class="pre">True</span></tt> to run pylab&#8217;s <tt class="docutils literal"><span class="pre">show()</span></tt> function</dd>
+<dt><tt class="docutils literal"><span class="pre">newfigure=True</span></tt></dt>
+<dd>set to <tt class="docutils literal"><span class="pre">False</span></tt> not to create a new figure with pylab&#8217;s <tt class="docutils literal"><span class="pre">figure()</span></tt> function</dd>
+<dt><tt class="docutils literal"><span class="pre">xlabel</span></tt></dt>
+<dd>label for the x-axis</dd>
+<dt><tt class="docutils literal"><span class="pre">ylabel</span></tt></dt>
+<dd>label for the y-axis</dd>
+<dt><tt class="docutils literal"><span class="pre">title</span></tt></dt>
+<dd>title for the plot</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="reference-monitors.html"
+                        title="previous chapter">Monitors</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="reference-variableupdating.html"
+                        title="next chapter">Variable updating</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/reference-plotting.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="reference-variableupdating.html" title="Variable updating"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="reference-monitors.html" title="Monitors"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="reference.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

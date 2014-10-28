@@ -1,0 +1,220 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: MicheleGiugliano (twister) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: QuentinPauluis (twister)" href="examples-twister_QuentinPauluis.html" />
+    <link rel="prev" title="Example: anonymous (twister)" href="examples-twister_anonymous.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-twister_QuentinPauluis.html" title="Example: QuentinPauluis (twister)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-twister_anonymous.html" title="Example: anonymous (twister)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-michelegiugliano-twister">
+<span id="example-twister-michelegiugliano"></span><span id="index-0"></span><h1>Example: MicheleGiugliano (twister)<a class="headerlink" href="#example-michelegiugliano-twister" title="Permalink to this headline">¶</a></h1>
+<p>Michele Giugliano&#8217;s entry for the 2012 Brian twister.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c">#</span>
+<span class="c"># Figure5B - from Giugliano et al., 2004</span>
+<span class="c"># Journal of Neurophysiology 92(2):977-96</span>
+<span class="c">#</span>
+<span class="c"># implemented by Eleni Vasilaki &lt;e.vasilaki@sheffield.ac.uk&gt; and</span>
+<span class="c"># Michele Giugliano &lt;michele.giugliano@ua.ac.be&gt;</span>
+<span class="c">#</span>
+<span class="c"># A sparsely connected network of excitatory neurons, interacting</span>
+<span class="c"># via current-based synaptic interactions, and incorporating</span>
+<span class="c"># spike-frequency adaptation, is simulated.</span>
+<span class="c">#</span>
+<span class="c"># Its overall emerging firing rate activity replicates some of the features of</span>
+<span class="c"># spontaneous patterned electrical activity, observed experimentally in cultured</span>
+<span class="c"># networks of neurons dissociated from the neocortex.</span>
+<span class="c">#</span>
+<span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="c"># Parameters of the simulation</span>
+<span class="n">T</span>    <span class="o">=</span> <span class="mi">30000</span> <span class="o">*</span><span class="n">ms</span>     <span class="c"># life time of the simulation</span>
+<span class="n">N</span>    <span class="o">=</span> <span class="mi">100</span>           <span class="c"># total number of (excitatory) integrate-and-fire model neurons in the network</span>
+
+<span class="c"># Parameters of each model neuron, voltage dynamics</span>
+<span class="n">C</span>    <span class="o">=</span> <span class="mf">67.95</span> <span class="o">*</span><span class="n">pF</span>      <span class="c"># Membrane capacitance of single model neurons</span>
+<span class="n">tau</span>  <span class="o">=</span> <span class="mf">22.25</span>  <span class="o">*</span><span class="n">ms</span>     <span class="c"># Membrane time-constant of single model neurons</span>
+<span class="n">H</span>    <span class="o">=</span> <span class="mf">2.39</span> <span class="o">*</span><span class="n">mV</span>       <span class="c"># Reset voltage, mimicking hyperpolarization potential following a spike</span>
+<span class="n">theta</span><span class="o">=</span> <span class="mi">20</span> <span class="o">*</span><span class="n">mV</span>         <span class="c"># Threshold voltage for spike initiation</span>
+<span class="n">tauarp</span><span class="o">=</span><span class="mf">7.76</span> <span class="o">*</span><span class="n">ms</span>       <span class="c"># Absolute refractory period</span>
+
+<span class="c"># Parameters of each model neuron, spike-frequency adaptation dynamics</span>
+<span class="n">taua</span> <span class="o">=</span> <span class="mi">2100</span> <span class="o">*</span><span class="n">ms</span>       <span class="c"># Adaptation time constant</span>
+<span class="n">a</span>    <span class="o">=</span> <span class="mf">0.75</span> <span class="o">*</span><span class="n">pA</span>       <span class="c"># Adaptation scaling factor - NO ADAPTATION</span>
+<span class="n">D</span>    <span class="o">=</span> <span class="mi">1</span><span class="o">*</span><span class="n">ms</span>           <span class="c"># Unit consistency factor</span>
+<span class="n">temp</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">*</span><span class="n">ms</span><span class="o">**</span><span class="p">(</span><span class="o">-.</span><span class="mi">5</span><span class="p">)</span>  <span class="c"># Unit consistency factor</span>
+
+<span class="c"># Parameters of network connectivity</span>
+<span class="n">Cee</span>  <span class="o">=</span> <span class="mf">0.38</span>           <span class="c"># Sparseness of all-to-all random connectivity</span>
+<span class="n">taue</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">*</span><span class="n">ms</span>          <span class="c"># Decay time constant of excitatory EPSPs</span>
+<span class="n">delta</span><span class="o">=</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="n">ms</span>       <span class="c"># Conduction+synaptic propagation delay</span>
+<span class="n">J</span>    <span class="o">=</span> <span class="mf">14.5</span><span class="o">*</span> <span class="n">pA</span>       <span class="c"># Strenght of synaptic coupling, up to 18 *pA</span>
+
+<span class="c"># Parameters of background synaptic activity, modelled as a identical and independent noisy extra-input to each model neuron</span>
+<span class="n">m0</span>   <span class="o">=</span> <span class="mf">25.1</span> <span class="o">*</span><span class="n">pA</span>       <span class="c"># Mean background input current</span>
+<span class="n">s0</span>   <span class="o">=</span> <span class="mi">92</span> <span class="o">*</span><span class="n">pA</span>         <span class="c"># Std dev of the (noisy) background input current</span>
+
+<span class="c"># Each model neuron is described as a leaky integrate-and-fire with adaptation and current-driven synapses</span>
+<span class="n">eqs</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">dv/dt  = - v / tau - a/C * x  + Ie/C + (m0 + s0 * xi / temp)/C  : mV</span>
+<span class="s">dx/dt  = -x/taua   : 1</span>
+<span class="s">dIe/dt = -Ie/taue  : pA</span>
+<span class="s">&quot;&quot;&quot;</span>
+
+<span class="c"># Custom refractory mechanisms are employed here, to allow the membrane potential to be clamped to the reset value H</span>
+<span class="k">def</span> <span class="nf">myresetfunc</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">spikes</span><span class="p">):</span>
+ <span class="n">P</span><span class="o">.</span><span class="n">v</span><span class="p">[</span><span class="n">spikes</span><span class="p">]</span> <span class="o">=</span> <span class="n">H</span>   <span class="c">#reset voltage</span>
+ <span class="n">P</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">spikes</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>  <span class="c">#low pass filter of spikes (adaptation mechanism)</span>
+
+<span class="n">SCR</span> <span class="o">=</span> <span class="n">SimpleCustomRefractoriness</span><span class="p">(</span><span class="n">myresetfunc</span><span class="p">,</span> <span class="n">tauarp</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="s">&#39;v&#39;</span><span class="p">)</span>
+
+<span class="c"># The population of identical N model neuon is defined now</span>
+<span class="n">P</span> <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">eqs</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="n">SCR</span><span class="p">)</span>
+
+<span class="c"># The interneuronal connectivity is defined now</span>
+<span class="n">Ce</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="s">&#39;Ie&#39;</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">J</span><span class="p">,</span> <span class="n">sparseness</span><span class="o">=</span><span class="n">Cee</span><span class="p">,</span> <span class="n">delay</span><span class="o">=</span><span class="n">delta</span><span class="p">)</span>
+
+<span class="c"># Initialization of the state variables, for each model neuron</span>
+<span class="n">P</span><span class="o">.</span><span class="n">v</span>    <span class="o">=</span> <span class="n">rand</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">P</span><span class="p">))</span> <span class="o">*</span> <span class="mi">20</span> <span class="o">*</span> <span class="n">mV</span>  <span class="c">#membrane potential</span>
+<span class="n">P</span><span class="o">.</span><span class="n">x</span>    <span class="o">=</span> <span class="n">rand</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">P</span><span class="p">))</span> <span class="o">*</span> <span class="mi">2</span>        <span class="c">#low pass filter of spikes</span>
+<span class="n">P</span><span class="o">.</span><span class="n">Ie</span>   <span class="o">=</span> <span class="mi">0</span> <span class="o">*</span><span class="n">pA</span>                   <span class="c">#excitatory synaptic input</span>
+
+<span class="c"># Definition of tools for plotting and visualization of single neuron and population quantities</span>
+<span class="n">R</span>      <span class="o">=</span> <span class="n">PopulationRateMonitor</span><span class="p">(</span><span class="n">P</span><span class="p">)</span>
+<span class="n">M</span>      <span class="o">=</span> <span class="n">SpikeMonitor</span><span class="p">(</span><span class="n">P</span><span class="p">)</span>
+<span class="n">trace</span>  <span class="o">=</span> <span class="n">StateMonitor</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="s">&#39;v&#39;</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">tracex</span> <span class="o">=</span> <span class="n">StateMonitor</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="s">&#39;x&#39;</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="k">print</span> <span class="s">&quot;Simulation running... (long-lasting simulation: be patient)&quot;</span>
+<span class="n">run</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+
+<span class="k">print</span> <span class="s">&quot;Simulation completed! If you did not see any firing rate population burst (lower panel), then slightly increase J!&quot;</span>
+
+<span class="c"># Plot nice spikes - adapted from Brette&#39;s code</span>
+<span class="n">vm</span>       <span class="o">=</span> <span class="n">trace</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">spikes0</span>  <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">t</span> <span class="ow">in</span> <span class="n">M</span><span class="o">.</span><span class="n">spikes</span> <span class="k">if</span> <span class="n">i</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">spikes0</span><span class="p">)):</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">spikes0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">defaultclock</span><span class="o">.</span><span class="n">dt</span><span class="p">)</span>
+    <span class="n">vm</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="mi">80</span> <span class="o">*</span> <span class="n">mV</span>
+
+<span class="n">subplot</span><span class="p">(</span><span class="mi">311</span><span class="p">)</span> <span class="c">#membrane potential of neuron 0</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">trace</span><span class="o">.</span><span class="n">times</span> <span class="o">/</span> <span class="n">ms</span><span class="p">,</span> <span class="n">vm</span> <span class="o">/</span> <span class="n">mV</span> <span class="o">-</span> <span class="mi">60</span><span class="p">)</span>
+
+<span class="n">subplot</span><span class="p">(</span><span class="mi">312</span><span class="p">)</span> <span class="c">#raster plot</span>
+<span class="n">raster_plot</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+
+<span class="n">subplot</span><span class="p">(</span><span class="mi">313</span><span class="p">)</span> <span class="c">#smoothed population rate</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">R</span><span class="o">.</span><span class="n">times</span> <span class="o">/</span> <span class="n">ms</span><span class="p">,</span> <span class="n">R</span><span class="o">.</span><span class="n">smooth_rate</span><span class="p">(</span><span class="mi">5</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span> <span class="o">/</span> <span class="n">Hz</span><span class="p">,</span> <span class="n">tracex</span><span class="o">.</span><span class="n">times</span> <span class="o">/</span> <span class="n">ms</span><span class="p">,</span> <span class="n">tracex</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">120</span><span class="p">)</span>
+
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-twister_anonymous.html"
+                        title="previous chapter">Example: anonymous (twister)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-twister_QuentinPauluis.html"
+                        title="next chapter">Example: QuentinPauluis (twister)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-twister_MicheleGiugliano.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-twister_QuentinPauluis.html" title="Example: QuentinPauluis (twister)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-twister_anonymous.html" title="Example: anonymous (twister)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

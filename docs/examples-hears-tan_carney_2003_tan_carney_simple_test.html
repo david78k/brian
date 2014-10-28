@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: tan_carney_simple_test (hears/tan_carney_2003) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: compensation_ex2_spikes (electrophysiology)" href="examples-electrophysiology_compensation_ex2_spikes.html" />
+    <link rel="prev" title="Example: tan_carney_Fig7 (hears/tan_carney_2003)" href="examples-hears-tan_carney_2003_tan_carney_Fig7.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-electrophysiology_compensation_ex2_spikes.html" title="Example: compensation_ex2_spikes (electrophysiology)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-hears-tan_carney_2003_tan_carney_Fig7.html" title="Example: tan_carney_Fig7 (hears/tan_carney_2003)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-tan-carney-simple-test-hears-tan-carney-2003">
+<span id="example-hears-tan-carney-2003-tan-carney-simple-test"></span><span id="index-0"></span><h1>Example: tan_carney_simple_test (hears/tan_carney_2003)<a class="headerlink" href="#example-tan-carney-simple-test-hears-tan-carney-2003" title="Permalink to this headline">¶</a></h1>
+<p>Fig. 1 and 3 (spking output without spiking/refractory period) should
+reproduce the output of the AN3_test_tone.m and AN3_test_click.m
+scripts, available in the code accompanying the paper Tan &amp; Carney (2003).
+This matlab code is available from
+<a class="reference external" href="http://www.urmc.rochester.edu/labs/Carney-Lab/publications/auditory-models.cfm">http://www.urmc.rochester.edu/labs/Carney-Lab/publications/auditory-models.cfm</a></p>
+<p>Tan, Q., and L. H. Carney.
+&#8220;A Phenomenological Model for the Responses of Auditory-nerve Fibers.
+II. Nonlinear Tuning with a Frequency Glide&#8221;.
+The Journal of the Acoustical Society of America 114 (2003): 2007.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+
+<span class="kn">from</span> <span class="nn">brian.stdunits</span> <span class="kn">import</span> <span class="n">kHz</span><span class="p">,</span> <span class="n">Hz</span><span class="p">,</span> <span class="n">ms</span>
+<span class="kn">from</span> <span class="nn">brian.network</span> <span class="kn">import</span> <span class="n">Network</span>
+<span class="kn">from</span> <span class="nn">brian.monitor</span> <span class="kn">import</span> <span class="n">StateMonitor</span><span class="p">,</span> <span class="n">SpikeMonitor</span>
+<span class="kn">from</span> <span class="nn">brian.globalprefs</span> <span class="kn">import</span> <span class="n">set_global_preferences</span>
+
+<span class="c">#set_global_preferences(useweave=True)</span>
+<span class="kn">from</span> <span class="nn">brian.hears</span> <span class="kn">import</span> <span class="p">(</span><span class="n">Sound</span><span class="p">,</span> <span class="n">get_samplerate</span><span class="p">,</span> <span class="n">set_default_samplerate</span><span class="p">,</span> <span class="n">tone</span><span class="p">,</span>
+                         <span class="n">click</span><span class="p">,</span> <span class="n">silence</span><span class="p">,</span> <span class="n">dB</span><span class="p">,</span> <span class="n">TanCarney</span><span class="p">,</span> <span class="n">MiddleEar</span><span class="p">,</span> <span class="n">ZhangSynapse</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">brian.clock</span> <span class="kn">import</span> <span class="n">reinit_default_clock</span>
+
+
+<span class="n">set_default_samplerate</span><span class="p">(</span><span class="mi">50</span><span class="o">*</span><span class="n">kHz</span><span class="p">)</span>
+<span class="n">sample_length</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">get_samplerate</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+<span class="n">cf</span> <span class="o">=</span> <span class="mi">1000</span> <span class="o">*</span> <span class="n">Hz</span>
+
+<span class="k">print</span> <span class="s">&#39;Testing click response&#39;</span>
+<span class="n">duration</span> <span class="o">=</span> <span class="mi">25</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">levels</span> <span class="o">=</span> <span class="p">[</span><span class="mi">40</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">120</span><span class="p">]</span>
+<span class="c"># a click of two samples</span>
+<span class="n">tones</span> <span class="o">=</span> <span class="n">Sound</span><span class="p">([</span><span class="n">Sound</span><span class="o">.</span><span class="n">sequence</span><span class="p">([</span><span class="n">click</span><span class="p">(</span><span class="n">sample_length</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span> <span class="n">peak</span><span class="o">=</span><span class="n">level</span><span class="o">*</span><span class="n">dB</span><span class="p">),</span>
+                               <span class="n">silence</span><span class="p">(</span><span class="n">duration</span><span class="o">=</span><span class="n">duration</span> <span class="o">-</span> <span class="n">sample_length</span><span class="p">)])</span>
+           <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="n">levels</span><span class="p">])</span>
+<span class="n">ihc</span> <span class="o">=</span> <span class="n">TanCarney</span><span class="p">(</span><span class="n">MiddleEar</span><span class="p">(</span><span class="n">tones</span><span class="p">),</span> <span class="p">[</span><span class="n">cf</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">levels</span><span class="p">),</span> <span class="n">update_interval</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">syn</span> <span class="o">=</span> <span class="n">ZhangSynapse</span><span class="p">(</span><span class="n">ihc</span><span class="p">,</span> <span class="n">cf</span><span class="p">)</span>
+<span class="n">s_mon</span> <span class="o">=</span> <span class="n">StateMonitor</span><span class="p">(</span><span class="n">syn</span><span class="p">,</span> <span class="s">&#39;s&#39;</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">clock</span><span class="o">=</span><span class="n">syn</span><span class="o">.</span><span class="n">clock</span><span class="p">)</span>
+<span class="n">R_mon</span> <span class="o">=</span> <span class="n">StateMonitor</span><span class="p">(</span><span class="n">syn</span><span class="p">,</span> <span class="s">&#39;R&#39;</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">clock</span><span class="o">=</span><span class="n">syn</span><span class="o">.</span><span class="n">clock</span><span class="p">)</span>
+<span class="n">spike_mon</span> <span class="o">=</span> <span class="n">SpikeMonitor</span><span class="p">(</span><span class="n">syn</span><span class="p">)</span>
+<span class="n">net</span> <span class="o">=</span> <span class="n">Network</span><span class="p">(</span><span class="n">syn</span><span class="p">,</span> <span class="n">s_mon</span><span class="p">,</span> <span class="n">R_mon</span><span class="p">,</span> <span class="n">spike_mon</span><span class="p">)</span>
+<span class="n">net</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">duration</span> <span class="o">*</span> <span class="mf">1.5</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">levels</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">levels</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">s_mon</span><span class="o">.</span><span class="n">times</span> <span class="o">/</span> <span class="n">ms</span><span class="p">,</span> <span class="n">s_mon</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;Time (msec)&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;Sp/sec&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">s_mon</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span><span class="o">/</span><span class="mf">2.</span><span class="p">,</span> <span class="s">&#39;Peak SPL=</span><span class="si">%s</span><span class="s"> SPL&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">level</span><span class="o">*</span><span class="n">dB</span><span class="p">));</span>
+    <span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">&#39;Click responses&#39;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">levels</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">R_mon</span><span class="o">.</span><span class="n">times</span> <span class="o">/</span> <span class="n">ms</span><span class="p">,</span> <span class="n">R_mon</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;Time (msec)&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;Time (msec)&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">s_mon</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span><span class="o">/</span><span class="mf">2.</span><span class="p">,</span> <span class="s">&#39;Peak SPL=</span><span class="si">%s</span><span class="s"> SPL&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">level</span><span class="o">*</span><span class="n">dB</span><span class="p">));</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">&#39;Click responses (with spikes and refractoriness)&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">spike_mon</span><span class="o">.</span><span class="n">spiketimes</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">/</span> <span class="n">ms</span><span class="p">,</span>
+         <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spike_mon</span><span class="o">.</span><span class="n">spiketimes</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">R_mon</span><span class="p">[</span><span class="n">idx</span><span class="p">]),</span> <span class="s">&#39;rx&#39;</span><span class="p">)</span>
+
+<span class="k">print</span> <span class="s">&#39;Testing tone response&#39;</span>
+<span class="n">reinit_default_clock</span><span class="p">()</span>
+<span class="n">duration</span> <span class="o">=</span> <span class="mi">60</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">levels</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">80</span><span class="p">]</span>
+<span class="n">tones</span> <span class="o">=</span> <span class="n">Sound</span><span class="p">([</span><span class="n">Sound</span><span class="o">.</span><span class="n">sequence</span><span class="p">([</span><span class="n">tone</span><span class="p">(</span><span class="n">cf</span><span class="p">,</span> <span class="n">duration</span><span class="p">)</span><span class="o">.</span><span class="n">atlevel</span><span class="p">(</span><span class="n">level</span><span class="o">*</span><span class="n">dB</span><span class="p">)</span><span class="o">.</span><span class="n">ramp</span><span class="p">(</span><span class="n">when</span><span class="o">=</span><span class="s">&#39;both&#39;</span><span class="p">,</span>
+                                                                         <span class="n">duration</span><span class="o">=</span><span class="mi">10</span><span class="o">*</span><span class="n">ms</span><span class="p">,</span>
+                                                                         <span class="n">inplace</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+                               <span class="n">silence</span><span class="p">(</span><span class="n">duration</span><span class="o">=</span><span class="n">duration</span><span class="o">/</span><span class="mi">2</span><span class="p">)])</span>
+               <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="n">levels</span><span class="p">])</span>
+<span class="n">ihc</span> <span class="o">=</span> <span class="n">TanCarney</span><span class="p">(</span><span class="n">MiddleEar</span><span class="p">(</span><span class="n">tones</span><span class="p">),</span> <span class="p">[</span><span class="n">cf</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">levels</span><span class="p">),</span> <span class="n">update_interval</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">syn</span> <span class="o">=</span> <span class="n">ZhangSynapse</span><span class="p">(</span><span class="n">ihc</span><span class="p">,</span> <span class="n">cf</span><span class="p">)</span>
+<span class="n">s_mon</span> <span class="o">=</span> <span class="n">StateMonitor</span><span class="p">(</span><span class="n">syn</span><span class="p">,</span> <span class="s">&#39;s&#39;</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">clock</span><span class="o">=</span><span class="n">syn</span><span class="o">.</span><span class="n">clock</span><span class="p">)</span>
+<span class="n">R_mon</span> <span class="o">=</span> <span class="n">StateMonitor</span><span class="p">(</span><span class="n">syn</span><span class="p">,</span> <span class="s">&#39;R&#39;</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">clock</span><span class="o">=</span><span class="n">syn</span><span class="o">.</span><span class="n">clock</span><span class="p">)</span>
+<span class="n">spike_mon</span> <span class="o">=</span> <span class="n">SpikeMonitor</span><span class="p">(</span><span class="n">syn</span><span class="p">)</span>
+<span class="n">net</span> <span class="o">=</span> <span class="n">Network</span><span class="p">(</span><span class="n">syn</span><span class="p">,</span> <span class="n">s_mon</span><span class="p">,</span> <span class="n">R_mon</span><span class="p">,</span> <span class="n">spike_mon</span><span class="p">)</span>
+<span class="n">net</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">duration</span> <span class="o">*</span> <span class="mf">1.5</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">levels</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">levels</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">s_mon</span><span class="o">.</span><span class="n">times</span> <span class="o">/</span> <span class="n">ms</span><span class="p">,</span> <span class="n">s_mon</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">120</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;Time (msec)&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;Sp/sec&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">1.25</span> <span class="o">*</span> <span class="n">duration</span><span class="o">/</span><span class="n">ms</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">s_mon</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span><span class="o">/</span><span class="mf">2.</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> SPL&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">level</span><span class="o">*</span><span class="n">dB</span><span class="p">));</span>
+    <span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">&#39;CF=</span><span class="si">%.0f</span><span class="s"> Hz - Response to Tone at CF&#39;</span> <span class="o">%</span> <span class="n">cf</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">levels</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">R_mon</span><span class="o">.</span><span class="n">times</span> <span class="o">/</span> <span class="n">ms</span><span class="p">,</span> <span class="n">R_mon</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;Time (msec)&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;Time (msec)&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">1.25</span> <span class="o">*</span> <span class="n">duration</span><span class="o">/</span><span class="n">ms</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">R_mon</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span><span class="o">/</span><span class="mf">2.</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> SPL&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">level</span><span class="o">*</span><span class="n">dB</span><span class="p">));</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">&#39;CF=</span><span class="si">%.0f</span><span class="s"> Hz - Response to Tone at CF (with spikes and refractoriness)&#39;</span> <span class="o">%</span> <span class="n">cf</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">spike_mon</span><span class="o">.</span><span class="n">spiketimes</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">/</span> <span class="n">ms</span><span class="p">,</span>
+         <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spike_mon</span><span class="o">.</span><span class="n">spiketimes</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">R_mon</span><span class="p">[</span><span class="n">idx</span><span class="p">]),</span> <span class="s">&#39;rx&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-hears-tan_carney_2003_tan_carney_Fig7.html"
+                        title="previous chapter">Example: tan_carney_Fig7 (hears/tan_carney_2003)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-electrophysiology_compensation_ex2_spikes.html"
+                        title="next chapter">Example: compensation_ex2_spikes (electrophysiology)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-hears-tan_carney_2003_tan_carney_simple_test.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-electrophysiology_compensation_ex2_spikes.html" title="Example: compensation_ex2_spikes (electrophysiology)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-hears-tan_carney_2003_tan_carney_Fig7.html" title="Example: tan_carney_Fig7 (hears/tan_carney_2003)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

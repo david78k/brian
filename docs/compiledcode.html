@@ -1,0 +1,164 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Compiled code &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Advanced concepts" href="advanced.html" />
+    <link rel="next" title="Projects with multiple files or functions" href="tasks_multiplefiles.html" />
+    <link rel="prev" title="How to write efficient Brian code" href="efficient.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="tasks_multiplefiles.html" title="Projects with multiple files or functions"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="efficient.html" title="How to write efficient Brian code"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="advanced.html" accesskey="U">Advanced concepts</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="compiled-code">
+<span id="id1"></span><h1>Compiled code<a class="headerlink" href="#compiled-code" title="Permalink to this headline">¶</a></h1>
+<p>Compiled C code can be used in several places in Brian to get speed improvements in cases where performance
+is the most important factor.</p>
+<div class="section" id="weave">
+<h2>Weave<a class="headerlink" href="#weave" title="Permalink to this headline">¶</a></h2>
+<p>Weave is a SciPy module that allows the use of inlined C++ code. Brian by default doesn&#8217;t use any C++
+optimisations for maximum compatibility across platforms, but you can enable several optimised
+versions of Brian objects and functions by enabling weave compilation. See <a class="reference internal" href="reference-preferences.html#preferences"><em>Preferences</em></a>
+for more information.</p>
+<p>See also <a class="reference internal" href="efficient.html#efficiency-vectorisation"><em>Vectorisation</em></a> for some information on writing your own inlined C++ code
+using Weave.</p>
+</div>
+<div class="section" id="c-objects">
+<h2>C++ objects<a class="headerlink" href="#c-objects" title="Permalink to this headline">¶</a></h2>
+<p>For maximum compatibility, Brian works with pure Python only. However, as well as the optional
+weave optimisations, there are also objects can run with a pure C++ version for a considerable speedup.
+For this to work, you need a copy of the <tt class="docutils literal"><span class="pre">gcc</span></tt> compiler installed (either on Linux, Mac or through cygwin on Windows)
+to build them. During installation (via <tt class="docutils literal"><span class="pre">easy_install</span></tt>, <tt class="docutils literal"><span class="pre">pip</span></tt> or with <tt class="docutils literal"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">install</span></tt>), two objects
+are compiled automatically: <cite>brian.utils.fastexp.fastexp</cite> (providing a fast, approximate exponential function) and
+<cite>brian.utils.ccircular.ccircular</cite> (a circular array data structure). If the compilation fails, a warning message
+will be displayed and the pure Python versions used instead.</p>
+<p>In addition, it is possible to compile a C++ version of a more recent datastructure underlying the Synapses object, the <cite>SpikeQueue</cite>.
+To compile this object, follow these instructions:</p>
+<p>In a command prompt or shell window, go to the directory where Brian is installed. On Windows this
+will probably be <tt class="docutils literal"><span class="pre">C:\Python27\lib\site-packages\brian</span></tt>. Now
+go to the <tt class="docutils literal"><span class="pre">experimental/cspikequeue</span></tt> folder. If you&#8217;re on Linux (and this may also work for Mac) run
+the command <tt class="docutils literal"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">build_ext</span> <span class="pre">--inplace</span></tt>. If you&#8217;re on Windows you&#8217;ll need to have cygwin with gcc
+installed, and then you run <tt class="docutils literal"><span class="pre">setup.py</span> <span class="pre">build_ext</span> <span class="pre">--inplace</span> <span class="pre">-c</span> <span class="pre">mingw32</span></tt> instead. You should see some
+compilation, possibly with some warnings but no errors.</p>
+<p>If all works OK, you should see a UserWarning when importing Brian. You can uninstall (and effectively switch off) the use of the C++ SpikeQueue by removing the <tt class="docutils literal"><span class="pre">*.so</span></tt> file in the <tt class="docutils literal"><span class="pre">experimental/cspikequeue/</span></tt> directory. Repeating the steps above (i.e. recompiling the object) will re-enable the C SpikeQueue.</p>
+<p>The same steps can also be used for compiling the <cite>ccircular</cite> or <cite>fastexp</cite> if they were not already compiled automatically during installation, just navigate
+to the respective directory.</p>
+</div>
+<div class="section" id="automatically-generated-c-code">
+<h2>Automatically generated C code<a class="headerlink" href="#automatically-generated-c-code" title="Permalink to this headline">¶</a></h2>
+<p>There is an experimental module for automatic generation of C code, see
+<a class="reference internal" href="experimental-codegen.html#experimental-codegen"><em>Code generation</em></a>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Compiled code</a><ul>
+<li><a class="reference internal" href="#weave">Weave</a></li>
+<li><a class="reference internal" href="#c-objects">C++ objects</a></li>
+<li><a class="reference internal" href="#automatically-generated-c-code">Automatically generated C code</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="efficient.html"
+                        title="previous chapter">How to write efficient Brian code</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="tasks_multiplefiles.html"
+                        title="next chapter">Projects with multiple files or functions</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/compiledcode.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="tasks_multiplefiles.html" title="Projects with multiple files or functions"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="efficient.html" title="How to write efficient Brian code"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="advanced.html" >Advanced concepts</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

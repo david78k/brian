@@ -1,0 +1,261 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Variable updating &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Reference" href="reference.html" />
+    <link rel="next" title="Analysis" href="reference-analysis.html" />
+    <link rel="prev" title="Plotting" href="reference-plotting.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="reference-analysis.html" title="Analysis"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="reference-plotting.html" title="Plotting"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="reference.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="variable-updating">
+<h1>Variable updating<a class="headerlink" href="#variable-updating" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="timed-arrays">
+<h2>Timed Arrays<a class="headerlink" href="#timed-arrays" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="brian.TimedArray">
+<em class="property">class </em><tt class="descclassname">brian.</tt><tt class="descname">TimedArray</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.TimedArray" title="Permalink to this definition">¶</a></dt>
+<dd><p>An array where each value has an associated time.</p>
+<p>Initialisation arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">arr</span></tt></dt>
+<dd>The values of the array. The first index is the time index. Any
+array shape works in principle, but only 1D/2D arrays are
+supported (other shapes may work, but may not). The idea is to,
+have the shapes (T,) or (T, N) for T the number of time steps and
+N the number of neurons.</dd>
+<dt><tt class="docutils literal"><span class="pre">times</span></tt></dt>
+<dd>A 1D array of times whose length should be the same as the first
+dimension of <tt class="docutils literal"><span class="pre">arr</span></tt>. Usually it is preferable to specify a
+clock rather than an array of times, but this doesn&#8217;t work in
+the case where the time intervals are not fixed.</dd>
+<dt><tt class="docutils literal"><span class="pre">clock</span></tt></dt>
+<dd>Specify the times corresponding to array values by a clock. The
+<tt class="docutils literal"><span class="pre">t</span></tt> attribute of the clock is the time of the first value
+in the array, and the time interval is the <tt class="docutils literal"><span class="pre">dt</span></tt> attribute of
+the clock. If neither <tt class="docutils literal"><span class="pre">times</span></tt> nor <tt class="docutils literal"><span class="pre">clock</span></tt> is specified, a
+clock will be guessed in the usual way (see <a class="reference internal" href="reference-clocks.html#brian.Clock" title="brian.Clock"><tt class="xref py py-class docutils literal"><span class="pre">Clock</span></tt></a>).</dd>
+<dt><tt class="docutils literal"><span class="pre">start,</span> <span class="pre">dt</span></tt></dt>
+<dd>Rather than specifying a clock, you can specify the start time
+and time interval explicitly. Technically, this is useful
+because it doesn&#8217;t create a <a class="reference internal" href="reference-clocks.html#brian.Clock" title="brian.Clock"><tt class="xref py py-class docutils literal"><span class="pre">Clock</span></tt></a> object which can
+lead to ambiguity about which clock is the default. If dt is
+specified and start is not, start is assumed to be 0.</dd>
+</dl>
+<p>Note that if the clock, or start time and dt, of the array should be the
+default clock values, then you should not specify clock, start or dt (see
+Technical notes below).</p>
+<p>Arbitrary slicing of the array is supported, but the clock will only
+be preserved where the intervals can be guaranteed to be fixed, that
+is except for the case where lists or numpy arrays are used on the
+time index.</p>
+<p>Timed arrays can be called as if they were a function of time if the
+array times are based on a clock (but not if the array times are
+arbitrary as the look up costs would be excessive). If <tt class="docutils literal"><span class="pre">x(t)</span></tt> is called
+where <tt class="docutils literal"><span class="pre">times[i]&lt;=t&lt;times[i]+dt</span></tt> for some index i then <tt class="docutils literal"><span class="pre">x(t)</span></tt> will
+have the value <tt class="docutils literal"><span class="pre">x[i]</span></tt>. You can also call <tt class="docutils literal"><span class="pre">x(t)</span></tt> with <tt class="docutils literal"><span class="pre">t</span></tt> a 1D array.
+If x is 1D then <tt class="docutils literal"><span class="pre">x(t)[i]=x(t[i])</span></tt>, if x is 2D then <tt class="docutils literal"><span class="pre">x(t)[i]=x(t[i])[i]</span></tt>.</p>
+<p>Has one method:</p>
+<p>See also <a class="reference internal" href="#brian.TimedArraySetter" title="brian.TimedArraySetter"><tt class="xref py py-class docutils literal"><span class="pre">TimedArraySetter</span></tt></a>, <a class="reference internal" href="#brian.set_group_var_by_array" title="brian.set_group_var_by_array"><tt class="xref py py-func docutils literal"><span class="pre">set_group_var_by_array()</span></tt></a> and
+<a class="reference internal" href="reference-models-and-groups.html#brian.NeuronGroup" title="brian.NeuronGroup"><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></a>.</p>
+<p><strong>Technical notes</strong></p>
+<p>Note that specifying a new clock, or values of start and dt, will mean
+that if you use this <a class="reference internal" href="#brian.TimedArray" title="brian.TimedArray"><tt class="xref py py-class docutils literal"><span class="pre">TimedArray</span></tt></a> to set the value of a
+<a class="reference internal" href="reference-models-and-groups.html#brian.NeuronGroup" title="brian.NeuronGroup"><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></a> variable, it will be updated on the schedule of this
+clock, which can (due to floating point errors) induce some timing problems.
+This rarely happens, but if an occasional inaccuracy of order dt might
+conceivably be critical for your simulation, you should use
+<a class="reference internal" href="reference-clocks.html#brian.RegularClock" title="brian.RegularClock"><tt class="xref py py-class docutils literal"><span class="pre">RegularClock</span></tt></a> objects instead of <a class="reference internal" href="reference-clocks.html#brian.Clock" title="brian.Clock"><tt class="xref py py-class docutils literal"><span class="pre">Clock</span></tt></a> objects.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.TimedArraySetter">
+<em class="property">class </em><tt class="descclassname">brian.</tt><tt class="descname">TimedArraySetter</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.TimedArraySetter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets NeuronGroup values with a TimedArray.</p>
+<p>At the beginning of each update step, this object will set the
+values of a given state variable of a group with the value from
+the array corresponding to the current simulation time.</p>
+<p>Initialisation arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">group</span></tt></dt>
+<dd>The <a class="reference internal" href="reference-models-and-groups.html#brian.NeuronGroup" title="brian.NeuronGroup"><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></a> to which the variable belongs.</dd>
+<dt><tt class="docutils literal"><span class="pre">var</span></tt></dt>
+<dd>The name or index of the state variable in the group.</dd>
+<dt><tt class="docutils literal"><span class="pre">arr</span></tt></dt>
+<dd>The array of values used to set the variable in the group.
+Can be an array or a <a class="reference internal" href="#brian.TimedArray" title="brian.TimedArray"><tt class="xref py py-class docutils literal"><span class="pre">TimedArray</span></tt></a>. If it is an array,
+you should specify the <tt class="docutils literal"><span class="pre">times</span></tt> or <tt class="docutils literal"><span class="pre">clock</span></tt> arguments, or
+leave them blank to use the default clock.</dd>
+<dt><tt class="docutils literal"><span class="pre">times</span></tt></dt>
+<dd>Times corresponding to the array values, see <a class="reference internal" href="#brian.TimedArray" title="brian.TimedArray"><tt class="xref py py-class docutils literal"><span class="pre">TimedArray</span></tt></a>
+for more details.</dd>
+<dt><tt class="docutils literal"><span class="pre">clock</span></tt></dt>
+<dd>The clock for the <a class="reference internal" href="reference-network.html#brian.NetworkOperation" title="brian.NetworkOperation"><tt class="xref py py-class docutils literal"><span class="pre">NetworkOperation</span></tt></a>. If none is specified,
+use the group&#8217;s clock. If <tt class="docutils literal"><span class="pre">arr</span></tt> is not a <a class="reference internal" href="#brian.TimedArray" title="brian.TimedArray"><tt class="xref py py-class docutils literal"><span class="pre">TimedArray</span></tt></a>
+then this clock will be used to initialise it too.</dd>
+<dt><tt class="docutils literal"><span class="pre">start,</span> <span class="pre">dt</span></tt></dt>
+<dd>Can specify these instead of a clock (see <a class="reference internal" href="#brian.TimedArray" title="brian.TimedArray"><tt class="xref py py-class docutils literal"><span class="pre">TimedArray</span></tt></a> for
+details).</dd>
+<dt><tt class="docutils literal"><span class="pre">when</span></tt></dt>
+<dd>The standard <a class="reference internal" href="reference-network.html#brian.NetworkOperation" title="brian.NetworkOperation"><tt class="xref py py-class docutils literal"><span class="pre">NetworkOperation</span></tt></a> <tt class="docutils literal"><span class="pre">when</span></tt> keyword, although
+note that the default value is &#8216;start&#8217;.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.set_group_var_by_array">
+<tt class="descclassname">brian.</tt><tt class="descname">set_group_var_by_array</tt><big>(</big><em>*args</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.set_group_var_by_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets NeuronGroup values with a TimedArray.</p>
+<p>Creates a <a class="reference internal" href="#brian.TimedArraySetter" title="brian.TimedArraySetter"><tt class="xref py py-class docutils literal"><span class="pre">TimedArraySetter</span></tt></a>, see that class for details.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="linked-variables">
+<h2>Linked variables<a class="headerlink" href="#linked-variables" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="brian.linked_var">
+<tt class="descclassname">brian.</tt><tt class="descname">linked_var</tt><big>(</big><em>source</em>, <em>var=0</em>, <em>func=None</em>, <em>when='start'</em>, <em>clock=None</em><big>)</big><a class="headerlink" href="#brian.linked_var" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used for linking one <a class="reference internal" href="reference-models-and-groups.html#brian.NeuronGroup" title="brian.NeuronGroup"><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></a> variable to another.</p>
+<p>Sample usage:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">G</span> <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">H</span> <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">G</span><span class="o">.</span><span class="n">V</span> <span class="o">=</span> <span class="n">linked_var</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="s">&#39;W&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In this scenario, the variable V in group G will always be updated with
+the values from variable W in group H. The groups G and H must be the
+same size (although subgroups can be used if they are not the same size).</p>
+<p>Arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">source</span></tt></dt>
+<dd>The group from which values will be taken.</dd>
+<dt><tt class="docutils literal"><span class="pre">var</span></tt></dt>
+<dd>The state variable of the source group to take values from.</dd>
+<dt><tt class="docutils literal"><span class="pre">func</span></tt></dt>
+<dd>An additional function of one argument to pass the source variable
+values through, e.g. <tt class="docutils literal"><span class="pre">func=lambda</span> <span class="pre">x:clip(x,0,Inf)</span></tt> to half rectify the
+values.</dd>
+<dt><tt class="docutils literal"><span class="pre">when</span></tt></dt>
+<dd>The time in the main Brian loop at which the copy operation is performed,
+as explained in <a class="reference internal" href="reference-network.html#brian.Network" title="brian.Network"><tt class="xref py py-class docutils literal"><span class="pre">Network</span></tt></a>.</dd>
+<dt><tt class="docutils literal"><span class="pre">clock</span></tt></dt>
+<dd>The update clock for the copy operation, by default it will use the clock
+of the target group.</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Variable updating</a><ul>
+<li><a class="reference internal" href="#timed-arrays">Timed Arrays</a></li>
+<li><a class="reference internal" href="#linked-variables">Linked variables</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="reference-plotting.html"
+                        title="previous chapter">Plotting</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="reference-analysis.html"
+                        title="next chapter">Analysis</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/reference-variableupdating.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="reference-analysis.html" title="Analysis"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="reference-plotting.html" title="Plotting"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="reference.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

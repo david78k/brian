@@ -1,0 +1,229 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Analysis and plotting &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="User manual" href="usermanual.html" />
+    <link rel="next" title="Realtime control" href="realtime.html" />
+    <link rel="prev" title="User-defined operations" href="operations.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="realtime.html" title="Realtime control"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="operations.html" title="User-defined operations"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="usermanual.html" accesskey="U">User manual</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="analysis-and-plotting">
+<span id="index-0"></span><h1>Analysis and plotting<a class="headerlink" href="#analysis-and-plotting" title="Permalink to this headline">¶</a></h1>
+<p id="index-1">Most plotting should be done with the PyLab commands, all of
+which are loaded when you import Brian. See:</p>
+<blockquote>
+<div><a class="reference external" href="http://matplotlib.sourceforge.net/matplotlib.pylab.html">http://matplotlib.sourceforge.net/matplotlib.pylab.html</a></div></blockquote>
+<p>for help on PyLab. The scientific library <a class="reference external" href="http://www.scipy.org">Scipy</a> is also automatically
+imported by the instruction <tt class="docutils literal"><span class="pre">from</span> <span class="pre">brian</span> <span class="pre">import</span> <span class="pre">*</span></tt>.</p>
+<p>The most useful plotting instruction is the Pylab function <tt class="docutils literal"><span class="pre">plot</span></tt>. A typical use with Brian is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="o">/</span><span class="n">ms</span><span class="p">,</span><span class="n">vm</span><span class="o">/</span><span class="n">mV</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where t is a vector of times with units ms and vm is a vector of voltage values with units mV.
+To display the figures on the screen, the function <tt class="docutils literal"><span class="pre">show()</span></tt> must be called once (this should be the
+last line of your script), except when using IPython with the Pylab mode (<tt class="docutils literal"><span class="pre">ipython</span> <span class="pre">-pylab</span></tt>).</p>
+<p>Brian currently defines just two plotting functions of its own,
+<a class="reference internal" href="reference-plotting.html#brian.raster_plot" title="brian.raster_plot"><tt class="xref py py-func docutils literal"><span class="pre">raster_plot()</span></tt></a> and <a class="reference internal" href="reference-plotting.html#brian.hist_plot" title="brian.hist_plot"><tt class="xref py py-func docutils literal"><span class="pre">hist_plot()</span></tt></a>. In addition, the <a class="reference internal" href="reference-monitors.html#brian.StateMonitor" title="brian.StateMonitor"><tt class="xref py py-class docutils literal"><span class="pre">StateMonitor</span></tt></a>
+object has a <a class="reference internal" href="reference-monitors.html#brian.StateMonitor.plot" title="brian.StateMonitor.plot"><tt class="xref py py-meth docutils literal"><span class="pre">plot()</span></tt></a> method.</p>
+<div class="section" id="raster-plots">
+<h2>Raster plots<a class="headerlink" href="#raster-plots" title="Permalink to this headline">¶</a></h2>
+<p>Spike trains recorded by a <a class="reference internal" href="reference-monitors.html#brian.SpikeMonitor" title="brian.SpikeMonitor"><tt class="xref py py-class docutils literal"><span class="pre">SpikeMonitor</span></tt></a> can be displayed as raster plots:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">S</span><span class="o">=</span><span class="n">SpikeMonitor</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+<span class="o">...</span>
+<span class="n">raster_plot</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Usual options of the <tt class="docutils literal"><span class="pre">plot</span></tt> command can also be passed to <a class="reference internal" href="reference-plotting.html#brian.raster_plot" title="brian.raster_plot"><tt class="xref py py-func docutils literal"><span class="pre">raster_plot()</span></tt></a>. One may also pass
+several spike monitors as arguments.</p>
+</div>
+<div class="section" id="state-variable-plots">
+<h2>State variable plots<a class="headerlink" href="#state-variable-plots" title="Permalink to this headline">¶</a></h2>
+<p>State values recorded by a <a class="reference internal" href="reference-monitors.html#brian.StateMonitor" title="brian.StateMonitor"><tt class="xref py py-class docutils literal"><span class="pre">StateMonitor</span></tt></a> can also be plotted as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">M</span> <span class="o">=</span> <span class="n">StateMonitor</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="s">&#39;V&#39;</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
+<span class="o">...</span>
+<span class="n">M</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="realtime-plotting">
+<h2>Realtime plotting<a class="headerlink" href="#realtime-plotting" title="Permalink to this headline">¶</a></h2>
+<p>Both <a class="reference internal" href="reference-plotting.html#brian.raster_plot" title="brian.raster_plot"><tt class="xref py py-func docutils literal"><span class="pre">raster_plot()</span></tt></a> and <a class="reference internal" href="reference-monitors.html#brian.StateMonitor.plot" title="brian.StateMonitor.plot"><tt class="xref py py-meth docutils literal"><span class="pre">StateMonitor.plot()</span></tt></a> have real-time versions
+which update as the simulation runs, for example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">G</span> <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">spikemon</span> <span class="o">=</span> <span class="n">SpikeMonitor</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+<span class="n">statemon</span> <span class="o">=</span> <span class="n">StateMonitor</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="s">&#39;V&#39;</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">ion</span><span class="p">()</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+<span class="n">raster_plot</span><span class="p">(</span><span class="n">spikemon</span><span class="p">,</span> <span class="n">refresh</span><span class="o">=</span><span class="mi">10</span><span class="o">*</span><span class="n">ms</span><span class="p">,</span> <span class="n">showlast</span><span class="o">=</span><span class="mi">200</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">)</span>
+<span class="n">statemon</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">refresh</span><span class="o">=</span><span class="mi">10</span><span class="o">*</span><span class="n">ms</span><span class="p">,</span> <span class="n">showlast</span><span class="o">=</span><span class="mi">200</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+<span class="n">run</span><span class="p">(</span><span class="mi">1</span><span class="o">*</span><span class="n">second</span><span class="p">)</span>
+<span class="n">ioff</span><span class="p">()</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">ion()</span></tt> and <tt class="docutils literal"><span class="pre">ioff()</span></tt> command activate and deactivate Pylab&#8217;s interactive
+plotting mode. The <tt class="docutils literal"><span class="pre">refresh</span></tt> parameter specifies how often (in simulation
+time) to refresh the plot - smaller values will slow down the simulation. The
+<tt class="docutils literal"><span class="pre">showlast</span></tt> option only plots the most recent values.</p>
+<p>With some IDEs, you may need to do something like the following at the
+beginning of your script to make interactive mode work:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s">&#39;WXAgg&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This is because the default graphical backend can sometimes interact badly with
+the IDE. Other options to try are <tt class="docutils literal"><span class="pre">GTKAgg</span></tt>, <tt class="docutils literal"><span class="pre">QTAgg</span></tt>, <tt class="docutils literal"><span class="pre">TkAgg</span></tt>.</p>
+</div>
+<div class="section" id="statistics">
+<h2>Statistics<a class="headerlink" href="#statistics" title="Permalink to this headline">¶</a></h2>
+<p>Here are a few functions to analyse first and second order statistical properties
+of spike trains, defined as ordered lists of spike times:</p>
+<ul class="simple">
+<li>Firing rate: <tt class="docutils literal"><span class="pre">firing_rate(spikes)</span></tt> where <tt class="docutils literal"><span class="pre">spikes</span></tt> is a spike train (list of spike times).</li>
+<li>Coefficient of variation: <tt class="docutils literal"><span class="pre">CV(spikes)</span></tt>.</li>
+<li>Cross-correlogram: <tt class="docutils literal"><span class="pre">correlogram(T1,T2,width=20*ms,bin=1*ms,T=None)</span></tt> returns
+the cross-correlogram of spike trains T1 and T2 with lag in [-width,width] and given bin size.
+T is the total duration (optional) and should be greater than the duration of T1 and T2.
+The result the rate of coincidences in each bin, returned as an array.</li>
+<li>Autocorrelogram: <tt class="docutils literal"><span class="pre">autocorrelogram(T0,width=20*ms,bin=1*ms,T=None)</span></tt> is the same as
+<tt class="docutils literal"><span class="pre">correlogram(T0,T0,width=20*ms,bin=1*ms,T=None)</span></tt>.</li>
+<li>Cross-correlation function: <tt class="docutils literal"><span class="pre">CCF(T1,T2,width=20*ms,bin=1*ms,T=None)</span></tt> returns the cross-correlation
+function of T1 and T2, which is the same as the cross-correlogram divided by the bin size (which makes the
+result independent of the bin size).</li>
+<li>Autocorrelation function: <tt class="docutils literal"><span class="pre">ACF(T0,width=20*ms,bin=1*ms,T=None)</span></tt>, same as
+<tt class="docutils literal"><span class="pre">CCF(T0,T0,width=20*ms,bin=1*ms,T=None)</span></tt>.</li>
+<li>Cross-covariance function: <tt class="docutils literal"><span class="pre">CCVF(T1,T2,width=20*ms,bin=1*ms,T=None)</span></tt> is the cross-correlation
+function of T1 and T2 minus for the cross-correlation of independent spike trains with the same rates
+(product of rates).</li>
+<li>Auto-covariance function: <tt class="docutils literal"><span class="pre">ACVF(T0,width=20*ms,bin=1*ms,T=None)</span></tt> is the same as
+<tt class="docutils literal"><span class="pre">CCVF(T0,T0,width=20*ms,bin=1*ms,T=None)</span></tt>.</li>
+<li>Total correlation coefficient: <tt class="docutils literal"><span class="pre">total_correlation(T1,T2,width=20*ms,T=None)</span></tt> is
+the integral of the cross-covariance function divided by the rate of T1, typically (but not
+always) between 0 and 1.</li>
+<li>Vector strength: <tt class="docutils literal"><span class="pre">vector_strength(spikes,period)</span></tt> returns the vector strength of the given
+spike train with respect to the period. If each spike time with phase phi is represented by
+a vector with angle phi, then the vector strength is the length of the average vector.
+It equals 1 for spikes with constant phase and 0 for homogeneous phase distributions.</li>
+<li>Gamma precision factor: <tt class="docutils literal"><span class="pre">gamma_factor(source,</span> <span class="pre">target,</span> <span class="pre">delta)</span></tt> returns the gamma precision
+factor between source and target trains, with precision delta.</li>
+</ul>
+<p>These functions return NaN (not a number) when a spike train is empty.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Analysis and plotting</a><ul>
+<li><a class="reference internal" href="#raster-plots">Raster plots</a></li>
+<li><a class="reference internal" href="#state-variable-plots">State variable plots</a></li>
+<li><a class="reference internal" href="#realtime-plotting">Realtime plotting</a></li>
+<li><a class="reference internal" href="#statistics">Statistics</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="operations.html"
+                        title="previous chapter">User-defined operations</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="realtime.html"
+                        title="next chapter">Realtime control</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/analysis.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="realtime.html" title="Realtime control"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="operations.html" title="User-defined operations"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="usermanual.html" >User manual</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

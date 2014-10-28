@@ -1,0 +1,295 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: PierreYger (twister) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: anonymous (twister)" href="examples-twister_anonymous.html" />
+    <link rel="prev" title="Example: FriedemannZenke (twister)" href="examples-twister_FriedemannZenke.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-twister_anonymous.html" title="Example: anonymous (twister)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-twister_FriedemannZenke.html" title="Example: FriedemannZenke (twister)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-pierreyger-twister">
+<span id="example-twister-pierreyger"></span><span id="index-0"></span><h1>Example: PierreYger (twister)<a class="headerlink" href="#example-pierreyger-twister" title="Permalink to this headline">¶</a></h1>
+<p>Pierre Yger&#8217;s winning entry for the 2012 Brian twister.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">numpy</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">pylab</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">An implementation of a simple topographical network, like those used in Mehring 2005 or Yger 2011.</span>
+<span class="sd">Cells are aranged randomly on a 2D plane and connected according to a gaussian profile</span>
+<span class="sd">P(r) = exp(-d**2/(2*sigma**2)), with delays depending linearly on the distances.</span>
+<span class="sd">Note that the exact number of synapses per neuron is not fixed here.</span>
+
+<span class="sd">To avoid any border conditions, the plane is considered to be toroidal.</span>
+<span class="sd">Script will generate an Synchronous Irregular (SI) slow regime with propagating</span>
+<span class="sd">waves that will spread in various directions, wandering over the network.</span>
+
+<span class="sd">In addition, an external layer of Poisson sources will stimulates some cells on the network, with</span>
+<span class="sd">a wiring scheme such that the word BRIAN will pop up. External rates can be turned off to observed the</span>
+<span class="sd">spontaneous activity of the 2D layer. One can observe that despite the inputs is constant, the network</span>
+<span class="sd">is not always responding to it.</span>
+
+<span class="sd">The script will display, while running, the spikes and Vm of the excitatory cells.</span>
+
+<span class="sd">Varying sigma will show the various activity structures from a random network (s_lat &gt; 1), to a very</span>
+<span class="sd">locally connected one (s_lat &lt; 0.1)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c">### We are setting the global timestep of the simulation</span>
+<span class="n">Clock</span><span class="p">(</span><span class="mf">0.1</span> <span class="o">*</span> <span class="n">ms</span><span class="p">)</span>
+
+<span class="c">### Cell parameters ###</span>
+<span class="n">tau_m</span>   <span class="o">=</span> <span class="mf">20.</span> <span class="o">*</span> <span class="n">ms</span> <span class="c"># Membrane time constant</span>
+<span class="n">c_m</span>     <span class="o">=</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="n">nF</span> <span class="c"># Capacitance</span>
+<span class="n">tau_exc</span> <span class="o">=</span>  <span class="mf">3.</span> <span class="o">*</span> <span class="n">ms</span> <span class="c"># Synaptic time constant (excitatory)</span>
+<span class="n">tau_inh</span> <span class="o">=</span>  <span class="mf">7.</span> <span class="o">*</span> <span class="n">ms</span> <span class="c"># Synaptic time constant (inhibitory)</span>
+<span class="n">tau_ref</span> <span class="o">=</span>  <span class="mf">5.</span> <span class="o">*</span> <span class="n">ms</span> <span class="c"># Refractory period</span>
+<span class="n">El</span>      <span class="o">=</span> <span class="o">-</span><span class="mi">80</span> <span class="o">*</span> <span class="n">mV</span> <span class="c"># Leak potential</span>
+<span class="n">Ee</span>      <span class="o">=</span>  <span class="mf">0.</span> <span class="o">*</span> <span class="n">mV</span> <span class="c"># Reversal potential (excitation)</span>
+<span class="n">Ei</span>      <span class="o">=</span> <span class="o">-</span><span class="mf">70.</span><span class="o">*</span> <span class="n">mV</span> <span class="c"># Reversal potential (inhibition)</span>
+<span class="n">Vt</span>      <span class="o">=</span> <span class="o">-</span><span class="mi">50</span> <span class="o">*</span> <span class="n">mV</span> <span class="c"># Spike Threhold</span>
+<span class="n">Vr</span>      <span class="o">=</span> <span class="o">-</span><span class="mi">60</span> <span class="o">*</span> <span class="n">mV</span> <span class="c"># Spike Reset</span>
+
+<span class="c">### Equation for a Conductance-based IAF ####</span>
+<span class="n">eqs</span> <span class="o">=</span> <span class="n">Equations</span><span class="p">(</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">dv/dt  = (El-v)/tau_m + (ge*(Ee-v)+gi*(Ei-v))/c_m : volt</span>
+<span class="s">dge/dt = -ge*(1./tau_exc) : uS</span>
+<span class="s">dgi/dt = -gi*(1./tau_inh) : uS</span>
+<span class="s">&#39;&#39;&#39;</span><span class="p">)</span>
+
+<span class="n">n_cells</span>       <span class="o">=</span> <span class="mi">12500</span>                   <span class="c"># Total number of cells</span>
+<span class="n">n_exc</span>         <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.8</span> <span class="o">*</span> <span class="n">n_cells</span><span class="p">)</span>      <span class="c"># 4:1 ratio for exc/inh</span>
+<span class="n">size</span>          <span class="o">=</span> <span class="mf">1.</span>                      <span class="c"># Size of the network</span>
+<span class="n">simtime</span>       <span class="o">=</span> <span class="mi">1000</span> <span class="o">*</span> <span class="n">ms</span>               <span class="c"># Simulation time</span>
+<span class="n">sim_step</span>      <span class="o">=</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ms</span>                  <span class="c"># Display snapshots every sim_step ms</span>
+<span class="n">epsilon</span>       <span class="o">=</span> <span class="mf">0.02</span>                    <span class="c"># Probability density</span>
+<span class="n">s_lat</span>         <span class="o">=</span> <span class="mf">0.2</span>                     <span class="c"># Spread of the lateral connections</span>
+<span class="n">g_exc</span>         <span class="o">=</span> <span class="mf">4.</span>  <span class="o">*</span> <span class="n">nS</span>                <span class="c"># Excitatory conductance</span>
+<span class="n">g_inh</span>         <span class="o">=</span> <span class="mf">64.</span> <span class="o">*</span> <span class="n">nS</span>                <span class="c"># Inhibitory conductance</span>
+<span class="n">g_ext</span>         <span class="o">=</span> <span class="mi">200</span> <span class="o">*</span> <span class="n">nS</span>                <span class="c"># External drive</span>
+<span class="n">velocity</span>      <span class="o">=</span> <span class="mf">0.3</span> <span class="o">*</span> <span class="n">mm</span><span class="o">/</span><span class="n">ms</span>             <span class="c"># velocity</span>
+<span class="n">ext_rate</span>      <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">Hz</span>                <span class="c"># Rate of the external source</span>
+<span class="n">max_distance</span>  <span class="o">=</span> <span class="n">size</span> <span class="o">*</span> <span class="n">mm</span><span class="o">/</span><span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="c"># Since this is a torus</span>
+<span class="n">max_delay</span>     <span class="o">=</span> <span class="n">max_distance</span><span class="o">/</span><span class="n">velocity</span>   <span class="c"># Needed for the connectors</span>
+
+<span class="c">### Generate the images with the letters B, R, I, A, N</span>
+<span class="c">### To do that, we create a png image and read it as a matrix</span>
+<span class="n">pylab</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">pylab</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.125</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="s">&quot;B R I A N&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">80</span><span class="p">)</span>
+<span class="n">pylab</span><span class="o">.</span><span class="n">setp</span><span class="p">(</span><span class="n">gca</span><span class="p">(),</span> <span class="n">xticks</span><span class="o">=</span><span class="p">[],</span> <span class="n">yticks</span><span class="o">=</span><span class="p">[])</span>
+<span class="n">pylab</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s">&quot;BRIAN.png&quot;</span><span class="p">)</span>
+<span class="n">brian_letters</span> <span class="o">=</span> <span class="n">imread</span><span class="p">(</span><span class="s">&quot;BRIAN.png&quot;</span><span class="p">)</span>
+<span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s">&quot;BRIAN.png&quot;</span><span class="p">)</span>
+<span class="n">brian_letters</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">mean</span><span class="p">(</span><span class="n">brian_letters</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+<span class="n">pylab</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="c">### We create the cells and generate random positons in [0, size]x[0, size]</span>
+<span class="n">all_cells</span>          <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="n">n_cells</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">eqs</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">Vt</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="n">Vr</span><span class="p">,</span> <span class="n">refractory</span><span class="o">=</span><span class="n">tau_ref</span><span class="p">)</span>
+<span class="n">all_cells</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">size</span><span class="o">*</span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">n_cells</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">exc_cells</span>          <span class="o">=</span> <span class="n">all_cells</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">n_exc</span><span class="p">]</span>
+<span class="n">inh_cells</span>          <span class="o">=</span> <span class="n">all_cells</span><span class="p">[</span><span class="n">n_exc</span><span class="p">:</span><span class="n">n_cells</span><span class="p">]</span>
+
+<span class="c">### We initialize v values slightly above Vt, to have initial spikes</span>
+<span class="n">all_cells</span><span class="o">.</span><span class="n">v</span>        <span class="o">=</span> <span class="n">El</span> <span class="o">+</span> <span class="mf">1.1</span><span class="o">*</span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">n_cells</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">Vt</span> <span class="o">-</span> <span class="n">El</span><span class="p">)</span>
+
+<span class="c">### Now we create the source that will write the word BRIAN</span>
+<span class="n">sources</span>            <span class="o">=</span> <span class="n">PoissonGroup</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ext_rate</span><span class="p">)</span>
+<span class="n">sources</span><span class="o">.</span><span class="n">position</span>   <span class="o">=</span> <span class="n">array</span><span class="p">([[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]])</span>
+
+<span class="c">### Function to get the distance between one position and an array of positions</span>
+<span class="c">### This is needed to used the vectorized form of the connections in the brian.Connection objects</span>
+<span class="c">### Note that the plane is wrapped, to avoid any border effects.</span>
+<span class="k">def</span> <span class="nf">get_distance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="n">d1</span>       <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">y</span><span class="p">)</span>
+    <span class="n">min_d</span>    <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">size</span> <span class="o">-</span> <span class="n">d1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">min_d</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+<span class="c">### Function returning the probabilities of connections as a functions of distances</span>
+<span class="k">def</span> <span class="nf">probas</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="n">distance</span> <span class="o">=</span> <span class="n">get_distance</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">distance</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">s_lat</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+
+<span class="c">### Function returning linear delays as function of distances</span>
+<span class="k">def</span> <span class="nf">delays</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="n">distance</span> <span class="o">=</span> <span class="n">get_distance</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+    <span class="k">return</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">ms</span> <span class="o">+</span> <span class="p">(</span><span class="n">distance</span> <span class="o">*</span> <span class="n">mm</span> <span class="p">)</span><span class="o">/</span> <span class="n">velocity</span>
+
+<span class="c">### Function assessing if a cell is located in a particular letter of the word BRIAN</span>
+<span class="c">### Return 0 if not, and 1 if yes.</span>
+<span class="k">def</span> <span class="nf">is_in_brian</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span>         <span class="o">=</span> <span class="n">brian_letters</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">tmp_x</span><span class="p">,</span> <span class="n">tmp_y</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">j</span><span class="p">][:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">a</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">j</span><span class="p">][:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">b</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">brian_letters</span><span class="p">[</span><span class="n">tmp_x</span><span class="p">,</span> <span class="n">tmp_y</span><span class="p">]</span>
+
+
+<span class="k">print</span> <span class="s">&quot;Building network with wrapped 2D gaussian profiles...&quot;</span>
+<span class="n">Ce</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">exc_cells</span><span class="p">,</span> <span class="n">all_cells</span><span class="p">,</span> <span class="s">&#39;ge&#39;</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">g_exc</span><span class="p">,</span> <span class="n">max_delay</span><span class="o">=</span><span class="n">max_delay</span><span class="p">,</span>
+            <span class="n">sparseness</span><span class="o">=</span><span class="k">lambda</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="p">:</span> <span class="n">probas</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">exc_cells</span><span class="o">.</span><span class="n">position</span><span class="p">,</span> <span class="n">all_cells</span><span class="o">.</span><span class="n">position</span><span class="p">),</span>
+            <span class="n">delay</span>     <span class="o">=</span><span class="k">lambda</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="p">:</span> <span class="n">delays</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">exc_cells</span><span class="o">.</span><span class="n">position</span><span class="p">,</span> <span class="n">all_cells</span><span class="o">.</span><span class="n">position</span><span class="p">))</span>
+<span class="n">Ci</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">inh_cells</span><span class="p">,</span> <span class="n">all_cells</span><span class="p">,</span> <span class="s">&#39;gi&#39;</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">g_inh</span><span class="p">,</span> <span class="n">max_delay</span><span class="o">=</span><span class="n">max_delay</span><span class="p">,</span>
+            <span class="n">sparseness</span><span class="o">=</span><span class="k">lambda</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="p">:</span> <span class="n">probas</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">inh_cells</span><span class="o">.</span><span class="n">position</span><span class="p">,</span> <span class="n">all_cells</span><span class="o">.</span><span class="n">position</span><span class="p">),</span>
+            <span class="n">delay</span>     <span class="o">=</span><span class="k">lambda</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="p">:</span> <span class="n">delays</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">inh_cells</span><span class="o">.</span><span class="n">position</span><span class="p">,</span> <span class="n">all_cells</span><span class="o">.</span><span class="n">position</span><span class="p">))</span>
+<span class="n">Cext</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">sources</span><span class="p">,</span> <span class="n">all_cells</span><span class="p">,</span> <span class="s">&#39;ge&#39;</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">g_ext</span><span class="p">,</span> <span class="n">max_delay</span><span class="o">=</span><span class="n">max_delay</span><span class="p">,</span>
+            <span class="n">sparseness</span><span class="o">=</span><span class="k">lambda</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="p">:</span> <span class="n">is_in_brian</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">sources</span><span class="o">.</span><span class="n">position</span><span class="p">,</span> <span class="n">all_cells</span><span class="o">.</span><span class="n">position</span><span class="p">))</span>
+
+<span class="k">print</span> <span class="s">&quot;--&gt; mean probability from excitatory synapses:&quot;</span><span class="p">,</span> <span class="n">Ce</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">getnnz</span><span class="p">()</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">n_exc</span><span class="o">*</span><span class="n">n_cells</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="s">&quot;%&quot;</span>
+<span class="k">print</span> <span class="s">&quot;--&gt; mean probability from inhibitory synapses:&quot;</span><span class="p">,</span> <span class="n">Ci</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">getnnz</span><span class="p">()</span><span class="o">/</span><span class="nb">float</span><span class="p">((</span><span class="n">n_cells</span> <span class="o">-</span> <span class="n">n_exc</span><span class="p">)</span><span class="o">*</span><span class="n">n_cells</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="s">&quot;%&quot;</span>
+
+
+<span class="k">print</span> <span class="s">&quot;Setting the recorders...&quot;</span>
+<span class="n">v_exc</span>   <span class="o">=</span> <span class="n">RecentStateMonitor</span><span class="p">(</span><span class="n">exc_cells</span><span class="p">,</span> <span class="s">&#39;v&#39;</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">s_exc</span>   <span class="o">=</span> <span class="n">SpikeCounter</span><span class="p">(</span><span class="n">exc_cells</span><span class="p">)</span>
+
+
+<span class="n">ion</span><span class="p">()</span> <span class="c"># To enter the interactive mode</span>
+<span class="k">print</span> <span class="s">&quot;Initializing the plots...&quot;</span>
+<span class="n">fig1</span>    <span class="o">=</span> <span class="n">pylab</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+<span class="n">im</span>      <span class="o">=</span> <span class="n">fig1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">all_cells</span><span class="o">.</span><span class="n">position</span><span class="p">[:</span><span class="n">n_exc</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">all_cells</span><span class="o">.</span><span class="n">position</span><span class="p">[:</span><span class="n">n_exc</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">n_exc</span><span class="p">)</span>
+<span class="n">im</span><span class="o">.</span><span class="n">set_clim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">fig1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&quot;spikes&quot;</span><span class="p">)</span>
+<span class="n">pylab</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">)</span>
+<span class="n">fig2</span>    <span class="o">=</span> <span class="n">pylab</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">)</span>
+<span class="n">im</span>      <span class="o">=</span> <span class="n">fig2</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">all_cells</span><span class="o">.</span><span class="n">position</span><span class="p">[:</span><span class="n">n_exc</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">all_cells</span><span class="o">.</span><span class="n">position</span><span class="p">[:</span><span class="n">n_exc</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">n_exc</span><span class="p">)</span>
+<span class="n">im</span><span class="o">.</span><span class="n">set_clim</span><span class="p">(</span><span class="n">El</span><span class="p">,</span> <span class="n">Vt</span><span class="p">)</span>
+<span class="n">fig2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&quot;v&quot;</span><span class="p">)</span>
+<span class="n">pylab</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">)</span>
+
+
+<span class="n">manager</span> <span class="o">=</span> <span class="n">pylab</span><span class="o">.</span><span class="n">get_current_fig_manager</span><span class="p">()</span>
+
+<span class="k">print</span> <span class="s">&quot;Running network ...&quot;</span>
+<span class="k">for</span> <span class="n">time</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="nb">int</span><span class="p">((</span><span class="n">simtime</span><span class="o">/</span><span class="n">sim_step</span><span class="p">)</span><span class="o">/</span><span class="n">ms</span><span class="p">)):</span>
+    <span class="n">run</span><span class="p">(</span><span class="n">sim_step</span><span class="p">)</span>
+    <span class="n">fig1</span><span class="o">.</span><span class="n">cla</span><span class="p">()</span>
+    <span class="n">fig1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s">&quot;t = </span><span class="si">%g</span><span class="s"> s&quot;</span> <span class="o">%</span><span class="p">((</span><span class="n">sim_step</span> <span class="o">*</span> <span class="n">time</span><span class="p">)</span><span class="o">/</span><span class="n">ms</span><span class="p">))</span>
+    <span class="n">idx</span>     <span class="o">=</span> <span class="n">s_exc</span><span class="o">.</span><span class="n">count</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">im</span> <span class="o">=</span> <span class="n">fig1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">all_cells</span><span class="o">.</span><span class="n">position</span><span class="p">[:</span><span class="n">n_exc</span><span class="p">,</span> <span class="mi">0</span><span class="p">][</span><span class="n">idx</span><span class="p">],</span> <span class="n">all_cells</span><span class="o">.</span><span class="n">position</span><span class="p">[:</span><span class="n">n_exc</span><span class="p">,</span> <span class="mi">1</span><span class="p">][</span><span class="n">idx</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">n_exc</span><span class="p">)</span>
+    <span class="n">s_exc</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_exc</span><span class="p">)</span> <span class="c">## We reset the spike counter</span>
+    <span class="n">fig1</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+    <span class="n">fig1</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+    <span class="n">fig1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&quot;spikes&quot;</span><span class="p">)</span>
+    <span class="n">im</span><span class="o">.</span><span class="n">set_clim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">setp</span><span class="p">(</span><span class="n">fig1</span><span class="p">,</span> <span class="n">xticks</span><span class="o">=</span><span class="p">[],</span> <span class="n">yticks</span><span class="o">=</span><span class="p">[])</span>
+
+    <span class="n">fig2</span><span class="o">.</span><span class="n">cla</span><span class="p">()</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">fig2</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">all_cells</span><span class="o">.</span><span class="n">position</span><span class="p">[:</span><span class="n">n_exc</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">all_cells</span><span class="o">.</span><span class="n">position</span><span class="p">[:</span><span class="n">n_exc</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">v_exc</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">fig2</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+    <span class="n">fig2</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+    <span class="n">fig2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&quot;v&quot;</span><span class="p">)</span>
+    <span class="n">im</span><span class="o">.</span><span class="n">set_clim</span><span class="p">(</span><span class="n">El</span><span class="p">,</span> <span class="n">Vt</span><span class="p">)</span>
+    <span class="n">setp</span><span class="p">(</span><span class="n">fig2</span><span class="p">,</span> <span class="n">xticks</span><span class="o">=</span><span class="p">[],</span> <span class="n">yticks</span><span class="o">=</span><span class="p">[])</span>
+
+    <span class="n">manager</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+    <span class="n">manager</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">flush_events</span><span class="p">()</span>
+<span class="n">ioff</span><span class="p">()</span> <span class="c"># To leave the interactive mode</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-twister_FriedemannZenke.html"
+                        title="previous chapter">Example: FriedemannZenke (twister)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-twister_anonymous.html"
+                        title="next chapter">Example: anonymous (twister)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-twister_PierreYger.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-twister_anonymous.html" title="Example: anonymous (twister)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-twister_FriedemannZenke.html" title="Example: FriedemannZenke (twister)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

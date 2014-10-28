@@ -1,0 +1,212 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: time_varying_filter1 (hears) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: dcgc (hears)" href="examples-hears_dcgc.html" />
+    <link rel="prev" title="Example: time_varying_filter2 (hears)" href="examples-hears_time_varying_filter2.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-hears_dcgc.html" title="Example: dcgc (hears)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-hears_time_varying_filter2.html" title="Example: time_varying_filter2 (hears)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-time-varying-filter1-hears">
+<span id="example-hears-time-varying-filter1"></span><span id="index-0"></span><h1>Example: time_varying_filter1 (hears)<a class="headerlink" href="#example-time-varying-filter1-hears" title="Permalink to this headline">¶</a></h1>
+<p>This example implements a band pass filter whose center frequency is modulated
+by an Ornstein-Uhlenbeck. The white noise term used for this process is output
+by a FunctionFilterbank. The bandpass filter coefficients update is an example
+of how to use a <a class="reference internal" href="reference-hears.html#brian.hears.ControlFilterbank" title="brian.hears.ControlFilterbank"><tt class="xref py py-class docutils literal"><span class="pre">ControlFilterbank</span></tt></a>. The bandpass filter is
+a basic biquadratic filter for which the Q factor and the center frequency must
+be given. The input is a white noise.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">brian.hears</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">samplerate</span> <span class="o">=</span> <span class="mi">20</span><span class="o">*</span><span class="n">kHz</span>
+<span class="n">SoundDuration</span> <span class="o">=</span> <span class="mi">300</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">sound</span> <span class="o">=</span> <span class="n">whitenoise</span><span class="p">(</span><span class="n">SoundDuration</span><span class="p">,</span> <span class="n">samplerate</span><span class="p">)</span><span class="o">.</span><span class="n">ramp</span><span class="p">()</span>
+
+<span class="c">#number of frequency channel (here it must be one as a spectrogram of the</span>
+<span class="c">#output is plotted)</span>
+<span class="n">nchannels</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="n">fc_init</span> <span class="o">=</span> <span class="mi">5000</span><span class="o">*</span><span class="n">Hz</span>   <span class="c">#initial center frequency of the band pass filter</span>
+<span class="n">Q</span> <span class="o">=</span> <span class="mi">5</span>               <span class="c">#quality factor of the band pass filter</span>
+<span class="n">update_interval</span> <span class="o">=</span> <span class="mi">4</span> <span class="c"># the filter coefficients are updated every 4 samples</span>
+
+<span class="c">#parameters of the Ornstein-Uhlenbeck process</span>
+<span class="n">s_i</span> <span class="o">=</span> <span class="mi">1200</span><span class="o">*</span><span class="n">Hz</span>
+<span class="n">tau_i</span> <span class="o">=</span> <span class="mi">100</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">mu_i</span> <span class="o">=</span> <span class="n">fc_init</span><span class="o">/</span><span class="n">tau_i</span>
+<span class="n">sigma_i</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">s_i</span><span class="o">/</span><span class="n">sqrt</span><span class="p">(</span><span class="n">tau_i</span><span class="p">)</span>
+<span class="n">deltaT</span> <span class="o">=</span> <span class="n">defaultclock</span><span class="o">.</span><span class="n">dt</span>
+
+<span class="c">#this function  is used in a FunctionFilterbank. It outputs a noise term that</span>
+<span class="c">#will be later used by the controler to update the center frequency</span>
+<span class="n">noise</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">mu_i</span><span class="o">*</span><span class="n">deltaT</span><span class="o">+</span><span class="n">sigma_i</span><span class="o">*</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">sqrt</span><span class="p">(</span><span class="n">deltaT</span><span class="p">)</span>
+<span class="n">noise_generator</span> <span class="o">=</span> <span class="n">FunctionFilterbank</span><span class="p">(</span><span class="n">sound</span><span class="p">,</span> <span class="n">noise</span><span class="p">)</span>
+
+<span class="c">#this class will take as input the output of the noise generator and as target</span>
+<span class="c">#the bandpass filter center frequency</span>
+<span class="k">class</span> <span class="nc">CoeffController</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deltaT</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="n">samplerate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">BW</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">arcsinh</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mi">2</span><span class="o">/</span><span class="n">Q</span><span class="p">)</span><span class="o">*</span><span class="mf">1.44269</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc</span> <span class="o">=</span> <span class="n">fc_init</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span>
+        <span class="c">#the control variables are taken as the last of the buffer</span>
+        <span class="n">noise_term</span> <span class="o">=</span> <span class="nb">input</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span>
+        <span class="c">#update the center frequency by updateing the OU process</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">fc</span><span class="o">/</span><span class="n">tau_i</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">deltaT</span><span class="o">+</span><span class="n">noise_term</span>
+
+        <span class="n">w0</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">fc</span><span class="o">/</span><span class="n">samplerate</span>
+        <span class="c">#update the coefficient of the biquadratic filterbank</span>
+        <span class="n">alpha</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">w0</span><span class="p">)</span><span class="o">*</span><span class="n">sinh</span><span class="p">(</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">BW</span><span class="o">*</span><span class="n">w0</span><span class="o">/</span><span class="n">sin</span><span class="p">(</span><span class="n">w0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">filt_b</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">w0</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">filt_b</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">filt_b</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="n">w0</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">filt_a</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="o">+</span><span class="n">alpha</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">filt_a</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">w0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">filt_a</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="o">-</span><span class="n">alpha</span>
+
+<span class="c"># In the present example the time varying filter is a LinearFilterbank therefore</span>
+<span class="c">#we must initialise the filter coefficients; the one used for the first buffer computation</span>
+<span class="n">w0</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">fc_init</span><span class="o">/</span><span class="n">samplerate</span>
+<span class="n">BW</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">arcsinh</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mi">2</span><span class="o">/</span><span class="n">Q</span><span class="p">)</span><span class="o">*</span><span class="mf">1.44269</span>
+<span class="n">alpha</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">w0</span><span class="p">)</span><span class="o">*</span><span class="n">sinh</span><span class="p">(</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">BW</span><span class="o">*</span><span class="n">w0</span><span class="o">/</span><span class="n">sin</span><span class="p">(</span><span class="n">w0</span><span class="p">))</span>
+
+<span class="n">filt_b</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">nchannels</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="n">filt_a</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">((</span><span class="n">nchannels</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="n">filt_b</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">w0</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
+<span class="n">filt_b</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">filt_b</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="n">w0</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
+<span class="n">filt_a</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="o">+</span><span class="n">alpha</span>
+<span class="n">filt_a</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">w0</span><span class="p">)</span>
+<span class="n">filt_a</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="o">-</span><span class="n">alpha</span>
+
+<span class="c">#the filter which will have time varying coefficients</span>
+<span class="n">bandpass_filter</span> <span class="o">=</span> <span class="n">LinearFilterbank</span><span class="p">(</span><span class="n">sound</span><span class="p">,</span> <span class="n">filt_b</span><span class="p">,</span> <span class="n">filt_a</span><span class="p">)</span>
+<span class="c">#the updater</span>
+<span class="n">updater</span> <span class="o">=</span> <span class="n">CoeffController</span><span class="p">(</span><span class="n">bandpass_filter</span><span class="p">)</span>
+
+<span class="c">#the controller. Remember it must be the last of the chain</span>
+<span class="n">control</span> <span class="o">=</span> <span class="n">ControlFilterbank</span><span class="p">(</span><span class="n">bandpass_filter</span><span class="p">,</span> <span class="n">noise_generator</span><span class="p">,</span> <span class="n">bandpass_filter</span><span class="p">,</span>
+                            <span class="n">updater</span><span class="p">,</span> <span class="n">update_interval</span><span class="p">)</span>
+
+<span class="n">time_varying_filter_mon</span> <span class="o">=</span> <span class="n">control</span><span class="o">.</span><span class="n">process</span><span class="p">()</span>
+
+<span class="n">figure</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">pxx</span><span class="p">,</span> <span class="n">freqs</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">im</span> <span class="o">=</span> <span class="n">specgram</span><span class="p">(</span><span class="n">squeeze</span><span class="p">(</span><span class="n">time_varying_filter_mon</span><span class="p">),</span>
+                                <span class="n">NFFT</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="n">Fs</span><span class="o">=</span><span class="n">samplerate</span><span class="p">,</span> <span class="n">noverlap</span><span class="o">=</span><span class="mi">240</span><span class="p">)</span>
+<span class="n">imshow</span><span class="p">(</span><span class="n">flipud</span><span class="p">(</span><span class="n">pxx</span><span class="p">),</span> <span class="n">aspect</span><span class="o">=</span><span class="s">&#39;auto&#39;</span><span class="p">)</span>
+
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-hears_time_varying_filter2.html"
+                        title="previous chapter">Example: time_varying_filter2 (hears)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-hears_dcgc.html"
+                        title="next chapter">Example: dcgc (hears)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-hears_time_varying_filter1.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-hears_dcgc.html" title="Example: dcgc (hears)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-hears_time_varying_filter2.html" title="Example: time_varying_filter2 (hears)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Electrophysiology: electrode compensation &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="The library" href="library.html" />
+    <link rel="next" title="Electrophysiology: trace analysis" href="traceanalysis.html" />
+    <link rel="prev" title="Electrophysiology: models" href="electrophysiology_models.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="traceanalysis.html" title="Electrophysiology: trace analysis"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="electrophysiology_models.html" title="Electrophysiology: models"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="library.html" accesskey="U">The library</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="electrophysiology-electrode-compensation">
+<h1>Electrophysiology: electrode compensation<a class="headerlink" href="#electrophysiology-electrode-compensation" title="Permalink to this headline">¶</a></h1>
+<p>The electrophysiology library also contains methods to compensate for the
+electrode voltage in single-electrode current clamp recordings.
+To import the electrophysiology library:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian.library.electrophysiology</span> <span class="kn">import</span> <span class="o">*</span>
+</pre></div>
+</div>
+<p>There is a series of example scripts in the examples/electrophysiology folder.</p>
+<div class="section" id="active-electrode-compensation-aec">
+<h2>Active Electrode Compensation (AEC)<a class="headerlink" href="#active-electrode-compensation-aec" title="Permalink to this headline">¶</a></h2>
+<p>The electrophysiology library includes the Active Electrode Compensation (AEC) technique
+described in Brette et al (2008),
+<a class="reference external" href="http://www.di.ens.fr/~brette/papers/Brette2008Neuron.html">High-resolution intracellular recordings using a real-time computational model of the electrode</a>,
+Neuron 59(3):379-91.</p>
+<p>Given a digital current-clamp recording of the (uncompensated) potential <tt class="docutils literal"><span class="pre">v</span></tt>
+(vector of values) and injected current <tt class="docutils literal"><span class="pre">i</span></tt>, the following instructions
+calculate the full kernel of the system and the electrode kernel:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">K</span><span class="o">=</span><span class="n">full_kernel</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">ksize</span><span class="p">)</span>
+<span class="n">Ke</span><span class="o">=</span><span class="n">electrode_kernel_soma</span><span class="p">(</span><span class="n">K</span><span class="p">,</span><span class="n">start_tail</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><tt class="docutils literal"><span class="pre">ksize</span></tt> is the size of the full kernel (number of sampling steps; typical size is
+about 15 ms) and <tt class="docutils literal"><span class="pre">start_tail</span></tt> is the size of the electrode kernel (start point
+of the &#8216;&#8217;tail&#8217;&#8217; of the full kernel; typical size if about 4 ms). The electrode
+should be compensated for capacitance (capacitance neutralization)
+but not resistance (bridge compensation). The best choice for the
+input current is a series of independent random values, and the last <tt class="docutils literal"><span class="pre">ksize</span></tt>
+steps of <tt class="docutils literal"><span class="pre">v</span></tt> should be null (i.e., the injection should stop before the end).
+Here it was assumed that the recording was done at the soma; if it is done in a thin
+process such as a dendrite or axon, the function <tt class="docutils literal"><span class="pre">electrode_kernel_dendrite</span></tt>
+should be used instead. The full kernel can also be obtained from a step current
+injection:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">K</span><span class="o">=</span><span class="n">full_kernel_from_step</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">ksize</span><span class="p">)</span>
+<span class="n">Ke</span><span class="o">=</span><span class="n">electrode_kernel_soma</span><span class="p">(</span><span class="n">K</span><span class="p">,</span><span class="n">start_tail</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where <tt class="docutils literal"><span class="pre">i</span></tt> is a constant value in this case (note that this is not the best choice for
+real recordings).</p>
+<p>Once the electrode kernel has been found, any recording can be compensated as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">vcomp</span><span class="o">=</span><span class="n">AEC_compensate</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">ke</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where <tt class="docutils literal"><span class="pre">v</span></tt> is the raw voltage recording, <tt class="docutils literal"><span class="pre">i</span></tt> is the injected current
+and <tt class="docutils literal"><span class="pre">ke</span></tt> is the electrode kernel.</p>
+</div>
+<div class="section" id="lp-compensation">
+<h2>Lp compensation<a class="headerlink" href="#lp-compensation" title="Permalink to this headline">¶</a></h2>
+<p>The Lp compensation is an other electrode compensation method. It is based on
+linear model fitting of an electrode and a neuron in response to an injected
+current. The fitness function is the Lp error between the full model response
+and the raw trace, with p&lt;2 to minimize the bias due to the nonlinear voltage
+excursions of action potentials.</p>
+<p>You can use it like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">Vcomp</span><span class="p">,</span> <span class="n">params</span> <span class="o">=</span> <span class="n">Lp_compensate</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">Vraw</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where <tt class="docutils literal"><span class="pre">I</span></tt> is the injected current, <tt class="docutils literal"><span class="pre">Vraw</span></tt> is the raw voltage trace, and the
+last parameter is the inverse of the sampling frequency. <tt class="docutils literal"><span class="pre">I</span></tt> and <tt class="docutils literal"><span class="pre">Vraw</span></tt> must be
+1D Numpy arrays with the same length. The <tt class="docutils literal"><span class="pre">Lp_compensate</span></tt> function returns the
+compensated trace <tt class="docutils literal"><span class="pre">Vcomp</span></tt> and the best parameters <tt class="docutils literal"><span class="pre">params</span></tt>, which is a 2D
+Numpy array where each column contains the parameters R, tau, Vr, Re, taue.
+Columns correspond to consecutive slices of the current and the voltage, the compensation
+is performed independently on each slice. The duration of the slices can be
+specified with the <tt class="docutils literal"><span class="pre">slice_duration</span></tt> keyword argument.
+Also, the <tt class="docutils literal"><span class="pre">p</span></tt> parameter can also be specified as a keyword argument.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Electrophysiology: electrode compensation</a><ul>
+<li><a class="reference internal" href="#active-electrode-compensation-aec">Active Electrode Compensation (AEC)</a></li>
+<li><a class="reference internal" href="#lp-compensation">Lp compensation</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="electrophysiology_models.html"
+                        title="previous chapter">Electrophysiology: models</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="traceanalysis.html"
+                        title="next chapter">Electrophysiology: trace analysis</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/electrode_compensation.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="traceanalysis.html" title="Electrophysiology: trace analysis"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="electrophysiology_models.html" title="Electrophysiology: models"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="library.html" >The library</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

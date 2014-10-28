@@ -1,0 +1,171 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: Brunel_Hakim_1999 (frompapers) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: Brette_Gerstner_2005 (frompapers)" href="examples-frompapers_Brette_Gerstner_2005.html" />
+    <link rel="prev" title="Example: modelfitting (modelfitting)" href="examples-modelfitting_modelfitting.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers_Brette_Gerstner_2005.html" title="Example: Brette_Gerstner_2005 (frompapers)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-modelfitting_modelfitting.html" title="Example: modelfitting (modelfitting)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-brunel-hakim-1999-frompapers">
+<span id="example-frompapers-brunel-hakim-1999"></span><span id="index-0"></span><h1>Example: Brunel_Hakim_1999 (frompapers)<a class="headerlink" href="#example-brunel-hakim-1999-frompapers" title="Permalink to this headline">¶</a></h1>
+<p>Dynamics of a network of sparsely connected inhibitory current-based
+integrate-and-fire neurons. Individual neurons fire irregularly at
+low rate but the network is in an oscillatory global activity regime
+where neurons are weakly synchronized.</p>
+<dl class="docutils">
+<dt>Reference:</dt>
+<dd>&#8220;Fast Global Oscillations in Networks of Integrate-and-Fire
+Neurons with Low Firing Rates&#8221;
+Nicolas Brunel &amp; Vincent Hakim
+Neural Computation 11, 1621-1671 (1999)</dd>
+</dl>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">N</span> <span class="o">=</span> <span class="mi">5000</span>
+<span class="n">Vr</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">mV</span>
+<span class="n">theta</span> <span class="o">=</span> <span class="mi">20</span> <span class="o">*</span> <span class="n">mV</span>
+<span class="n">tau</span> <span class="o">=</span> <span class="mi">20</span> <span class="o">*</span> <span class="n">ms</span>
+<span class="n">delta</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">ms</span>
+<span class="n">taurefr</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">ms</span>
+<span class="n">duration</span> <span class="o">=</span> <span class="o">.</span><span class="mi">1</span> <span class="o">*</span> <span class="n">second</span>
+<span class="n">C</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="n">sparseness</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">C</span><span class="p">)</span><span class="o">/</span><span class="n">N</span>
+<span class="n">J</span> <span class="o">=</span> <span class="o">.</span><span class="mi">1</span> <span class="o">*</span> <span class="n">mV</span>
+<span class="n">muext</span> <span class="o">=</span> <span class="mi">25</span> <span class="o">*</span> <span class="n">mV</span>
+<span class="n">sigmaext</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">mV</span>
+
+<span class="n">eqs</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">dV/dt = (-V+muext + sigmaext * sqrt(tau) * xi)/tau : volt</span>
+<span class="s">&quot;&quot;&quot;</span>
+
+<span class="n">group</span> <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">eqs</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span>
+                    <span class="n">reset</span><span class="o">=</span><span class="n">Vr</span><span class="p">,</span> <span class="n">refractory</span><span class="o">=</span><span class="n">taurefr</span><span class="p">)</span>
+<span class="n">group</span><span class="o">.</span><span class="n">V</span> <span class="o">=</span> <span class="n">Vr</span>
+<span class="n">conn</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="s">&#39;V&#39;</span><span class="p">,</span> <span class="n">delay</span><span class="o">=</span><span class="n">delta</span><span class="p">,</span>
+                  <span class="n">weight</span> <span class="o">=</span> <span class="o">-</span><span class="n">J</span><span class="p">,</span>
+                  <span class="n">sparseness</span><span class="o">=</span><span class="n">sparseness</span><span class="p">)</span>
+<span class="n">M</span> <span class="o">=</span> <span class="n">SpikeMonitor</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+<span class="n">LFP</span> <span class="o">=</span> <span class="n">PopulationRateMonitor</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="nb">bin</span><span class="o">=</span><span class="mf">0.4</span> <span class="o">*</span> <span class="n">ms</span><span class="p">)</span>
+
+<span class="n">run</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span>
+
+<span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+<span class="n">raster_plot</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+<span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">duration</span><span class="o">/</span><span class="n">ms</span><span class="p">)</span>
+
+<span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">LFP</span><span class="o">.</span><span class="n">times_</span><span class="o">/</span><span class="n">ms</span><span class="p">,</span> <span class="n">LFP</span><span class="o">.</span><span class="n">rate</span><span class="p">)</span>
+<span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">duration</span><span class="o">/</span><span class="n">ms</span><span class="p">)</span>
+
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-modelfitting_modelfitting.html"
+                        title="previous chapter">Example: modelfitting (modelfitting)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-frompapers_Brette_Gerstner_2005.html"
+                        title="next chapter">Example: Brette_Gerstner_2005 (frompapers)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-frompapers_Brunel_Hakim_1999.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers_Brette_Gerstner_2005.html" title="Example: Brette_Gerstner_2005 (frompapers)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-modelfitting_modelfitting.html" title="Example: modelfitting (modelfitting)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

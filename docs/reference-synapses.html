@@ -1,0 +1,379 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Synapses &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Reference" href="reference.html" />
+    <link rel="next" title="Network" href="reference-network.html" />
+    <link rel="prev" title="Plasticity" href="reference-plasticity.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="reference-network.html" title="Network"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="reference-plasticity.html" title="Plasticity"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="reference.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="synapses">
+<h1>Synapses<a class="headerlink" href="#synapses" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="#brian.Synapses" title="brian.Synapses"><tt class="xref py py-class docutils literal"><span class="pre">Synapses</span></tt></a> class was introduced in Brian version 1.4 and can be used
+to define everything around synaptic interactions. It can replace the
+<a class="reference internal" href="reference-connections.html#brian.Connection" title="brian.Connection"><tt class="xref py py-class docutils literal"><span class="pre">Connection</span></tt></a> class but is much more flexible, in particular it allows to
+directly incorporate descriptions of synaptic plasticity.
+See section <a class="reference internal" href="synapses.html#usermanual-synapses"><em>Synapses</em></a> in the user manual for
+instructions how to use the class.</p>
+<dl class="class">
+<dt id="brian.Synapses">
+<em class="property">class </em><tt class="descclassname">brian.</tt><tt class="descname">Synapses</tt><big>(</big><em>source</em>, <em>target=None</em>, <em>model=None</em>, <em>pre=None</em>, <em>post=None</em>, <em>max_delay=0.0 * second</em>, <em>level=0</em>, <em>clock=None</em>, <em>code_namespace=None</em>, <em>unit_checking=True</em>, <em>method=None</em>, <em>freeze=False</em>, <em>implicit=False</em>, <em>order=1</em><big>)</big><a class="headerlink" href="#brian.Synapses" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set of synapses between two neuron groups</p>
+<p>Initialised with arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">source</span></tt></dt>
+<dd>The source <a class="reference internal" href="reference-models-and-groups.html#brian.NeuronGroup" title="brian.NeuronGroup"><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></a>.</dd>
+<dt><tt class="docutils literal"><span class="pre">target=None</span></tt></dt>
+<dd>The target <a class="reference internal" href="reference-models-and-groups.html#brian.NeuronGroup" title="brian.NeuronGroup"><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></a>. By default, target=source.</dd>
+<dt><tt class="docutils literal"><span class="pre">model=None</span></tt></dt>
+<dd>The equations that defined the synaptic variables, as an Equations object or a string.
+The syntax is the same as for a <a class="reference internal" href="reference-models-and-groups.html#brian.NeuronGroup" title="brian.NeuronGroup"><tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt></a>.</dd>
+<dt><tt class="docutils literal"><span class="pre">pre=None</span></tt></dt>
+<dd>The code executed when presynaptic spikes arrive at the synapses.
+There can be multiple presynaptic codes, passed as a list or tuple of strings.</dd>
+<dt><tt class="docutils literal"><span class="pre">post=None</span></tt></dt>
+<dd>The code executed when postsynaptic spikes arrive at the synapses.</dd>
+<dt><tt class="docutils literal"><span class="pre">max_delay=0*ms</span></tt></dt>
+<dd>The maximum pre and postsynaptic delay. This is only useful if the delays can change
+during the simulation.</dd>
+<dt><tt class="docutils literal"><span class="pre">level=0</span></tt></dt>
+<dd>See <a class="reference internal" href="reference-models-and-groups.html#brian.Equations" title="brian.Equations"><tt class="xref py py-class docutils literal"><span class="pre">Equations</span></tt></a> for details.</dd>
+<dt><tt class="docutils literal"><span class="pre">clock=None</span></tt></dt>
+<dd>The clock for updating synaptic state variables according to <tt class="docutils literal"><span class="pre">model</span></tt>.
+Currently, this must be identical to both the source and target clocks.</dd>
+<dt><tt class="docutils literal"><span class="pre">compile=False</span></tt></dt>
+<dd>Whether or not to attempt to compile the differential equation
+solvers (into Python code). Typically, for best performance, both <tt class="docutils literal"><span class="pre">compile</span></tt>
+and <tt class="docutils literal"><span class="pre">freeze</span></tt> should be set to <tt class="docutils literal"><span class="pre">True</span></tt> for nonlinear differential equations.</dd>
+<dt><tt class="docutils literal"><span class="pre">freeze=False</span></tt></dt>
+<dd>If True, parameters are replaced by their values at the time
+of initialization.</dd>
+<dt><tt class="docutils literal"><span class="pre">method=None</span></tt></dt>
+<dd>If not None, the integration method is forced. Possible values are
+linear, nonlinear, Euler, exponential_Euler (overrides implicit and order
+keywords).</dd>
+<dt><tt class="docutils literal"><span class="pre">unit_checking=True</span></tt></dt>
+<dd>Set to <tt class="docutils literal"><span class="pre">False</span></tt> to bypass unit-checking.</dd>
+<dt><tt class="docutils literal"><span class="pre">order=1</span></tt></dt>
+<dd>The order to use for nonlinear differential equation solvers.
+TODO: more details.</dd>
+<dt><tt class="docutils literal"><span class="pre">implicit=False</span></tt></dt>
+<dd>Whether to use an implicit method for solving the differential
+equations. TODO: more details.</dd>
+<dt><tt class="docutils literal"><span class="pre">code_namespace=None</span></tt></dt>
+<dd>Namespace for the pre and post codes.</dd>
+</dl>
+<p><strong>Methods</strong></p>
+<dl class="method">
+<dt id="brian.Synapses.state">
+<tt class="descname">state</tt><big>(</big><em>var</em><big>)</big><a class="headerlink" href="#brian.Synapses.state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the vector of values for state
+variable <tt class="docutils literal"><span class="pre">var</span></tt>, with length the number of synapses. The
+vector is an instance of class <tt class="xref py py-class docutils literal"><span class="pre">SynapticVariable</span></tt>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.Synapses.synapse_index">
+<tt class="descname">synapse_index</tt><big>(</big><em>i</em><big>)</big><a class="headerlink" href="#brian.Synapses.synapse_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the synapse indexes correspond to i, which can be a tuple or a slice.
+If i is a tuple (m,n), m and n can be an integer, an array, a slice or a subgroup.</p>
+</dd></dl>
+
+<p>The following usages are also possible for a Synapses object <tt class="docutils literal"><span class="pre">S</span></tt>:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">len(S)</span></tt></dt>
+<dd>Returns the number of synapses in <tt class="docutils literal"><span class="pre">S</span></tt>.</dd>
+</dl>
+<p>Attributes:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">delay</span></tt></dt>
+<dd>The presynaptic delays for all synapses (synapse-&gt;delay). If there are multiple
+presynaptic delays (multiple pre codes), this is a list.</dd>
+<dt><tt class="docutils literal"><span class="pre">delay_pre</span></tt></dt>
+<dd>Same as <tt class="docutils literal"><span class="pre">delay</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">delay_post</span></tt></dt>
+<dd>The postsynaptic delays for all synapses (synapse-&gt;delay post).</dd>
+<dt><tt class="docutils literal"><span class="pre">lastupdate</span></tt></dt>
+<dd>The time of last update of all synapses (synapse-&gt;last update). This
+only exists if there are dynamic synaptic variables.</dd>
+</dl>
+<p>Internal attributes:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">source</span></tt></dt>
+<dd>The source neuron group.</dd>
+<dt><tt class="docutils literal"><span class="pre">target</span></tt></dt>
+<dd>The target neuron group.</dd>
+<dt><tt class="docutils literal"><span class="pre">_S</span></tt></dt>
+<dd>The state matrix (a 2D dynamical array with values of synaptic variables).
+At run time, it is transformed into a static 2D array (with compress()).</dd>
+<dt><tt class="docutils literal"><span class="pre">presynaptic</span></tt></dt>
+<dd>The (dynamic) array of presynaptic neuron indexes for all synapses (synapse-&gt;i).</dd>
+<dt><tt class="docutils literal"><span class="pre">postsynaptic</span></tt></dt>
+<dd>The array of postsynaptic neuron indexes for all synapses (synapse-&gt;j).</dd>
+<dt><tt class="docutils literal"><span class="pre">synapses_pre</span></tt></dt>
+<dd>A list of (dynamic) arrays giving the set of synapse indexes for each presynaptic neuron i
+(i-&gt;synapses)</dd>
+<dt><tt class="docutils literal"><span class="pre">synapses_post</span></tt></dt>
+<dd>A list of (dynamic) arrays giving the set of synapse indexes for each postsynaptic neuron j
+(j-&gt;synapses)</dd>
+<dt><tt class="docutils literal"><span class="pre">queues</span></tt></dt>
+<dd>List of SpikeQueues for pre and postsynaptic spikes.</dd>
+<dt><tt class="docutils literal"><span class="pre">codes</span></tt></dt>
+<dd>The compiled codes to be executed on pre and postsynaptic spikes.</dd>
+<dt><tt class="docutils literal"><span class="pre">namespaces</span></tt></dt>
+<dd>The namespaces for the pre and postsynaptic codes.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.SynapticEquations">
+<em class="property">class </em><tt class="descclassname">brian.</tt><tt class="descname">SynapticEquations</tt><big>(</big><em>expr=''</em>, <em>level=0</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.SynapticEquations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Equations for the Synapses class.
+The only difference with <a class="reference internal" href="reference-models-and-groups.html#brian.Equations" title="brian.Equations"><tt class="xref py py-class docutils literal"><span class="pre">Equations</span></tt></a> is that differential equations
+can be marked for an event-driven implementation, e.g.:</p>
+<p><tt class="docutils literal"><span class="pre">dx/dt=-x/tau</span> <span class="pre">:</span> <span class="pre">1</span> <span class="pre">(event-driven)</span></tt></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.synapses.synapticvariable.SynapticVariable">
+<em class="property">class </em><tt class="descclassname">brian.synapses.synapticvariable.</tt><tt class="descname">SynapticVariable</tt><big>(</big><em>data</em>, <em>synapses</em>, <em>name</em><big>)</big><a class="headerlink" href="#brian.synapses.synapticvariable.SynapticVariable" title="Permalink to this definition">¶</a></dt>
+<dd><p>A vector of synaptic variables that is returned by <tt class="xref py py-meth docutils literal"><span class="pre">Synapses.__getattr__()</span></tt>,
+and that can be subscripted with 2 or 3 arguments.</p>
+<p>Example usages, where <tt class="docutils literal"><span class="pre">S</span></tt> is Synapses object:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">S.w[12]</span></tt></dt>
+<dd>Value of variable w for synapse 12.</dd>
+<dt><tt class="docutils literal"><span class="pre">S.w[1,3]</span></tt></dt>
+<dd>Value of variable w for synapses from neuron 1 to neuron 3. This is an array,
+as there can be several synapses for a given neuron pair (e.g. with different
+delays)</dd>
+<dt><tt class="docutils literal"><span class="pre">S.w[1,3,4]</span></tt></dt>
+<dd>Value of variable w for synapse 4 from neuron 1 to neuron 3.</dd>
+</dl>
+<p>Indexes can be integers, slices, arrays or groups.</p>
+<p>Synaptic variables can be assigned values as follows:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">S.w[P,Q]=x</span></tt></dt>
+<dd>where x is a float or a 1D array. The number of elements in the array must
+equal the number of selected synapses.</dd>
+<dt><tt class="docutils literal"><span class="pre">S.w[P,Q]=s</span></tt></dt>
+<dd>where s is a string. The string is Python code that is executed in a single
+vectorised operation, where <tt class="docutils literal"><span class="pre">i</span></tt> is the presynaptic neuron index (a vector
+of length the number of synapses), <tt class="docutils literal"><span class="pre">j</span></tt> is the postsynaptic neuron index and
+<tt class="docutils literal"><span class="pre">n</span></tt> is the number of synapses. The methods <tt class="docutils literal"><span class="pre">rand</span></tt> and <tt class="docutils literal"><span class="pre">randn</span></tt> return
+arrays of n random values.</dd>
+</dl>
+<p>Initialised with arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">data</span></tt></dt>
+<dd>Vector of values.</dd>
+<dt><tt class="docutils literal"><span class="pre">synapses</span></tt></dt>
+<dd>The Synapses object.</dd>
+</dl>
+<dl class="method">
+<dt id="brian.synapses.synapticvariable.SynapticVariable.to_matrix">
+<tt class="descname">to_matrix</tt><big>(</big><em>multiple_synapses='last'</em><big>)</big><a class="headerlink" href="#brian.synapses.synapticvariable.SynapticVariable.to_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the wanted state as a matrix of shape (# presynaptic neurons, # postsynaptic neurons) for visualization purposes. 
+The returned array value at [i,j] is the value of the wanted synaptic variable for the synapse between (i, j). If not synapse exists between those two neurons, then the value is <tt class="docutils literal"><span class="pre">np.nan</span></tt>.</p>
+<ul class="simple">
+<li>Dealing with multiple synapses between two neurons</li>
+</ul>
+<p>Outputting a 2D matrix is not generally possible, because multiple synapses can exist for a given pair or pre- and post-synaptic neurons.
+In this case, the state values for all the synapses between neurons i and j are aggregated in the (i, j) position of the matrix. This is done according to the <tt class="docutils literal"><span class="pre">multiple_synapses</span></tt> keyword argument which can be changed:</p>
+<p><tt class="docutils literal"><span class="pre">mutiple_synapses</span> <span class="pre">=</span> <span class="pre">'last'</span></tt> (default) takes the last value</p>
+<p><tt class="docutils literal"><span class="pre">mutiple_synapses</span> <span class="pre">=</span> <span class="pre">'first'</span></tt> takes the first value</p>
+<p><tt class="docutils literal"><span class="pre">mutiple_synapses</span> <span class="pre">=</span> <span class="pre">'min'</span></tt> takes the min of the values</p>
+<p><tt class="docutils literal"><span class="pre">mutiple_synapses</span> <span class="pre">=</span> <span class="pre">'max'</span></tt> takes the max of the values</p>
+<p><tt class="docutils literal"><span class="pre">mutiple_synapses</span> <span class="pre">=</span> <span class="pre">'sum'</span></tt> takes the sum of the values</p>
+<p>Please note that this function should be used for visualization, and should not be used to store or reload synaptic variable values. 
+If you want to do so, refer to the documentation at <tt class="xref py py-meth docutils literal"><span class="pre">Synapses.save_connectivity()</span></tt>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.synapses.synapticvariable.SynapticDelayVariable">
+<em class="property">class </em><tt class="descclassname">brian.synapses.synapticvariable.</tt><tt class="descname">SynapticDelayVariable</tt><big>(</big><em>data</em>, <em>synapses</em>, <em>name</em><big>)</big><a class="headerlink" href="#brian.synapses.synapticvariable.SynapticDelayVariable" title="Permalink to this definition">¶</a></dt>
+<dd><p>A synaptic variable that is a delay.
+The main difference with <a class="reference internal" href="#brian.synapses.synapticvariable.SynapticVariable" title="brian.synapses.synapticvariable.SynapticVariable"><tt class="xref py py-class docutils literal"><span class="pre">SynapticVariable</span></tt></a>
+is that delays are stored as integers (timebins) but
+accessed as absolute times (in seconds).</p>
+<p>TODO: pass the clock as argument.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.synapses.spikequeue.SpikeQueue">
+<em class="property">class </em><tt class="descclassname">brian.synapses.spikequeue.</tt><tt class="descname">SpikeQueue</tt><big>(</big><em>source</em>, <em>synapses</em>, <em>delays</em>, <em>max_delay=0.0 * second</em>, <em>maxevents=1</em>, <em>precompute_offsets=True</em><big>)</big><a class="headerlink" href="#brian.synapses.spikequeue.SpikeQueue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Spike queue</p>
+<p>Initialised with arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">source</span></tt></dt>
+<dd>The neuron group that sends spikes.</dd>
+<dt><tt class="docutils literal"><span class="pre">synapses</span></tt></dt>
+<dd>A list of synapses (synapses[i]=array of synapse indices for neuron i).</dd>
+<dt><tt class="docutils literal"><span class="pre">delays</span></tt></dt>
+<dd>An array of delays (delays[k]=delay of synapse k).</dd>
+<dt><tt class="docutils literal"><span class="pre">max_delay=0*ms</span></tt></dt>
+<dd>The maximum delay (in second) of synaptic events. At run time, the
+structure is resized to the maximum delay in <tt class="docutils literal"><span class="pre">delays</span></tt>, and thus
+the <tt class="docutils literal"><span class="pre">max_delay</span></tt> should only be specified if delays can change
+during the simulation (in which case offsets should not be
+precomputed).</dd>
+<dt><tt class="docutils literal"><span class="pre">maxevents</span> <span class="pre">=</span> <span class="pre">INITIAL_MAXSPIKESPER_DT</span></tt></dt>
+<dd>The initial size of the queue for each timestep. Note that the data
+structure automatically grows to the required size, and therefore this
+option is generally not useful.</dd>
+<dt><tt class="docutils literal"><span class="pre">precompute_offsets</span> <span class="pre">=</span> <span class="pre">True</span></tt></dt>
+<dd>A flag to precompute offsets. By default, offsets (an internal array
+derived from <tt class="docutils literal"><span class="pre">delays</span></tt>, used to insert events in the data structure,
+see below)
+are precomputed for all neurons, the first time the object is run.
+This usually results in a speed up but takes memory, which is why it
+can be disabled.</dd>
+</dl>
+<p><strong>Data structure</strong></p>
+<p>A spike queue is implemented as a 2D array <tt class="docutils literal"><span class="pre">X</span></tt> that is circular in the time
+direction (rows) and dynamic in the events direction (columns). The
+row index corresponding to the current timestep is <tt class="docutils literal"><span class="pre">currentime</span></tt>.
+Each element contains the target synapse index.</p>
+<p>The class is implemented as a <a class="reference internal" href="reference-monitors.html#brian.SpikeMonitor" title="brian.SpikeMonitor"><tt class="xref py py-class docutils literal"><span class="pre">SpikeMonitor</span></tt></a>, so that the propagate()
+method is called at each timestep (of the monitored group).</p>
+<p><strong>Methods</strong></p>
+<dl class="method">
+<dt id="brian.SpikeQueue.next">
+<tt class="descname">next</tt><big>(</big><big>)</big><a class="headerlink" href="#brian.SpikeQueue.next" title="Permalink to this definition">¶</a></dt>
+<dd><p>Advances by one timestep.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.SpikeQueue.peek">
+<tt class="descname">peek</tt><big>(</big><big>)</big><a class="headerlink" href="#brian.SpikeQueue.peek" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the all the synaptic events corresponding to the current time,
+as an array of synapse indexes.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.SpikeQueue.precompute_offsets">
+<tt class="descname">precompute_offsets</tt><big>(</big><big>)</big><a class="headerlink" href="#brian.SpikeQueue.precompute_offsets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Precompute all offsets corresponding to delays. This assumes that
+delays will not change during the simulation. If they do (between two
+runs for example), then this method can be called.</p>
+</dd></dl>
+
+<p><strong>Offsets</strong></p>
+<p>Offsets are used to solve the problem of inserting multiple synaptic events with the
+same delay. This is difficult to vectorise. If there are n synaptic events with the same
+delay, these events are given an offset between 0 and n-1, corresponding to their
+relative position in the data structure.
+They can be either precalculated
+(faster), or determined at run time (saves memory). Note that if they
+are determined at run time, then it is possible to also vectorise over
+presynaptic spikes.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="reference-plasticity.html"
+                        title="previous chapter">Plasticity</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="reference-network.html"
+                        title="next chapter">Network</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/reference-synapses.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="reference-network.html" title="Network"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="reference-plasticity.html" title="Plasticity"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="reference.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Analysis &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Reference" href="reference.html" />
+    <link rel="next" title="Input/output" href="reference-io.html" />
+    <link rel="prev" title="Variable updating" href="reference-variableupdating.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="reference-io.html" title="Input/output"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="reference-variableupdating.html" title="Variable updating"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="reference.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="analysis">
+<h1>Analysis<a class="headerlink" href="#analysis" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="statistics-of-spike-trains">
+<h2>Statistics of spike trains<a class="headerlink" href="#statistics-of-spike-trains" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="brian.firing_rate">
+<tt class="descclassname">brian.</tt><tt class="descname">firing_rate</tt><big>(</big><em>spikes</em><big>)</big><a class="headerlink" href="#brian.firing_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rate of the spike train.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.CV">
+<tt class="descclassname">brian.</tt><tt class="descname">CV</tt><big>(</big><em>spikes</em><big>)</big><a class="headerlink" href="#brian.CV" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coefficient of variation.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.correlogram">
+<tt class="descclassname">brian.</tt><tt class="descname">correlogram</tt><big>(</big><em>T1</em>, <em>T2</em>, <em>width=20.0 * msecond</em>, <em>bin=1.0 * msecond</em>, <em>T=None</em><big>)</big><a class="headerlink" href="#brian.correlogram" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a cross-correlogram with lag in [-width,width] and given bin size.
+T is the total duration (optional) and should be greater than the duration of T1 and T2.
+The result is in Hz (rate of coincidences in each bin).</p>
+<p>N.B.: units are discarded.
+TODO: optimise?</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.autocorrelogram">
+<tt class="descclassname">brian.</tt><tt class="descname">autocorrelogram</tt><big>(</big><em>T0</em>, <em>width=20.0 * msecond</em>, <em>bin=1.0 * msecond</em>, <em>T=None</em><big>)</big><a class="headerlink" href="#brian.autocorrelogram" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an autocorrelogram with lag in [-width,width] and given bin size.
+T is the total duration (optional) and should be greater than the duration of T1 and T2.
+The result is in Hz (rate of coincidences in each bin).</p>
+<p>N.B.: units are discarded.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.CCF">
+<tt class="descclassname">brian.</tt><tt class="descname">CCF</tt><big>(</big><em>T1</em>, <em>T2</em>, <em>width=20.0 * msecond</em>, <em>bin=1.0 * msecond</em>, <em>T=None</em><big>)</big><a class="headerlink" href="#brian.CCF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the cross-correlation function with lag in [-width,width] and given bin size.
+T is the total duration (optional).
+The result is in Hz**2:
+CCF(T1,T2)=&lt;T1(t)T2(t+s)&gt;</p>
+<p>N.B.: units are discarded.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.ACF">
+<tt class="descclassname">brian.</tt><tt class="descname">ACF</tt><big>(</big><em>T0</em>, <em>width=20.0 * msecond</em>, <em>bin=1.0 * msecond</em>, <em>T=None</em><big>)</big><a class="headerlink" href="#brian.ACF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the autocorrelation function with lag in [-width,width] and given bin size.
+T is the total duration (optional).
+The result is in Hz**2:
+ACF(T0)=&lt;T0(t)T0(t+s)&gt;</p>
+<p>N.B.: units are discarded.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.CCVF">
+<tt class="descclassname">brian.</tt><tt class="descname">CCVF</tt><big>(</big><em>T1</em>, <em>T2</em>, <em>width=20.0 * msecond</em>, <em>bin=1.0 * msecond</em>, <em>T=None</em><big>)</big><a class="headerlink" href="#brian.CCVF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the cross-covariance function with lag in [-width,width] and given bin size.
+T is the total duration (optional).
+The result is in Hz**2:
+CCVF(T1,T2)=&lt;T1(t)T2(t+s)&gt;-&lt;T1&gt;&lt;T2&gt;</p>
+<p>N.B.: units are discarded.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.ACVF">
+<tt class="descclassname">brian.</tt><tt class="descname">ACVF</tt><big>(</big><em>T0</em>, <em>width=20.0 * msecond</em>, <em>bin=1.0 * msecond</em>, <em>T=None</em><big>)</big><a class="headerlink" href="#brian.ACVF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the autocovariance function with lag in [-width,width] and given bin size.
+T is the total duration (optional).
+The result is in Hz**2:
+ACVF(T0)=&lt;T0(t)T0(t+s)&gt;-&lt;T0&gt;**2</p>
+<p>N.B.: units are discarded.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.total_correlation">
+<tt class="descclassname">brian.</tt><tt class="descname">total_correlation</tt><big>(</big><em>T1</em>, <em>T2</em>, <em>width=20.0 * msecond</em>, <em>T=None</em><big>)</big><a class="headerlink" href="#brian.total_correlation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the total correlation coefficient with lag in [-width,width].
+T is the total duration (optional).
+The result is a real (typically in [0,1]):
+total_correlation(T1,T2)=int(CCVF(T1,T2))/rate(T1)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.spike_triggered_average">
+<tt class="descclassname">brian.</tt><tt class="descname">spike_triggered_average</tt><big>(</big><em>spikes</em>, <em>stimulus</em>, <em>max_interval</em>, <em>dt</em>, <em>onset=None</em>, <em>display=False</em><big>)</big><a class="headerlink" href="#brian.spike_triggered_average" title="Permalink to this definition">¶</a></dt>
+<dd><p>Spike triggered average reverse correlation. 
+spikes is an array containing spike times
+stimulus is an array containing the stimulus
+max_interval (second) is the duration of the averaging window
+dt (second) is the sampling period
+onset (second) before which the spikes are discarded. Note: it will be at least as long as max_interval
+display (default=False) display the number of spikes processed out of the total number
+output the spike triggered average and the corresponding time axis</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Analysis</a><ul>
+<li><a class="reference internal" href="#statistics-of-spike-trains">Statistics of spike trains</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="reference-variableupdating.html"
+                        title="previous chapter">Variable updating</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="reference-io.html"
+                        title="next chapter">Input/output</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/reference-analysis.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="reference-io.html" title="Input/output"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="reference-variableupdating.html" title="Variable updating"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="reference.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

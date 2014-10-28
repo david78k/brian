@@ -1,0 +1,142 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: cochleagram (hears) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: simple_anf (hears)" href="examples-hears_simple_anf.html" />
+    <link rel="prev" title="Example: gammatone (hears)" href="examples-hears_gammatone.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-hears_simple_anf.html" title="Example: simple_anf (hears)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-hears_gammatone.html" title="Example: gammatone (hears)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-cochleagram-hears">
+<span id="example-hears-cochleagram"></span><span id="index-0"></span><h1>Example: cochleagram (hears)<a class="headerlink" href="#example-cochleagram-hears" title="Permalink to this headline">¶</a></h1>
+<p>Example of basic filtering of a sound with Brian hears.
+This example implements a cochleagram based on a gammatone filterbank
+followed by halfwave rectification, cube root compression and 10 Hz
+low pass filtering.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">brian.hears</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">sound1</span> <span class="o">=</span> <span class="n">tone</span><span class="p">(</span><span class="mi">1</span><span class="o">*</span><span class="n">kHz</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="o">*</span><span class="n">second</span><span class="p">)</span>
+<span class="n">sound2</span> <span class="o">=</span> <span class="n">whitenoise</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="o">*</span><span class="n">second</span><span class="p">)</span>
+
+<span class="n">sound</span> <span class="o">=</span> <span class="n">sound1</span><span class="o">+</span><span class="n">sound2</span>
+<span class="n">sound</span> <span class="o">=</span> <span class="n">sound</span><span class="o">.</span><span class="n">ramp</span><span class="p">()</span>
+
+<span class="n">cf</span> <span class="o">=</span> <span class="n">erbspace</span><span class="p">(</span><span class="mi">20</span><span class="o">*</span><span class="n">Hz</span><span class="p">,</span> <span class="mi">20</span><span class="o">*</span><span class="n">kHz</span><span class="p">,</span> <span class="mi">3000</span><span class="p">)</span>
+<span class="n">gammatone</span> <span class="o">=</span> <span class="n">Gammatone</span><span class="p">(</span><span class="n">sound</span><span class="p">,</span> <span class="n">cf</span><span class="p">)</span>
+<span class="n">cochlea</span> <span class="o">=</span> <span class="n">FunctionFilterbank</span><span class="p">(</span><span class="n">gammatone</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">clip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Inf</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="mf">3.0</span><span class="p">))</span>
+<span class="n">lowpass</span> <span class="o">=</span> <span class="n">LowPass</span><span class="p">(</span><span class="n">cochlea</span><span class="p">,</span> <span class="mi">10</span><span class="o">*</span><span class="n">Hz</span><span class="p">)</span>
+<span class="n">output</span> <span class="o">=</span> <span class="n">lowpass</span><span class="o">.</span><span class="n">process</span><span class="p">()</span>
+
+<span class="n">imshow</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s">&#39;lower left&#39;</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s">&#39;auto&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-hears_gammatone.html"
+                        title="previous chapter">Example: gammatone (hears)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-hears_simple_anf.html"
+                        title="next chapter">Example: simple_anf (hears)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-hears_cochleagram.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-hears_simple_anf.html" title="Example: simple_anf (hears)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-hears_gammatone.html" title="Example: gammatone (hears)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

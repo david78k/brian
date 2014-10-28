@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Electrode compensation &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Reference" href="reference.html" />
+    <link rel="next" title="Brian hears" href="reference-hears.html" />
+    <link rel="prev" title="Model fitting toolbox" href="reference-modelfitting.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="reference-hears.html" title="Brian hears"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="reference-modelfitting.html" title="Model fitting toolbox"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="reference.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="electrode-compensation">
+<h1>Electrode compensation<a class="headerlink" href="#electrode-compensation" title="Permalink to this headline">¶</a></h1>
+<p>The L^p electrode compensation method is implemented, along with a spike
+detection method and a quality test (Rossant et al 2012).</p>
+<dl class="function">
+<dt id="brian.library.electrophysiology.Lp_compensate">
+<tt class="descclassname">brian.library.electrophysiology.</tt><tt class="descname">Lp_compensate</tt><big>(</big><em>I</em>, <em>Vraw</em>, <em>dt</em>, <em>slice_duration=1.0 * second</em>, <em>p=1.0</em>, <em>criterion=None</em>, <em>full=False</em>, <em>docompensation=True</em>, <em>**initial_params</em><big>)</big><a class="headerlink" href="#brian.library.electrophysiology.Lp_compensate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform the L^p electrode compensation technique on a recorded membrane
+potential.</p>
+<ul class="simple">
+<li>I: injected current, 1D vector.</li>
+<li>Vraw: raw (uncompensated) voltage trace, 1D vector, same length as I.</li>
+<li>dt: sampling period (inverse of the sampling frequency), in second.</li>
+<li>slice_duration=1*second: duration of each time slice, where the fit is 
+performed independently</li>
+<li>p=1.0: parameter of the Lp error. p should be less than 2.
+Experimenting with this parameter is recommended.
+Use p~1 at first, especially with difficult recordings
+Use p~0.5 with good recordings (less noise) or with biophysical model
+simulations without noise.</li>
+<li>criterion: a custom error function used in the optimization. If None,
+it is the Lp error. Otherwise, it should be a function of the form
+&#8220;lambda raw, model: error&#8221;, where raw and model are the raw and linear
+model membrane potential traces. For instance, the function for the 
+Lp error is: &#8220;lambda raw, model: sum(abs(raw-model)**self.p)&#8221;.
+It can also be a function of the form:
+&#8220;lambda raw, model, electrode: error&#8221; in the case when one needs
+the electrode response to compute the error.</li>
+<li>full=False: if False, return a tuple (compensated_trace, parameters)
+where parameters is an array of the best parameters (one column/slice)
+If True, return a dict with the following keys:
+Vcompensated, Vneuron, Velectrode, params=params, instance
+where instance in the ElectrodeCompensation object.</li>
+<li>docompensation=True: if False, does not perform the optimization and only
+return an ElectrodeCompensation object instance, to take full control over
+the optimization procedure.</li>
+<li>params: a list of initial parameters for the optimization, in the 
+following order: R, tau, Vr, Re, taue. Best results are obtained when
+reasonable estimates of the parameters are given.</li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.library.electrophysiology.find_spikes">
+<tt class="descclassname">brian.library.electrophysiology.</tt><tt class="descname">find_spikes</tt><big>(</big><em>v</em>, <em>vc=None</em>, <em>dt=0.1 * msecond</em>, <em>refractory=5.0 * msecond</em>, <em>check_quality=False</em><big>)</big><a class="headerlink" href="#brian.library.electrophysiology.find_spikes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find spikes in an intracellular trace.</p>
+<ul class="simple">
+<li>vc=None: separatrix (in volt). If None, a separatrix will be automatically 
+detected using the method described in the paper.</li>
+<li>dt=0.1*ms: timestep in the trace (inverse of the sampling frequency)</li>
+<li>refractory=5*ms: refractory period: minimal duration between two 
+successive spikes</li>
+<li>check_quality=False: if True, will check spike detection quality using
+signal detection theory. The function then returns a tuple (spikes,scores)
+where scores is a dict.</li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.library.electrophysiology.get_trace_quality">
+<tt class="descclassname">brian.library.electrophysiology.</tt><tt class="descname">get_trace_quality</tt><big>(</big><em>v</em>, <em>I</em>, <em>full=False</em><big>)</big><a class="headerlink" href="#brian.library.electrophysiology.get_trace_quality" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the quality of a compensated trace.</p>
+<ul class="simple">
+<li>v: a compensated intracellular trace</li>
+<li>I: injected current</li>
+<li>full=False: if True, return a dict with the following keys:
+correlation, spikes, coefficients, after_onsets, peaks_prediction,
+after_onsets, spike_before, spike_onset, spike_after</li>
+</ul>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="reference-modelfitting.html"
+                        title="previous chapter">Model fitting toolbox</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="reference-hears.html"
+                        title="next chapter">Brian hears</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/reference-electrodecompensation.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="reference-hears.html" title="Brian hears"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="reference-modelfitting.html" title="Model fitting toolbox"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="reference.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

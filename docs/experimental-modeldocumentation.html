@@ -1,0 +1,275 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Automatic Model Documentation &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Experimental features" href="experimental.html" />
+    <link rel="next" title="Developer’s guide" href="developer.html" />
+    <link rel="prev" title="Realtime Connection Monitor" href="experimental-realtimeconnectionmonitor.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="developer.html" title="Developer’s guide"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="experimental-realtimeconnectionmonitor.html" title="Realtime Connection Monitor"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="experimental.html" accesskey="U">Experimental features</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-brian.experimental.model_documentation">
+<span id="automatic-model-documentation"></span><h1>Automatic Model Documentation<a class="headerlink" href="#module-brian.experimental.model_documentation" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="brian.experimental.model_documentation.DocumentWriter">
+<em class="property">class </em><tt class="descclassname">brian.experimental.model_documentation.</tt><tt class="descname">DocumentWriter</tt><a class="headerlink" href="#brian.experimental.model_documentation.DocumentWriter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for documenting a network. Already takes care of assigning
+labels to objects if none are given.</p>
+<dl class="method">
+<dt id="brian.experimental.model_documentation.DocumentWriter.document_connections">
+<tt class="descname">document_connections</tt><big>(</big><em>connections</em><big>)</big><a class="headerlink" href="#brian.experimental.model_documentation.DocumentWriter.document_connections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Document the connections of the network (including <tt class="xref py py-class docutils literal"><span class="pre">SpikeMonitor</span></tt>
+etc. as they are modeled as <tt class="xref py py-class docutils literal"><span class="pre">Connection</span></tt> objects).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.experimental.model_documentation.DocumentWriter.document_group">
+<tt class="descname">document_group</tt><big>(</big><em>group</em><big>)</big><a class="headerlink" href="#brian.experimental.model_documentation.DocumentWriter.document_group" title="Permalink to this definition">¶</a></dt>
+<dd><p>Document a single <tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt> <cite>group</cite>. Will normally be called
+for every group by <a class="reference internal" href="#brian.experimental.model_documentation.DocumentWriter.document_groups" title="brian.experimental.model_documentation.DocumentWriter.document_groups"><tt class="xref py py-meth docutils literal"><span class="pre">document_groups()</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.experimental.model_documentation.DocumentWriter.document_groups">
+<tt class="descname">document_groups</tt><big>(</big><em>groups</em><big>)</big><a class="headerlink" href="#brian.experimental.model_documentation.DocumentWriter.document_groups" title="Permalink to this definition">¶</a></dt>
+<dd><p>Document all <tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt> <cite>groups</cite>. Should normally call
+<a class="reference internal" href="#brian.experimental.model_documentation.DocumentWriter.document_group" title="brian.experimental.model_documentation.DocumentWriter.document_group"><tt class="xref py py-meth docutils literal"><span class="pre">document_group()</span></tt></a> for every group.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.experimental.model_documentation.DocumentWriter.document_network">
+<tt class="descname">document_network</tt><big>(</big><em>net=None</em>, <em>labels=None</em>, <em>sim=True</em>, <em>groups=True</em>, <em>connections=True</em>, <em>operations=True</em>, <em>graph_connections=False</em><big>)</big><a class="headerlink" href="#brian.experimental.model_documentation.DocumentWriter.document_network" title="Permalink to this definition">¶</a></dt>
+<dd><p>Documents the network <cite>net</cite>, if not network is given, a
+<tt class="xref py py-class docutils literal"><span class="pre">MagicNetwork</span></tt> is automatically created and documented, i.e.
+if you are running scripts without any explicit network (you use
+<cite>run(...)</cite> instead of <cite>net.run(...)</cite>), you can simply call
+<cite>writer.document_network()</cite>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.experimental.model_documentation.DocumentWriter.document_operation">
+<tt class="descname">document_operation</tt><big>(</big><em>operation</em><big>)</big><a class="headerlink" href="#brian.experimental.model_documentation.DocumentWriter.document_operation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Document a single <tt class="xref py py-class docutils literal"><span class="pre">NetworkOperation</span></tt> <cite>operation</cite>. Should normally
+be called by <a class="reference internal" href="#brian.experimental.model_documentation.DocumentWriter.document_operations" title="brian.experimental.model_documentation.DocumentWriter.document_operations"><tt class="xref py py-meth docutils literal"><span class="pre">document_operations()</span></tt></a> for every operation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.experimental.model_documentation.DocumentWriter.document_operations">
+<tt class="descname">document_operations</tt><big>(</big><em>operations</em><big>)</big><a class="headerlink" href="#brian.experimental.model_documentation.DocumentWriter.document_operations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Document all <tt class="xref py py-class docutils literal"><span class="pre">NetworkOperation</span></tt> <cite>operations</cite> (including
+<tt class="xref py py-class docutils literal"><span class="pre">StateMonitor</span></tt> etc. as they are modeled as
+<tt class="xref py py-class docutils literal"><span class="pre">NetworkOperation</span></tt> objects). Should normally call
+<a class="reference internal" href="#brian.experimental.model_documentation.DocumentWriter.document_operation" title="brian.experimental.model_documentation.DocumentWriter.document_operation"><tt class="xref py py-meth docutils literal"><span class="pre">document_operation()</span></tt></a> for every operation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.experimental.model_documentation.DocumentWriter.document_sim">
+<tt class="descname">document_sim</tt><big>(</big><em>network</em><big>)</big><a class="headerlink" href="#brian.experimental.model_documentation.DocumentWriter.document_sim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Document some general properties of the network, e.g. the timestep used
+in the simulation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.experimental.model_documentation.DocumentWriter.graph_connections">
+<tt class="descname">graph_connections</tt><big>(</big><em>connections</em>, <em>groups</em><big>)</big><a class="headerlink" href="#brian.experimental.model_documentation.DocumentWriter.graph_connections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw a graph visualizing the connection structure of the network.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.experimental.model_documentation.DocumentWriter.intro">
+<tt class="descname">intro</tt><big>(</big><big>)</big><a class="headerlink" href="#brian.experimental.model_documentation.DocumentWriter.intro" title="Permalink to this definition">¶</a></dt>
+<dd><p>Is called before any other output function, useful for the start of
+an HTML or LaTeX document.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brian.experimental.model_documentation.DocumentWriter.outro">
+<tt class="descname">outro</tt><big>(</big><big>)</big><a class="headerlink" href="#brian.experimental.model_documentation.DocumentWriter.outro" title="Permalink to this definition">¶</a></dt>
+<dd><p>Is called after all other output function, useful for the end of
+an HTML or LaTeX document.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="brian.experimental.model_documentation.DocumentWriter.to_sympy_expression">
+<em class="property">static </em><tt class="descname">to_sympy_expression</tt><big>(</big><em>eq_string</em><big>)</big><a class="headerlink" href="#brian.experimental.model_documentation.DocumentWriter.to_sympy_expression" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple helper function for converting an Equation string <cite>eq_string</cite> 
+(only the right hand side of an equation) into a <cite>sympy</cite> expression by
+calling <cite>x = Symbol(&#8216;x&#8217;)</cite> for every variable <cite>x</cite> in the equation.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.experimental.model_documentation.TextDocumentWriter">
+<em class="property">class </em><tt class="descclassname">brian.experimental.model_documentation.</tt><tt class="descname">TextDocumentWriter</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#brian.experimental.model_documentation.TextDocumentWriter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Documents the network by printing to stdout, uses <cite>sympy</cite> for formatting
+the equations (including nice Unicode symbols)</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="brian.experimental.model_documentation.LaTeXDocumentWriter">
+<em class="property">class </em><tt class="descclassname">brian.experimental.model_documentation.</tt><tt class="descname">LaTeXDocumentWriter</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#brian.experimental.model_documentation.LaTeXDocumentWriter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Documents the network by printing LaTeX code to stdout. Prints a full
+document (i.e. including preamble etc.). The resulting LaTeX file needs
+the <cite>amsmath</cite> package.</p>
+<p>Note that if you use the <cite>graph_connections=True</cite> option, you additionally
+need the <cite>tikz</cite> and <cite>dot2texi</cite> packages (part of <cite>texlive-core</cite> and
+<cite>texlive-pictures</cite> on Linux systems) and the <cite>dot2tex</cite> tool. To make the 
+conversion from dot code to LaTeX automatically happen on document creation
+you have to pass the <cite>&#8211;shell-escape</cite> option to your LaTeX call, e.g.
+<cite>pdflatex &#8211;shell-escape network_doc.tex</cite></p>
+<dl class="staticmethod">
+<dt id="brian.experimental.model_documentation.LaTeXDocumentWriter.format_equation">
+<em class="property">static </em><tt class="descname">format_equation</tt><big>(</big><em>lhs</em>, <em>rhs</em>, <em>unit</em><big>)</big><a class="headerlink" href="#brian.experimental.model_documentation.LaTeXDocumentWriter.format_equation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function to convert an equation consisting of two strings for the
+left respectively the right hand side of an equation (<cite>lhs</cite> and <cite>rhs</cite>)
+and a Brian <tt class="xref py py-class docutils literal"><span class="pre">Unit</span></tt> <cite>unit</cite> into a LaTeX expression aligning on the
+equality sign for <cite>amsmath</cite>&#8216;s <cite>align</cite> environment.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="brian.experimental.model_documentation.LaTeXDocumentWriter.latex_equation">
+<em class="property">static </em><tt class="descname">latex_equation</tt><big>(</big><em>eq_string</em><big>)</big><a class="headerlink" href="#brian.experimental.model_documentation.LaTeXDocumentWriter.latex_equation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function to convert the right hand side of an equation string
+<cite>eq_string</cite> to a LaTeX expression (not a full equation in LaTeX terms)
+using <cite>sympy</cite>.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="brian.experimental.model_documentation.LaTeXDocumentWriter.latex_equations">
+<em class="property">static </em><tt class="descname">latex_equations</tt><big>(</big><em>eqs</em><big>)</big><a class="headerlink" href="#brian.experimental.model_documentation.LaTeXDocumentWriter.latex_equations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert Brian equations (either a &#8211; possibly multi-line &#8211; string or an
+<tt class="xref py py-class docutils literal"><span class="pre">Equation</span></tt> object) <cite>eqs</cite> into a LaTeX equation using <cite>amsmath</cite>&#8216;s
+<cite>align</cite> environment.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.experimental.model_documentation.document_network">
+<tt class="descclassname">brian.experimental.model_documentation.</tt><tt class="descname">document_network</tt><big>(</big><em>net=None</em>, <em>output='text'</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#brian.experimental.model_documentation.document_network" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience method for documenting a network without having to construct
+a <a class="reference internal" href="#brian.experimental.model_documentation.DocumentWriter" title="brian.experimental.model_documentation.DocumentWriter"><tt class="xref py py-class docutils literal"><span class="pre">DocumentWriter</span></tt></a> object first.</p>
+<p>If no network <cite>net</cite> is given, a <tt class="xref py py-class docutils literal"><span class="pre">MagicNetwork</span></tt> is automatically
+created and documented. The <cite>output</cite> argument should be either <cite>text</cite> (the
+default) or <cite>latex</cite>. Any further keyword arguments are passed on to the 
+respective <a class="reference internal" href="#brian.experimental.model_documentation.DocumentWriter" title="brian.experimental.model_documentation.DocumentWriter"><tt class="xref py py-class docutils literal"><span class="pre">DocumentWriter</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="brian.experimental.model_documentation.labels_from_namespace">
+<tt class="descclassname">brian.experimental.model_documentation.</tt><tt class="descname">labels_from_namespace</tt><big>(</big><em>namespace</em><big>)</big><a class="headerlink" href="#brian.experimental.model_documentation.labels_from_namespace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a labels dictionary that can be handed over to the
+<cite>document_network</cite> from a given namespace. Would typically be called like
+this:
+<cite>net.document_network(labels=labels_from_namespace(locals()))</cite>
+This allows <cite>document_network</cite> to use the variable names used in the Python
+code as the short labels, making it easier to link the model description
+and the actual code.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="experimental-realtimeconnectionmonitor.html"
+                        title="previous chapter">Realtime Connection Monitor</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="developer.html"
+                        title="next chapter">Developer&#8217;s guide</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/experimental-modeldocumentation.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="developer.html" title="Developer’s guide"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="experimental-realtimeconnectionmonitor.html" title="Realtime Connection Monitor"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="experimental.html" >Experimental features</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

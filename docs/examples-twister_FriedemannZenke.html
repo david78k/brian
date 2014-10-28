@@ -1,0 +1,233 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: FriedemannZenke (twister) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: PierreYger (twister)" href="examples-twister_PierreYger.html" />
+    <link rel="prev" title="Example: PeterDiehl (twister)" href="examples-twister_PeterDiehl.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-twister_PierreYger.html" title="Example: PierreYger (twister)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-twister_PeterDiehl.html" title="Example: PeterDiehl (twister)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-friedemannzenke-twister">
+<span id="example-twister-friedemannzenke"></span><span id="index-0"></span><h1>Example: FriedemannZenke (twister)<a class="headerlink" href="#example-friedemannzenke-twister" title="Permalink to this headline">¶</a></h1>
+<p>Friedemann Zenke&#8217;s winning entry for the 2012 Brian twister.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># ###########################################</span>
+<span class="c">#</span>
+<span class="c"># Inhibitory synaptic plasticity in a recurrent network model</span>
+<span class="c"># (F. Zenke, 2011)</span>
+<span class="c">#</span>
+<span class="c"># Adapted from:</span>
+<span class="c"># Vogels, T. P., H. Sprekeler, F. Zenke, C. Clopath, and W. Gerstner.</span>
+<span class="c"># &#39;Inhibitory Plasticity Balances Excitation and Inhibition in Sensory</span>
+<span class="c"># Pathways and Memory Networks.&#39; Science (November 10, 2011).</span>
+<span class="c">#</span>
+<span class="c"># ###########################################</span>
+
+<span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="c"># ###########################################</span>
+<span class="c"># Defining network model parameters</span>
+<span class="c"># ###########################################</span>
+
+<span class="n">NE</span> <span class="o">=</span> <span class="mi">8000</span>          <span class="c"># Number of excitatory cells</span>
+<span class="n">NI</span> <span class="o">=</span> <span class="n">NE</span><span class="o">/</span><span class="mi">4</span>          <span class="c"># Number of inhibitory cells</span>
+
+<span class="n">w</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">*</span><span class="n">nS</span>           <span class="c"># Basic weight unit</span>
+<span class="n">tau_ampa</span> <span class="o">=</span> <span class="mf">5.0</span><span class="o">*</span><span class="n">ms</span>   <span class="c"># Glutamatergic synaptic time constant</span>
+<span class="n">tau_gaba</span> <span class="o">=</span> <span class="mf">10.0</span><span class="o">*</span><span class="n">ms</span>  <span class="c"># GABAergic synaptic time constant</span>
+<span class="n">epsilon</span> <span class="o">=</span> <span class="mf">0.02</span>      <span class="c"># Sparseness of synaptic connections</span>
+
+<span class="n">eta</span> <span class="o">=</span> <span class="mf">1e-2</span>          <span class="c"># Learning rate</span>
+<span class="n">tau_stdp</span> <span class="o">=</span> <span class="mi">20</span><span class="o">*</span><span class="n">ms</span>    <span class="c"># STDP time constant</span>
+
+<span class="n">simtime</span> <span class="o">=</span> <span class="mi">10</span><span class="o">*</span><span class="n">second</span> <span class="c"># Simulation time</span>
+
+<span class="c"># ###########################################</span>
+<span class="c"># Neuron model</span>
+<span class="c"># ###########################################</span>
+
+<span class="n">gl</span> <span class="o">=</span> <span class="mf">10.0</span><span class="o">*</span><span class="n">nsiemens</span>   <span class="c"># Leak conductance</span>
+<span class="n">el</span> <span class="o">=</span> <span class="o">-</span><span class="mi">60</span><span class="o">*</span><span class="n">mV</span>          <span class="c"># Resting potential</span>
+<span class="n">er</span> <span class="o">=</span> <span class="o">-</span><span class="mi">80</span><span class="o">*</span><span class="n">mV</span>          <span class="c"># Inhibitory reversal potential</span>
+<span class="n">vt</span> <span class="o">=</span> <span class="o">-</span><span class="mf">50.</span><span class="o">*</span><span class="n">mV</span>         <span class="c"># Spiking threshold</span>
+<span class="n">memc</span> <span class="o">=</span> <span class="mf">200.0</span><span class="o">*</span><span class="n">pfarad</span>  <span class="c"># Membrane capacitance</span>
+<span class="n">bgcurrent</span> <span class="o">=</span> <span class="mi">200</span><span class="o">*</span><span class="n">pA</span>   <span class="c"># External current</span>
+
+<span class="n">eqs_neurons</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">dv/dt=(-gl*(v-el)-(g_ampa*w*v+g_gaba*(v-er)*w)+bgcurrent)/memc : volt</span>
+<span class="s">dg_ampa/dt = -g_ampa/tau_ampa : 1</span>
+<span class="s">dg_gaba/dt = -g_gaba/tau_gaba : 1</span>
+<span class="s">&#39;&#39;&#39;</span>
+
+<span class="c"># ###########################################</span>
+<span class="c"># Initialize neuron group</span>
+<span class="c"># ###########################################</span>
+
+<span class="n">neurons</span><span class="o">=</span><span class="n">NeuronGroup</span><span class="p">(</span><span class="n">NE</span><span class="o">+</span><span class="n">NI</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="n">eqs_neurons</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="n">vt</span><span class="p">,</span><span class="n">reset</span><span class="o">=</span><span class="n">el</span><span class="p">,</span><span class="n">refractory</span><span class="o">=</span><span class="mi">5</span><span class="o">*</span><span class="n">ms</span><span class="p">)</span>
+<span class="n">Pe</span><span class="o">=</span><span class="n">neurons</span><span class="o">.</span><span class="n">subgroup</span><span class="p">(</span><span class="n">NE</span><span class="p">)</span>
+<span class="n">Pi</span><span class="o">=</span><span class="n">neurons</span><span class="o">.</span><span class="n">subgroup</span><span class="p">(</span><span class="n">NI</span><span class="p">)</span>
+
+<span class="c"># ###########################################</span>
+<span class="c"># Connecting the network</span>
+<span class="c"># ###########################################</span>
+
+<span class="n">con_e</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">Pe</span><span class="p">,</span><span class="n">neurons</span><span class="p">,</span><span class="s">&#39;g_ampa&#39;</span><span class="p">,</span><span class="n">weight</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span><span class="n">sparseness</span><span class="o">=</span><span class="n">epsilon</span><span class="p">)</span>
+<span class="n">con_ie</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">Pi</span><span class="p">,</span><span class="n">Pe</span><span class="p">,</span><span class="s">&#39;g_gaba&#39;</span><span class="p">,</span><span class="n">weight</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">,</span><span class="n">sparseness</span><span class="o">=</span><span class="n">epsilon</span><span class="p">)</span>
+<span class="n">con_ii</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">Pi</span><span class="p">,</span><span class="n">Pi</span><span class="p">,</span><span class="s">&#39;g_gaba&#39;</span><span class="p">,</span><span class="n">weight</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">sparseness</span><span class="o">=</span><span class="n">epsilon</span><span class="p">)</span>
+
+<span class="c"># ###########################################</span>
+<span class="c"># Setting up monitors</span>
+<span class="c"># ###########################################</span>
+
+<span class="n">sm</span> <span class="o">=</span> <span class="n">SpikeMonitor</span><span class="p">(</span><span class="n">Pe</span><span class="p">)</span>
+
+<span class="c"># ###########################################</span>
+<span class="c"># Run without plasticity</span>
+<span class="c"># ###########################################</span>
+
+<span class="n">run</span><span class="p">(</span><span class="mi">1</span><span class="o">*</span><span class="n">second</span><span class="p">)</span>
+
+<span class="c"># ###########################################</span>
+<span class="c"># Inhibitory Plasticity</span>
+<span class="c"># ###########################################</span>
+
+<span class="n">alpha</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">Hz</span><span class="o">*</span><span class="n">tau_stdp</span><span class="o">*</span><span class="mi">2</span>  <span class="c"># Target rate parameter</span>
+<span class="n">gmax</span> <span class="o">=</span> <span class="mi">100</span>               <span class="c"># Maximum inhibitory weight</span>
+
+<span class="n">eqs_stdp_inhib</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">dA_pre/dt=-A_pre/tau_stdp : 1</span>
+<span class="s">dA_post/dt=-A_post/tau_stdp : 1</span>
+<span class="s">&#39;&#39;&#39;</span>
+
+<span class="n">stdp_ie</span> <span class="o">=</span> <span class="n">STDP</span><span class="p">(</span><span class="n">con_ie</span><span class="p">,</span> <span class="n">eqs</span><span class="o">=</span><span class="n">eqs_stdp_inhib</span><span class="p">,</span> <span class="n">pre</span><span class="o">=</span><span class="s">&#39;A_pre+=1.; w+=(A_post-alpha)*eta;&#39;</span><span class="p">,</span>
+        <span class="n">post</span><span class="o">=</span><span class="s">&#39;A_post+=1.; w+=A_pre*eta;&#39;</span><span class="p">,</span> <span class="n">wmax</span><span class="o">=</span><span class="n">gmax</span><span class="p">)</span>
+
+<span class="c"># ###########################################</span>
+<span class="c"># Run with plasticity</span>
+<span class="c"># ###########################################</span>
+
+<span class="n">run</span><span class="p">(</span><span class="n">simtime</span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">second</span><span class="p">,</span><span class="n">report</span><span class="o">=</span><span class="s">&#39;text&#39;</span><span class="p">)</span>
+
+<span class="c"># ###########################################</span>
+<span class="c"># Make plots</span>
+<span class="c"># ###########################################</span>
+
+<span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+<span class="n">raster_plot</span><span class="p">(</span><span class="n">sm</span><span class="p">,</span><span class="n">ms</span><span class="o">=</span><span class="mf">1.</span><span class="p">)</span>
+<span class="n">title</span><span class="p">(</span><span class="s">&quot;Before&quot;</span><span class="p">)</span>
+<span class="n">xlabel</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">)</span>
+<span class="n">xlim</span><span class="p">(</span><span class="mf">0.8</span><span class="o">*</span><span class="mf">1e3</span><span class="p">,</span><span class="mi">1</span><span class="o">*</span><span class="mf">1e3</span><span class="p">)</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">)</span>
+<span class="n">raster_plot</span><span class="p">(</span><span class="n">sm</span><span class="p">,</span><span class="n">ms</span><span class="o">=</span><span class="mf">1.</span><span class="p">)</span>
+<span class="n">title</span><span class="p">(</span><span class="s">&quot;After&quot;</span><span class="p">)</span>
+<span class="n">xlim</span><span class="p">((</span><span class="n">simtime</span><span class="o">-</span><span class="mf">0.2</span><span class="o">*</span><span class="n">second</span><span class="p">)</span><span class="o">*</span><span class="mf">1e3</span><span class="p">,</span><span class="n">simtime</span><span class="o">*</span><span class="mf">1e3</span><span class="p">)</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-twister_PeterDiehl.html"
+                        title="previous chapter">Example: PeterDiehl (twister)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-twister_PierreYger.html"
+                        title="next chapter">Example: PierreYger (twister)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-twister_FriedemannZenke.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-twister_PierreYger.html" title="Example: PierreYger (twister)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-twister_PeterDiehl.html" title="Example: PeterDiehl (twister)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

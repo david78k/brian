@@ -1,0 +1,209 @@
+.. currentmodule:: brian.library.modelfitting
+
+.. _model-fitting-library:
+
+Model fitting
+=============
+The modelfitting library is used for fitting a neuron model to data. 
+
+The library provides a single function :func:`modelfitting`, which accepts the model
+and the data as arguments and returns the model parameters that fit best the data.
+The model is a spiking neuron model, whereas the data consists of both an input
+(time-varying signal, for example an injected current) and a set of spike trains.
+Only spikes are considered for the fitness. Several target spike trains can be
+specified in order to fit independently several data sets. In this case,
+the :func:`modelfitting` function returns as many parameters sets as there are target spike trains.
+
+The model is defined as any spiking neuron model in Brian, by giving the equations
+as mathematical equations, and the reset and threshold values. The free parameters
+of the model that shall be fitted by the library are also specified. The data is
+specified by the input (a vector containing the time-varying injected current),
+the timestep of the input, and the data as a list of spike times.
+
+How it works
+------------
+
+Fitting a spiking neuron model to electrophysiological data is performed by maximizing
+a fitness function measuring the adequacy of the model to the data.
+This function is defined as the gamma factor, which is based on
+the number of coincidences between the model spikes and the experimentally-recorded spikes, defined
+as the number of spikes in the experimental train such that there is at least one spike
+in the model train within plus or minus ``delta``, where ``delta`` is the size of the temporal window
+(typically a few milliseconds). For more details on the gamma factor, see
+`Jolivet et al. 2008, "A benchmark test for a quantitative assessment of simple neuron models", J. Neurosci. Methods <http://www.ncbi.nlm.nih.gov/pubmed/18160135>`__ (available in PDF
+`here <http://icwww.epfl.ch/~gerstner/PUBLICATIONS/Jolivet08.pdf>`__).
+
+The optimization procedure is performed by an optimization algorithm. The optimization toolbox
+used by modelfitting is implemented in the external Python package `Playdoh
+<https://code.google.com/p/playdoh/>`__. It also
+supports distributed and parallel optimization across CPUs and machines.
+Different optimization algorithms are supported, the default one is :class:`CMAES`.
+All those algorithms require the evaluation of the fitness function for a large number of parameter
+sets. Each iteration of the algorithm
+involves the simulation of a large number of neurons (one neuron corresponding to one parameter set) 
+as well as the computation of the gamma factor for each neuron. 
+The quality of the result depends
+on the number of neurons used, which is specified in the :func:`modelfitting` function. 
+
+Playdoh supports the use of graphical processing
+units (GPUs) in order to accelerate the speed of convergence of the algorithm.
+If multiple cores are detected, the library will use all of them by default.
+Also, if a CUDA-enabled GPU is present on the system, and if PyCUDA is installed,
+the library will automatically use the GPU by default. In addition, several computers
+can be networked over IP, see :ref:`modelfitting-clusters`.
+
+Usage example
+-------------
+
+To import the library, use ::
+
+  from brian.library.modelfitting import *
+
+To fit the parameters of a neuron model with respect to some data, use the
+:func:`modelfitting` function ::
+                        
+    results = modelfitting(model = equations, reset = 0, threshold = 1,
+                         data = spikes, 
+                         input = input, dt = .1*ms,
+                         popsize = 1000, maxiter = 10, 
+                         R = [1.0e9, 1.0e10], tau = [1*ms, 50*ms])
+
+    print_table(results)
+
+.. warning::
+
+	Windows users should read the section :ref:`note-for-windows-users`. 
+
+The model is defined by ``equations`` (an :class:`~brian.Equations` object), 
+``reset`` (a scalar value or a set of equations as a string) and 
+``threshold`` (a scalar value or a set of equations as a string).
+
+The target spike trains are defined by ``data`` (a list of pairs ``(neuron index, spike time)``
+or a list of spike times if there is only one target spike train).
+
+The input is specified with ``input`` (a vector containing the time-varying signal)
+and ``dt`` (the time step of the signal).
+The input variable should be ``I`` in the equations, although the input variable name
+can be specified with ``input_var``.
+
+The number of particles per target train used in the optimization algorithm is
+specified with ``popsize``. The total number of neurons is  ``popsize`` multiplied
+by the number of target spike trains.
+The number of iterations in the algorithm is specified with ``maxiter``.
+
+Each free parameter of the model that shall be fitted is defined by two values ::
+  
+    param_name = [min, max]
+
+``param_name`` should correspond to the parameter name in the model equations.
+``min`` and ``max`` specify the initial interval from which the parameter values
+will be uniformly sampled at the beginning of the optimization algorithm.
+A boundary interval can also be specified by giving four values ::
+
+    param_name = [bound_min, min, max, bound_max]
+
+The parameter values will be forced to stay inside the interval [bound_min, bound_max]
+during the optimization.
+
+The complete list of arguments can be found in the reference
+section of the :func:`modelfitting` function.
+
+The best parameters and the corresponding best fitness values found by the optimization 
+procedure are returned in the :class:`OptimizationResult`
+object ``result``.
+
+.. _note-for-windows-users:
+
+Important note for Windows users
+--------------------------------
+
+The model fitting library uses the Python `multiprocessing <http://docs.python.org/library/multiprocessing.html>`__
+package to distribute fitting across processors in a single computer or across
+multiple computers. However, there is a limitation of the Windows version of
+multiprocessing which you can read about `here <http://docs.python.org/library/multiprocessing.html#windows>`__.
+The end result is that a script like this::
+
+	from brian.library.modelfitting import *
+	...
+	results = modelfitting(...)
+	
+will crash, going into an endless loop and creating hundreds of Python processes
+that have to be shut down by hand. Instead, you have to do this::
+
+	from brian.library.modelfitting import *
+	...
+	if __name__=='__main__':
+		results = modelfitting(...)
+
+.. _modelfitting-clusters:
+
+Clusters
+--------
+
+The model fitting package can be used with a cluster of computers connected over
+IP. Every computer must have Brian and Playdoh installed, and they must run
+the Playdoh server: see 
+`the Playdoh documentation <http://playdoh.googlecode.com/svn/docs/playdoh.html#launching-the-playdoh-server>`__.
+Then, you can launch the ```modelfitting`` function with the ``machines`` keyword,
+which is the list of the IP addresses of the machines to use in parallel 
+for the fitting procedure. You must also specify the ``unit_type`` keyword, which is ``CPU`` or ``GPU``,
+to indicate whether you want to use CPUs or GPUs on these computers. You can't mix CPUs and GPUs
+for the same optimization.
+
+IP
+~~
+
+To connect several machines via IP, pass a list of host names or IP addresses
+as strings to the ``machines`` keyword of the :func:`modelfitting` function.
+To specify a specific port, use a tuple ``(IP, port)`` instead
+of a string. You can also specify a default port in the Playdoh user preferences, see 
+`the Playdoh documentation <http://playdoh.googlecode.com/svn/docs/playdoh.html#userpref>`__.
+
+Authentication
+~~~~~~~~~~~~~~
+
+You can specify an authentication string on all the computers running the Playdoh server
+to secure communications.
+See 
+`the Playdoh documentation <http://playdoh.googlecode.com/svn/docs/playdoh.html#userpref>`__.
+
+Example
+~~~~~~~
+
+The following script launches a fitting procedure in parallel on two machines::
+
+	from brian import loadtxt, ms, Equations
+	from brian.library.modelfitting import *
+	
+	if __name__ == '__main__':
+	    # List of machines IP addresses
+	    machines = ['bobs-machine.university.com',
+	                'jims-machine.university.com']
+	    
+	    equations = Equations('''
+	        dV/dt=(R*I-V)/tau : 1
+	        I : 1
+	        R : 1
+	        tau : second
+	    ''')
+	    input = loadtxt('current.txt')
+	    spikes = loadtxt('spikes.txt')
+	    results = modelfitting( model = equations,
+	                            reset = 0,
+	                            threshold = 1,
+	                            data = spikes,
+	                            input = input,
+	                            dt = .1*ms,
+	                            popsize = 1000,
+	                            maxiter = 3,
+	                            delta = 4*ms,
+	                            unit_type = 'CPU',
+	                            machines = machines,
+	                            R = [1.0e9, 9.0e9],
+	                            tau = [10*ms, 40*ms],
+	                            refractory = [0*ms, 10*ms])
+	    print_table(results)
+
+
+The two remote machines would run the `Playdoh server <http://playdoh.googlecode.com/svn/docs/playdoh.html#launching-the-playdoh-server>`__.
+

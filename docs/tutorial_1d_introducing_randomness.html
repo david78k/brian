@@ -1,0 +1,168 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Tutorial 1d: Introducing randomness &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Tutorial 1: Basic Concepts" href="tutorial1_basic_concepts.html" />
+    <link rel="next" title="Tutorial 1e: Connecting neurons" href="tutorial_1e_connecting_neurons.html" />
+    <link rel="prev" title="Tutorial 1c: Making some activity" href="tutorial_1c_making_some_activity.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="tutorial_1e_connecting_neurons.html" title="Tutorial 1e: Connecting neurons"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="tutorial_1c_making_some_activity.html" title="Tutorial 1c: Making some activity"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="tutorials.html" >Tutorials</a> &raquo;</li>
+          <li><a href="tutorial1_basic_concepts.html" accesskey="U">Tutorial 1: Basic Concepts</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="tutorial-1d-introducing-randomness">
+<h1>Tutorial 1d: Introducing randomness<a class="headerlink" href="#tutorial-1d-introducing-randomness" title="Permalink to this headline">¶</a></h1>
+<p>In the previous part of the tutorial, all the neurons start
+at the same values and proceed deterministically, so they all
+spike at exactly the same times. In this part, we introduce
+some randomness by initialising all the membrane potentials
+to uniform random values between the reset and threshold
+values.</p>
+<p>We start as before:</p>
+<blockquote>
+<div><div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">tau</span> <span class="o">=</span> <span class="mi">20</span> <span class="o">*</span> <span class="n">msecond</span>        <span class="c"># membrane time constant</span>
+<span class="n">Vt</span> <span class="o">=</span> <span class="o">-</span><span class="mi">50</span> <span class="o">*</span> <span class="n">mvolt</span>          <span class="c"># spike threshold</span>
+<span class="n">Vr</span> <span class="o">=</span> <span class="o">-</span><span class="mi">60</span> <span class="o">*</span> <span class="n">mvolt</span>          <span class="c"># reset value</span>
+<span class="n">El</span> <span class="o">=</span> <span class="o">-</span><span class="mi">49</span> <span class="o">*</span> <span class="n">mvolt</span>          <span class="c"># resting potential (same as the reset)</span>
+
+<span class="n">G</span> <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s">&#39;dV/dt = -(V-El)/tau : volt&#39;</span><span class="p">,</span>
+              <span class="n">threshold</span><span class="o">=</span><span class="n">Vt</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="n">Vr</span><span class="p">)</span>
+
+<span class="n">M</span> <span class="o">=</span> <span class="n">SpikeMonitor</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>But before we run the simulation, we set the values of the
+membrane potentials directly. The notation <tt class="docutils literal"><span class="pre">G.V</span></tt> refers
+to the array of values for the variable <tt class="docutils literal"><span class="pre">V</span></tt> in group <tt class="docutils literal"><span class="pre">G</span></tt>. In
+our case, this is an array of length 40. We set its values
+by generating an array of random numbers using Brian&#8217;s
+<tt class="docutils literal"><span class="pre">rand</span></tt> function. The syntax is <tt class="docutils literal"><span class="pre">rand(size)</span></tt> generates an
+array of length <tt class="docutils literal"><span class="pre">size</span></tt> consisting of uniformly distributed
+random numbers in the interval 0, 1.</p>
+<blockquote>
+<div><div class="highlight-python"><div class="highlight"><pre><span class="n">G</span><span class="o">.</span><span class="n">V</span> <span class="o">=</span> <span class="n">Vr</span> <span class="o">+</span> <span class="n">rand</span><span class="p">(</span><span class="mi">40</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">Vt</span> <span class="o">-</span> <span class="n">Vr</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>And now we run the simulation as before.</p>
+<blockquote>
+<div><div class="highlight-python"><div class="highlight"><pre><span class="n">run</span><span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="n">second</span><span class="p">)</span>
+
+<span class="k">print</span> <span class="n">M</span><span class="o">.</span><span class="n">nspikes</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>But this time we get a varying number of spikes each time
+we run it, roughly between 800 and 850 spikes. In the
+next part of this tutorial, we introduce a bit more
+interest into this network by connecting the neurons together.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="tutorial_1c_making_some_activity.html"
+                        title="previous chapter">Tutorial 1c: Making some activity</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="tutorial_1e_connecting_neurons.html"
+                        title="next chapter">Tutorial 1e: Connecting neurons</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/tutorial_1d_introducing_randomness.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="tutorial_1e_connecting_neurons.html" title="Tutorial 1e: Connecting neurons"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="tutorial_1c_making_some_activity.html" title="Tutorial 1c: Making some activity"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="tutorials.html" >Tutorials</a> &raquo;</li>
+          <li><a href="tutorial1_basic_concepts.html" >Tutorial 1: Basic Concepts</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

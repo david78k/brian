@@ -1,0 +1,206 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: drnl (hears) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: cochlear_models (hears)" href="examples-hears_cochlear_models.html" />
+    <link rel="prev" title="Example: log_gammachirp (hears)" href="examples-hears_log_gammachirp.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-hears_cochlear_models.html" title="Example: cochlear_models (hears)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-hears_log_gammachirp.html" title="Example: log_gammachirp (hears)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-drnl-hears">
+<span id="example-hears-drnl"></span><span id="index-0"></span><h1>Example: drnl (hears)<a class="headerlink" href="#example-drnl-hears" title="Permalink to this headline">¶</a></h1>
+<p>Implementation example of the dual resonance nonlinear (DRNL) filter with
+parameters fitted for human as described in Lopez-Paveda, E. and Meddis, R., A
+human nonlinear cochlear filterbank, JASA 2001.</p>
+<p>A class called <a class="reference internal" href="reference-hears.html#brian.hears.DRNL" title="brian.hears.DRNL"><tt class="xref py py-class docutils literal"><span class="pre">DRNL</span></tt></a> implementing this model is available
+in the library.</p>
+<p>The entire pathway consists of the sum of a linear and a nonlinear pathway.</p>
+<p>The linear path consists of a bank of bandpass filters (second order gammatone),
+a low pass function, and a gain/attenuation factor, g, in a cascade.</p>
+<p>The nonlinear path is  a cascade consisting of a bank of gammatone filters, a
+compression function, a second bank of gammatone filters, and a low
+pass function, in that order.</p>
+<p>The parameters are given in the form <tt class="docutils literal"><span class="pre">10**(p0+mlog10(cf))</span></tt>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">brian.hears</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">simulation_duration</span> <span class="o">=</span> <span class="mi">50</span><span class="o">*</span><span class="n">ms</span>
+<span class="n">samplerate</span> <span class="o">=</span> <span class="mi">50</span><span class="o">*</span><span class="n">kHz</span>
+<span class="n">level</span> <span class="o">=</span> <span class="mi">50</span><span class="o">*</span><span class="n">dB</span>  <span class="c"># level of the input sound in rms dB SPL</span>
+<span class="n">sound</span> <span class="o">=</span> <span class="n">whitenoise</span><span class="p">(</span><span class="n">simulation_duration</span><span class="p">,</span> <span class="n">samplerate</span><span class="p">)</span><span class="o">.</span><span class="n">ramp</span><span class="p">()</span>
+<span class="n">sound</span><span class="o">.</span><span class="n">level</span> <span class="o">=</span> <span class="n">level</span>
+
+<span class="n">nbr_cf</span> <span class="o">=</span> <span class="mi">50</span>  <span class="c">#number of centre frequencies</span>
+<span class="c">#center frequencies with a spacing following an ERB scale</span>
+<span class="n">center_frequencies</span> <span class="o">=</span> <span class="n">erbspace</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">Hz</span><span class="p">,</span><span class="mi">1000</span><span class="o">*</span><span class="n">Hz</span><span class="p">,</span> <span class="n">nbr_cf</span><span class="p">)</span>
+
+<span class="c">#conversion to stape velocity (which are the units needed by the following centres)</span>
+<span class="n">sound</span> <span class="o">=</span> <span class="n">sound</span><span class="o">*</span><span class="mf">0.00014</span>
+
+<span class="c">#### Linear Pathway ####</span>
+
+<span class="c">#bandpass filter (second order gammatone filter)</span>
+<span class="n">center_frequencies_linear</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">0.067</span><span class="o">+</span><span class="mf">1.016</span><span class="o">*</span><span class="n">log10</span><span class="p">(</span><span class="n">center_frequencies</span><span class="p">))</span>
+<span class="n">bandwidth_linear</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="mf">0.037</span><span class="o">+</span><span class="mf">0.785</span><span class="o">*</span><span class="n">log10</span><span class="p">(</span><span class="n">center_frequencies</span><span class="p">))</span>
+<span class="n">order_linear</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">gammatone</span> <span class="o">=</span> <span class="n">ApproximateGammatone</span><span class="p">(</span><span class="n">sound</span><span class="p">,</span> <span class="n">center_frequencies_linear</span><span class="p">,</span>
+                                 <span class="n">bandwidth_linear</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order_linear</span><span class="p">)</span>
+
+<span class="c">#linear gain</span>
+<span class="n">g</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="mf">4.2</span><span class="o">-</span><span class="mf">0.48</span><span class="o">*</span><span class="n">log10</span><span class="p">(</span><span class="n">center_frequencies</span><span class="p">))</span>
+<span class="n">func_gain</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">g</span><span class="o">*</span><span class="n">x</span>
+<span class="n">gain</span> <span class="o">=</span> <span class="n">FunctionFilterbank</span><span class="p">(</span><span class="n">gammatone</span><span class="p">,</span> <span class="n">func_gain</span><span class="p">)</span>
+
+<span class="c">#low pass filter(cascade of 4 second order lowpass butterworth filters)</span>
+<span class="n">cutoff_frequencies_linear</span> <span class="o">=</span> <span class="n">center_frequencies_linear</span>
+<span class="n">order_lowpass_linear</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">lp_l</span> <span class="o">=</span> <span class="n">LowPass</span><span class="p">(</span><span class="n">gain</span><span class="p">,</span> <span class="n">cutoff_frequencies_linear</span><span class="p">)</span>
+<span class="n">lowpass_linear</span> <span class="o">=</span> <span class="n">Cascade</span><span class="p">(</span><span class="n">gain</span><span class="p">,</span> <span class="n">lp_l</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+
+<span class="c">#### Nonlinear Pathway ####</span>
+
+<span class="c">#bandpass filter (third order gammatone filters)</span>
+<span class="n">center_frequencies_nonlinear</span> <span class="o">=</span> <span class="n">center_frequencies</span>
+<span class="n">bandwidth_nonlinear</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">0.031</span><span class="o">+</span><span class="mf">0.774</span><span class="o">*</span><span class="n">log10</span><span class="p">(</span><span class="n">center_frequencies</span><span class="p">))</span>
+<span class="n">order_nonlinear</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">bandpass_nonlinear1</span> <span class="o">=</span> <span class="n">ApproximateGammatone</span><span class="p">(</span><span class="n">sound</span><span class="p">,</span> <span class="n">center_frequencies_nonlinear</span><span class="p">,</span>
+                                           <span class="n">bandwidth_nonlinear</span><span class="p">,</span>
+                                           <span class="n">order</span><span class="o">=</span><span class="n">order_nonlinear</span><span class="p">)</span>
+
+<span class="c">#compression (linear at low level, compress at high level)</span>
+<span class="n">a</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="mf">1.402</span><span class="o">+</span><span class="mf">0.819</span><span class="o">*</span><span class="n">log10</span><span class="p">(</span><span class="n">center_frequencies</span><span class="p">))</span>  <span class="c">#linear gain</span>
+<span class="n">b</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="mf">1.619</span><span class="o">-</span><span class="mf">0.818</span><span class="o">*</span><span class="n">log10</span><span class="p">(</span><span class="n">center_frequencies</span><span class="p">))</span>
+<span class="n">v</span> <span class="o">=</span> <span class="o">.</span><span class="mi">2</span> <span class="c">#compression exponent</span>
+<span class="n">func_compression</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">sign</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">minimum</span><span class="p">(</span><span class="n">a</span><span class="o">*</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">b</span><span class="o">*</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">**</span><span class="n">v</span><span class="p">)</span>
+<span class="n">compression</span> <span class="o">=</span> <span class="n">FunctionFilterbank</span><span class="p">(</span><span class="n">bandpass_nonlinear1</span><span class="p">,</span> <span class="n">func_compression</span><span class="p">)</span>
+
+<span class="c">#bandpass filter (third order gammatone filters)</span>
+<span class="n">bandpass_nonlinear2</span> <span class="o">=</span> <span class="n">ApproximateGammatone</span><span class="p">(</span><span class="n">compression</span><span class="p">,</span>
+                                           <span class="n">center_frequencies_nonlinear</span><span class="p">,</span>
+                                           <span class="n">bandwidth_nonlinear</span><span class="p">,</span>
+                                           <span class="n">order</span><span class="o">=</span><span class="n">order_nonlinear</span><span class="p">)</span>
+
+<span class="c">#low pass filter</span>
+<span class="n">cutoff_frequencies_nonlinear</span> <span class="o">=</span> <span class="n">center_frequencies_nonlinear</span>
+<span class="n">order_lowpass_nonlinear</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">lp_nl</span> <span class="o">=</span> <span class="n">LowPass</span><span class="p">(</span><span class="n">bandpass_nonlinear2</span><span class="p">,</span> <span class="n">cutoff_frequencies_nonlinear</span><span class="p">)</span>
+<span class="n">lowpass_nonlinear</span> <span class="o">=</span> <span class="n">Cascade</span><span class="p">(</span><span class="n">bandpass_nonlinear2</span><span class="p">,</span> <span class="n">lp_nl</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+<span class="c">#adding the two pathways</span>
+<span class="n">dnrl_filter</span> <span class="o">=</span> <span class="n">lowpass_linear</span><span class="o">+</span><span class="n">lowpass_nonlinear</span>
+
+<span class="n">dnrl</span> <span class="o">=</span> <span class="n">dnrl_filter</span><span class="o">.</span><span class="n">process</span><span class="p">()</span>
+
+<span class="n">figure</span><span class="p">()</span>
+<span class="n">imshow</span><span class="p">(</span><span class="n">flipud</span><span class="p">(</span><span class="n">dnrl</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">aspect</span><span class="o">=</span><span class="s">&#39;auto&#39;</span><span class="p">)</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-hears_log_gammachirp.html"
+                        title="previous chapter">Example: log_gammachirp (hears)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-hears_cochlear_models.html"
+                        title="next chapter">Example: cochlear_models (hears)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-hears_drnl.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-hears_cochlear_models.html" title="Example: cochlear_models (hears)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-hears_log_gammachirp.html" title="Example: log_gammachirp (hears)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

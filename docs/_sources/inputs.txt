@@ -1,0 +1,173 @@
+.. currentmodule:: brian
+
+Inputs
+======
+Some specific types of neuron groups are available to provide inputs to a network.
+
+Poisson inputs
+--------------
+Poisson spike trains can be generated as follows::
+
+  group=PoissonGroup(100,rates=10*Hz)
+
+Here 100 neurons are defined, which emit spikes independently according to Poisson
+processes with rates 10 Hz. To have different rates across the group,
+initialise with an array of rates:
+
+  group=PoissonGroup(100,rates=linspace(0*Hz,10*Hz,100))
+
+Inhomogeneous Poisson processes can be defined by passing a function of time that returns the
+rates::
+
+  group=PoissonGroup(100,rates=lambda t:(1+cos(t))*10*Hz)
+
+or::
+
+  r0=linspace(0*Hz,10*Hz,100)
+  group=PoissonGroup(100,rates=lambda t:(1+cos(t))*r0)
+
+There is another class for Poisson inputs: :class:`PoissonInput`, which updates
+the state variable of a :class:`NeuronGroup` dynamically without storing in memory all 
+the Poisson events. It can be used like this::
+
+  input = PoissonInput(group, N=N, rate=rate, weight=w, state='I')
+
+In this case, the variable ``I`` represents the sum of ``N`` independent Poisson 
+spike inputs with rate ``rate``, where each individual synaptic event increases 
+the variable ``I`` by ``w``. Several :class:`PoissonInput` objects can be
+created for a given :class:`NeuronGroup`, in which case all the independent
+inputs are linearly superimposed. 
+
+Other features of the :class:`PoissonInput` class include the following (see the reference):
+  * record the individual Poisson events (``record=True`` keyword),
+  * having identical Poisson events for all neurons, instead of having
+    independent copies for every neuron (``freeze=True`` keyword)
+  * copying every Poisson input a specified number of times (``copies=p`` keyword). This
+    is equivalent of specifying ``weight=p*w``, except that those copies can be randomly shifted
+    (``jitter`` keyword), or can be unreliable to model synapse unreliability (``reliability``
+    keyword). The latter case corresponds to a Binomial synaptic weight.
+
+Correlated inputs
+-----------------
+Generation of correlated spike trains is partially implemented, using algorithms from the
+the following paper: Brette, R. (2009) `Generation of correlated spike trains <http://www.di.ens.fr/~brette/papers/Brette2008NC.html>`__,
+Neural Computation 21(1): 188-215. Currently, only the method with Cox processes
+(or doubly stochastic processes, first method in the paper) is fully implemented.
+
+Doubly stochastic processes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+To generate correlated spike trains with identical rates and homogeneous exponential correlations,
+use the class :class:`HomogeneousCorrelatedSpikeTrains`::
+  
+  group=HomogeneousCorrelatedSpikeTrains(100,r=10*Hz,c=0.1,tauc=10*ms)
+
+where ``r`` is the rate, ``c`` is the total correlation strength and ``tauc`` is the correlation time constant.
+The cross-covariance functions are `(c*r/tauc)*exp(-|s|/tauc)`.
+To generate correlated spike trains with arbitrary rates r(i) and
+cross-covariance functions `c(i,j)*exp(-|s|/tauc)`, use the class :class:`CorrelatedSpikeTrains`::
+
+  group=CorrelatedSpikeTrains(rates,C,tauc)
+
+where ``rates`` is the vector of rates r(i), ``C`` is the correlation matrix (which must be
+symmetrical) and ``tauc`` is the correlation time constant. Note that distortions are introduced
+with strong correlations and short correlation time constants. For short time constants,
+the mixture method is more appropriate (see the paper above).
+The two classes :class:`HomogeneousCorrelatedSpikeTrains` and :class:`CorrelatedSpikeTrains`
+define neuron groups, which can be directly used with :class:`Connection` objects.
+
+Mixture method
+^^^^^^^^^^^^^^
+The mixture method to generate correlated spike trains is only partially implemented and the
+interface may change in future releases. Currently, one can use the function
+:func:`mixture_process` to generate spike trains::
+
+  spiketrains=mixture_process(nu,P,tauc,t)
+
+where ``nu`` is the vector of rates of the source spike trains,
+``P`` is the mixture matrix (entries between 0 and 1),
+``tauc`` is the correlation time constant,
+``t`` is the duration. It returns a list of
+(neuron_number,spike_time), which can be passed to
+``SpikeGeneratorGroup``. This method is appropriate for short time constants and is explained
+in the paper mentioned above.
+
+Input spike trains
+------------------
+A set of spike trains can be explicitly defined as list of pairs (i,t)
+(meaning neuron i fires at time t), which used to initialise a
+:class:`SpikeGeneratorGroup`::
+
+  spiketimes=[(0,1*ms), (1,2*ms)]
+  input=SpikeGeneratorGroup(5,spiketimes)
+
+The neuron 0 fires at time 1 ms and neuron 1 fires at time 2 ms (there are 5 neurons,
+but 3 of them never spike).
+One may also pass a generator instead of a list (in that case the pairs should be
+ordered in time).
+
+Gaussian spike packets
+^^^^^^^^^^^^^^^^^^^^^^
+There is a subclass of :class:`SpikeGeneratorGroup` for generating spikes with a Gaussian
+distribution::
+
+  input=PulsePacket(t=10*ms,n=10,sigma=3*ms)
+
+Here 10 spikes are produced, with spike times distributed according a Gaussian distribution with
+mean 10 ms and standard deviation 3 ms.
+
+Direct input
+------------
+Inputs may also be defined by accessing directly the state variables of a neuron group. The standard way
+to do this is to insert parameters in the equations::
+
+  eqs = '''
+  dv/dt = (I-v)/tau : volt
+  I : volt
+  '''
+  group = NeuronGroup(100, model=eqs, reset=0*mV, threshold=15*mV)
+  group.I = linspace(0*mV, 20*mV, 100)
+
+Here the value of the parameter I for each neuron is provided at initialisation time
+(evenly distributed between 0 mV and 20 mV).
+
+Time varying inputs
+^^^^^^^^^^^^^^^^^^^
+
+It is possible to change the value of I every timestep by using a user-defined operation (see next
+section). Alternatively, you can use a :class:`TimedArray` to specify the values the variable will
+have at each time interval, for example::
+
+  eqs = '''
+  dv/dt = (I-v)/tau : volt
+  I : volt
+  '''
+  group = NeuronGroup(1, model=eqs, reset=0*mV, threshold=15*mV)
+  group.I = TimedArray(linspace(0*mV, 20*mV, 100), dt=10*ms)
+
+Here ``I`` will have value ``0*mV`` for t between 0 and ``10*ms`, ``0.2*mV`` between ``10*ms`` and
+``20*ms``, and so on. A more intuitive syntax is::
+
+  I = TimedArray(linspace(0*mV, 20*mV, 100), dt=10*ms)
+  eqs = '''
+  dv/dt = (I(t) * volt - v)/tau : volt
+  '''
+  group = NeuronGroup(1, model=eqs, reset=0*mV, threshold=15*mV)
+
+Note however that the more efficient exact linear differential equations solver won't be used in this
+case because ``I(t)`` could be any function, so the previous mechanism is often preferable. 
+Additionally, be aware that the call to ``I(t)`` does return a value without units (as units cannot
+be stored in arrays), therefore you have to explicitly multiply it with the respective unit.
+
+Linked variables
+^^^^^^^^^^^^^^^^
+
+Another option is to link the variable of one group to the variables of another group using
+:func:`linked_var`, for example::
+
+    G = NeuronGroup(...)
+    H = NeuronGroup(...)
+    G.V = linked_var(H, 'W')
+
+In this scenario, the variable V in group G will always be updated with
+the values from variable W in group H. The groups G and H must be the
+same size (although subgroups can be used if they are not the same size).

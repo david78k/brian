@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Multilinear state updater &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Experimental features" href="experimental.html" />
+    <link rel="next" title="Realtime Connection Monitor" href="experimental-realtimeconnectionmonitor.html" />
+    <link rel="prev" title="GPU/CUDA" href="experimental-cuda.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="experimental-realtimeconnectionmonitor.html" title="Realtime Connection Monitor"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="experimental-cuda.html" title="GPU/CUDA"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="experimental.html" accesskey="U">Experimental features</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="multilinear-state-updater">
+<h1>Multilinear state updater<a class="headerlink" href="#multilinear-state-updater" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="brian.experimental.multilinearstateupdater.MultiLinearNeuronGroup">
+<em class="property">class </em><tt class="descclassname">brian.experimental.multilinearstateupdater.</tt><tt class="descname">MultiLinearNeuronGroup</tt><big>(</big><em>eqs</em>, <em>subs</em>, <em>clock=None</em>, <em>level=0</em>, <em>**kwds</em><big>)</big><a class="headerlink" href="#brian.experimental.multilinearstateupdater.MultiLinearNeuronGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a NeuronGroup with a linear differential equation for each neuron</p>
+<p>You give a single set of differential equations with parameters, the
+variables you want substituted should be defined as parameters in the equations,
+but they will not be treated as parameters, instead they will be substituted.
+You also pass a list of variables to have their values substituted, and these
+names should exist in the namespace initialising the MultiLinearNeuronGroup.</p>
+<p>Arguments:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">eqs</span></tt></dt>
+<dd>should be the equations, and must be a string not an <tt class="xref py py-class docutils literal"><span class="pre">Equations</span></tt> object.</dd>
+<dt><tt class="docutils literal"><span class="pre">subs</span></tt></dt>
+<dd>A list of variables to be substituted with values.</dd>
+<dt><tt class="docutils literal"><span class="pre">level</span></tt></dt>
+<dd>How many levels up to look for the equations&#8217; namespace.</dd>
+<dt><tt class="docutils literal"><span class="pre">clock</span></tt></dt>
+<dd>If you want.</dd>
+<dt><tt class="docutils literal"><span class="pre">kwds</span></tt></dt>
+<dd>Any additonal arguments to pass to <tt class="xref py py-class docutils literal"><span class="pre">NeuronGroup</span></tt> init.</dd>
+</dl>
+</dd></dl>
+
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">eqs</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">dv/dt = k*v/(1*second) : 1</span>
+<span class="s">dw/dt = k*w/(1*second) : 1</span>
+<span class="s">k : 1</span>
+<span class="s">&#39;&#39;&#39;</span>
+<span class="n">k</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">3</span><span class="p">])</span>
+<span class="n">subs</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;k&#39;</span><span class="p">]</span>
+<span class="n">G</span> <span class="o">=</span> <span class="n">MultiLinearNeuronGroup</span><span class="p">(</span><span class="n">eqs</span><span class="p">,</span> <span class="n">subs</span><span class="p">)</span>
+<span class="n">G</span><span class="o">.</span><span class="n">v</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">G</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">M</span> <span class="o">=</span> <span class="n">StateMonitor</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="s">&#39;v&#39;</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">run</span><span class="p">(</span><span class="mi">1</span><span class="o">*</span><span class="n">second</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">G</span><span class="p">)):</span>
+    <span class="n">plot</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">times</span><span class="p">,</span> <span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="experimental-cuda.html"
+                        title="previous chapter">GPU/CUDA</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="experimental-realtimeconnectionmonitor.html"
+                        title="next chapter">Realtime Connection Monitor</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/experimental-multilinearstateupdater.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="experimental-realtimeconnectionmonitor.html" title="Realtime Connection Monitor"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="experimental-cuda.html" title="GPU/CUDA"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="experimental.html" >Experimental features</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: Rothman_Manis_2003 (frompapers) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: Plakiewicz_Brette_2010 (frompapers)" href="examples-frompapers_Plakiewicz_Brette_2010.html" />
+    <link rel="prev" title="Example: Brette_Gerstner_2005 (frompapers)" href="examples-frompapers_Brette_Gerstner_2005.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers_Plakiewicz_Brette_2010.html" title="Example: Plakiewicz_Brette_2010 (frompapers)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers_Brette_Gerstner_2005.html" title="Example: Brette_Gerstner_2005 (frompapers)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-rothman-manis-2003-frompapers">
+<span id="example-frompapers-rothman-manis-2003"></span><span id="index-0"></span><h1>Example: Rothman_Manis_2003 (frompapers)<a class="headerlink" href="#example-rothman-manis-2003-frompapers" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="cochlear-neuron-model-of-rothman-manis">
+<h2>Cochlear neuron model of Rothman &amp; Manis<a class="headerlink" href="#cochlear-neuron-model-of-rothman-manis" title="Permalink to this headline">¶</a></h2>
+<p>Rothman JS, Manis PB (2003) The roles potassium currents play in
+regulating the electrical activity of ventral cochlear nucleus neurons.
+J Neurophysiol 89:3097-113.</p>
+<p>All model types differ only by the maximal conductances.</p>
+<p>Adapted from their Neuron implementation by Romain Brette</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="c">#defaultclock.dt=0.025*ms # for better precision</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Simulation parameters: choose current amplitude and neuron type</span>
+<span class="sd">(from type1c, type1t, type12, type 21, type2, type2o)</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="n">neuron_type</span> <span class="o">=</span> <span class="s">&#39;type1c&#39;</span>
+<span class="n">Ipulse</span> <span class="o">=</span> <span class="mi">250</span> <span class="o">*</span> <span class="n">pA</span>
+
+<span class="n">C</span> <span class="o">=</span> <span class="mi">12</span> <span class="o">*</span> <span class="n">pF</span>
+<span class="n">Eh</span> <span class="o">=</span> <span class="o">-</span><span class="mi">43</span> <span class="o">*</span> <span class="n">mV</span>
+<span class="n">EK</span> <span class="o">=</span> <span class="o">-</span><span class="mi">70</span> <span class="o">*</span> <span class="n">mV</span> <span class="c"># -77*mV in mod file</span>
+<span class="n">El</span> <span class="o">=</span> <span class="o">-</span><span class="mi">65</span> <span class="o">*</span> <span class="n">mV</span>
+<span class="n">ENa</span> <span class="o">=</span> <span class="mi">50</span> <span class="o">*</span> <span class="n">mV</span>
+<span class="n">nf</span> <span class="o">=</span> <span class="mf">0.85</span> <span class="c"># proportion of n vs p kinetics</span>
+<span class="n">zss</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="c"># steady state inactivation of glt</span>
+<span class="n">celsius</span> <span class="o">=</span> <span class="mf">22.</span> <span class="c"># temperature</span>
+<span class="n">q10</span> <span class="o">=</span> <span class="mf">3.</span> <span class="o">**</span> <span class="p">((</span><span class="n">celsius</span> <span class="o">-</span> <span class="mi">22</span><span class="p">)</span> <span class="o">/</span> <span class="mf">10.</span><span class="p">)</span>
+<span class="c"># hcno current (octopus cell)</span>
+<span class="n">frac</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">qt</span> <span class="o">=</span> <span class="mf">4.5</span> <span class="o">**</span> <span class="p">((</span><span class="n">celsius</span> <span class="o">-</span> <span class="mf">33.</span><span class="p">)</span> <span class="o">/</span> <span class="mf">10.</span><span class="p">)</span>
+
+<span class="c"># Maximal conductances of different cell types in nS</span>
+<span class="n">maximal_conductances</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+<span class="n">type1c</span><span class="o">=</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+<span class="n">type1t</span><span class="o">=</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+<span class="n">type12</span><span class="o">=</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+<span class="n">type21</span><span class="o">=</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+<span class="n">type2</span><span class="o">=</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+<span class="n">type2o</span><span class="o">=</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="c"># octopus cell</span>
+<span class="p">)</span>
+<span class="n">gnabar</span><span class="p">,</span> <span class="n">gkhtbar</span><span class="p">,</span> <span class="n">gkltbar</span><span class="p">,</span> <span class="n">gkabar</span><span class="p">,</span> <span class="n">ghbar</span><span class="p">,</span> <span class="n">gbarno</span><span class="p">,</span> <span class="n">gl</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="o">*</span> <span class="n">nS</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">maximal_conductances</span><span class="p">[</span><span class="n">neuron_type</span><span class="p">]]</span>
+
+<span class="c"># Classical Na channel</span>
+<span class="n">eqs_na</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">ina = gnabar*m**3*h*(ENa-v) : amp</span>
+<span class="s">dm/dt=q10*(minf-m)/mtau : 1</span>
+<span class="s">dh/dt=q10*(hinf-h)/htau : 1</span>
+<span class="s">minf = 1./(1+exp(-(vu + 38.) / 7.)) : 1</span>
+<span class="s">hinf = 1./(1+exp((vu + 65.) / 6.)) : 1</span>
+<span class="s">mtau =  ((10. / (5*exp((vu+60.) / 18.) + 36.*exp(-(vu+60.) / 25.))) + 0.04)*ms : ms</span>
+<span class="s">htau =  ((100. / (7*exp((vu+60.) / 11.) + 10.*exp(-(vu+60.) / 25.))) + 0.6)*ms : ms</span>
+<span class="s">&quot;&quot;&quot;</span>
+
+<span class="c"># KHT channel (delayed-rectifier K+)</span>
+<span class="n">eqs_kht</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">ikht = gkhtbar*(nf*n**2 + (1-nf)*p)*(EK-v) : amp</span>
+<span class="s">dn/dt=q10*(ninf-n)/ntau : 1</span>
+<span class="s">dp/dt=q10*(pinf-p)/ptau : 1</span>
+<span class="s">ninf =   (1 + exp(-(vu + 15) / 5.))**-0.5 : 1</span>
+<span class="s">pinf =  1. / (1 + exp(-(vu + 23) / 6.)) : 1</span>
+<span class="s">ntau =  ((100. / (11*exp((vu+60) / 24.) + 21*exp(-(vu+60) / 23.))) + 0.7)*ms : ms</span>
+<span class="s">ptau = ((100. / (4*exp((vu+60) / 32.) + 5*exp(-(vu+60) / 22.))) + 5)*ms : ms</span>
+<span class="s">&quot;&quot;&quot;</span>
+
+<span class="c"># Ih channel (subthreshold adaptive, non-inactivating)</span>
+<span class="n">eqs_ih</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">ih = ghbar*r*(Eh-v) : amp</span>
+<span class="s">dr/dt=q10*(rinf-r)/rtau : 1</span>
+<span class="s">rinf = 1. / (1+exp((vu + 76.) / 7.)) : 1</span>
+<span class="s">rtau = ((100000. / (237.*exp((vu+60.) / 12.) + 17.*exp(-(vu+60.) / 14.))) + 25.)*ms : ms</span>
+<span class="s">&quot;&quot;&quot;</span>
+
+<span class="c"># KLT channel (low threshold K+)</span>
+<span class="n">eqs_klt</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">iklt = gkltbar*w**4*z*(EK-v) : amp</span>
+<span class="s">dw/dt=q10*(winf-w)/wtau : 1</span>
+<span class="s">dz/dt=q10*(zinf-z)/wtau : 1</span>
+<span class="s">winf = (1. / (1 + exp(-(vu + 48.) / 6.)))**0.25 : 1</span>
+<span class="s">zinf = zss + ((1.-zss) / (1 + exp((vu + 71.) / 10.))) : 1</span>
+<span class="s">wtau = ((100. / (6.*exp((vu+60.) / 6.) + 16.*exp(-(vu+60.) / 45.))) + 1.5)*ms : ms</span>
+<span class="s">ztau = ((1000. / (exp((vu+60.) / 20.) + exp(-(vu+60.) / 8.))) + 50)*ms : ms</span>
+<span class="s">&quot;&quot;&quot;</span>
+
+<span class="c"># Ka channel (transient K+)</span>
+<span class="n">eqs_ka</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">ika = gkabar*a**4*b*c*(EK-v): amp</span>
+<span class="s">da/dt=q10*(ainf-a)/atau : 1</span>
+<span class="s">db/dt=q10*(binf-b)/btau : 1</span>
+<span class="s">dc/dt=q10*(cinf-c)/ctau : 1</span>
+<span class="s">ainf = (1. / (1 + exp(-(vu + 31) / 6.)))**0.25 : 1</span>
+<span class="s">binf = 1. / (1 + exp((vu + 66) / 7.))**0.5 : 1</span>
+<span class="s">cinf = 1. / (1 + exp((vu + 66) / 7.))**0.5 : 1</span>
+<span class="s">atau =  ((100. / (7*exp((vu+60) / 14.) + 29*exp(-(vu+60) / 24.))) + 0.1)*ms : ms</span>
+<span class="s">btau =  ((1000. / (14*exp((vu+60) / 27.) + 29*exp(-(vu+60) / 24.))) + 1)*ms : ms</span>
+<span class="s">ctau = ((90. / (1 + exp((-66-vu) / 17.))) + 10)*ms : ms</span>
+<span class="s">&quot;&quot;&quot;</span>
+
+<span class="c"># Leak</span>
+<span class="n">eqs_leak</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">ileak = gl*(El-v) : amp</span>
+<span class="s">&quot;&quot;&quot;</span>
+
+<span class="c"># h current for octopus cells</span>
+<span class="n">eqs_hcno</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">ihcno = gbarno*(h1*frac + h2*(1-frac))*(Eh-v) : amp</span>
+<span class="s">dh1/dt=(hinfno-h1)/tau1 : 1</span>
+<span class="s">dh2/dt=(hinfno-h2)/tau2 : 1</span>
+<span class="s">hinfno = 1./(1+exp((vu+66.)/7.)) : 1</span>
+<span class="s">tau1 = bet1/(qt*0.008*(1+alp1))*ms : ms</span>
+<span class="s">tau2 = bet2/(qt*0.0029*(1+alp2))*ms : ms</span>
+<span class="s">alp1 = exp(1e-3*3*(vu+50)*9.648e4/(8.315*(273.16+celsius))) : 1</span>
+<span class="s">bet1 = exp(1e-3*3*0.3*(vu+50)*9.648e4/(8.315*(273.16+celsius))) : 1</span>
+<span class="s">alp2 = exp(1e-3*3*(vu+84)*9.648e4/(8.315*(273.16+celsius))) : 1</span>
+<span class="s">bet2 = exp(1e-3*3*0.6*(vu+84)*9.648e4/(8.315*(273.16+celsius))) : 1</span>
+<span class="s">&quot;&quot;&quot;</span>
+
+<span class="n">eqs</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">dv/dt=(ileak+ina+ikht+iklt+ika+ih+ihcno+I)/C : volt</span>
+<span class="s">vu = v/mV : 1 # unitless v</span>
+<span class="s">I : amp</span>
+<span class="s">&quot;&quot;&quot;</span>
+<span class="n">eqs</span> <span class="o">+=</span> <span class="n">eqs_leak</span> <span class="o">+</span> <span class="n">eqs_ka</span> <span class="o">+</span> <span class="n">eqs_na</span> <span class="o">+</span> <span class="n">eqs_ih</span> <span class="o">+</span> <span class="n">eqs_klt</span> <span class="o">+</span> <span class="n">eqs_kht</span> <span class="o">+</span> <span class="n">eqs_hcno</span>
+
+<span class="n">neuron</span> <span class="o">=</span> <span class="n">NeuronGroup</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">eqs</span><span class="p">,</span> <span class="n">implicit</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">neuron</span><span class="o">.</span><span class="n">v</span> <span class="o">=</span> <span class="n">El</span>
+
+<span class="n">run</span><span class="p">(</span><span class="mi">50</span> <span class="o">*</span> <span class="n">ms</span><span class="p">)</span> <span class="c"># Go to rest</span>
+
+<span class="n">M</span> <span class="o">=</span> <span class="n">StateMonitor</span><span class="p">(</span><span class="n">neuron</span><span class="p">,</span> <span class="s">&#39;v&#39;</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">neuron</span><span class="o">.</span><span class="n">I</span> <span class="o">=</span> <span class="n">Ipulse</span>
+
+<span class="n">run</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">ms</span><span class="p">,</span> <span class="n">report</span><span class="o">=</span><span class="s">&#39;text&#39;</span><span class="p">)</span>
+
+<span class="n">plot</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">times</span> <span class="o">/</span> <span class="n">ms</span><span class="p">,</span> <span class="n">M</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">mV</span><span class="p">)</span>
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Example: Rothman_Manis_2003 (frompapers)</a><ul>
+<li><a class="reference internal" href="#cochlear-neuron-model-of-rothman-manis">Cochlear neuron model of Rothman &amp; Manis</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-frompapers_Brette_Gerstner_2005.html"
+                        title="previous chapter">Example: Brette_Gerstner_2005 (frompapers)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-frompapers_Plakiewicz_Brette_2010.html"
+                        title="next chapter">Example: Plakiewicz_Brette_2010 (frompapers)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-frompapers_Rothman_Manis_2003.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers_Plakiewicz_Brette_2010.html" title="Example: Plakiewicz_Brette_2010 (frompapers)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers_Brette_Gerstner_2005.html" title="Example: Brette_Gerstner_2005 (frompapers)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

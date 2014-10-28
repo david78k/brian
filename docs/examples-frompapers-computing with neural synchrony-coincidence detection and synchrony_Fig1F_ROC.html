@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example: Fig1F_ROC (frompapers/computing with neural synchrony/coincidence detection and synchrony) &mdash; Brian 1.4.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Brian 1.4.1 documentation" href="index.html" />
+    <link rel="up" title="Examples" href="examples.html" />
+    <link rel="next" title="Example: Fig12A_Goodman_Brette_2010 (frompapers/computing with neural synchrony/hearing)" href="examples-frompapers-computing with neural synchrony-hearing_Fig12A_Goodman_Brette_2010.html" />
+    <link rel="prev" title="Example: Fig1C (frompapers/computing with neural synchrony/coincidence detection and synchrony)" href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig1C.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-hearing_Fig12A_Goodman_Brette_2010.html" title="Example: Fig12A_Goodman_Brette_2010 (frompapers/computing with neural synchrony/hearing)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig1C.html" title="Example: Fig1C (frompapers/computing with neural synchrony/coincidence detection and synchrony)"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" accesskey="U">Examples</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example-fig1f-roc-frompapers-computing-with-neural-synchrony-coincidence-detection-and-synchrony">
+<span id="example-frompapers-computing-with-neural-synchrony-coincidence-detection-and-synchrony-fig1f-roc"></span><span id="index-0"></span><h1>Example: Fig1F_ROC (frompapers/computing with neural synchrony/coincidence detection and synchrony)<a class="headerlink" href="#example-fig1f-roc-frompapers-computing-with-neural-synchrony-coincidence-detection-and-synchrony" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="brette-r-2012-computing-with-neural-synchrony-plos-comp-biol-8-6-e1002561-doi-10-1371-journal-pcbi-1002561">
+<h2>Brette R (2012). Computing with neural synchrony. PLoS Comp Biol. 8(6): e1002561. doi:10.1371/journal.pcbi.1002561<a class="headerlink" href="#brette-r-2012-computing-with-neural-synchrony-plos-comp-biol-8-6-e1002561-doi-10-1371-journal-pcbi-1002561" title="Permalink to this headline">¶</a></h2>
+<p>Figure 1F.
+(simulation takes about 10 mins)</p>
+<p>Coincidence detection is seen as a signal detection problem, that of detecting a given depolarization in a background
+of noise, within one characteristic time constant. The choice of the spike threshold implements a particular trade-off
+between false alarms (depolarization was due to noise) and misses (depolarization was not detected).</p>
+<p>Caption (Fig 1F). Receiver-operation characteristic (ROC) for one level of noise,
+obtained by varying the threshold (black curve). The hit rate is the
+probability that the neuron fires within one integration time constant t
+when depolarized by Dv, and the false alarm rate is the firing
+probability without depolarization. The corresponding theoretical
+curve, with sensitivity index d&#8217; =Dv/sigma, is shown in red.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">brian</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">scipy.special</span> <span class="kn">import</span> <span class="n">erf</span>
+
+<span class="k">def</span> <span class="nf">spike_probability</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> <span class="c"># firing probability for unit variance and zero mean, and threshold = x</span>
+    <span class="k">return</span> <span class="o">.</span><span class="mi">5</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">erf</span><span class="p">(</span><span class="n">x</span><span class="o">/</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.</span><span class="p">)))</span>
+
+<span class="n">tau_cd</span><span class="o">=</span><span class="mi">5</span><span class="o">*</span><span class="n">ms</span>     <span class="c"># membrane time constant (cd for coincidence detector)</span>
+<span class="n">tau_n</span><span class="o">=</span><span class="n">tau_cd</span>    <span class="c"># input is an Ornstein-Uhlenbeck process with the same time constant as the membrane time constant</span>
+<span class="n">T</span><span class="o">=</span><span class="mi">3</span><span class="o">*</span><span class="n">tau_n</span>       <span class="c"># neurons are depolarized by w at regular intervales, T is the spacing</span>
+<span class="n">Nspikes</span><span class="o">=</span><span class="mi">10000</span>   <span class="c"># number of input spikes</span>
+<span class="n">T0</span><span class="o">=</span><span class="n">T</span><span class="o">*</span><span class="n">Nspikes</span>    <span class="c"># initial period without inputs, to calculate the false alarm rate</span>
+<span class="n">N</span><span class="o">=</span><span class="mi">500</span>           <span class="c"># number of neurons, each neuron has a different threshold between 0. and 3.</span>
+<span class="n">w</span><span class="o">=</span><span class="mi">1</span>             <span class="c"># synaptic weight (depolarization)</span>
+<span class="n">sigma</span><span class="o">=</span><span class="mf">1.</span>        <span class="c"># input noise s.d.</span>
+<span class="n">sigmav</span><span class="o">=</span><span class="n">sigma</span><span class="o">*</span><span class="n">sqrt</span><span class="p">(</span><span class="n">tau_n</span><span class="o">/</span><span class="p">(</span><span class="n">tau_n</span><span class="o">+</span><span class="n">tau_cd</span><span class="p">))</span> <span class="c"># noise s.d. on the membrane potential</span>
+<span class="k">print</span> <span class="s">&quot;d&#39;=&quot;</span><span class="p">,</span><span class="mf">1.</span><span class="o">/</span><span class="n">sigmav</span> <span class="c"># discriminability index</span>
+
+<span class="c"># Integrate-and-fire neurons</span>
+<span class="n">eqs</span><span class="o">=</span><span class="s">&#39;&#39;&#39;</span>
+<span class="s">dv/dt=(sigma*n-v)/tau_cd : 1</span>
+<span class="s">dn/dt=-n/tau_n+(2/tau_n)**.5*xi : 1</span>
+<span class="s">vt : 1 # spike threshold</span>
+<span class="s">&#39;&#39;&#39;</span>
+<span class="n">neurons</span><span class="o">=</span><span class="n">NeuronGroup</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="n">eqs</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="s">&#39;v&gt;vt&#39;</span><span class="p">,</span><span class="n">reset</span><span class="o">=</span><span class="s">&#39;v=0&#39;</span><span class="p">,</span><span class="n">refractory</span><span class="o">=</span><span class="n">tau_cd</span><span class="p">)</span>
+<span class="n">neurons</span><span class="o">.</span><span class="n">vt</span><span class="o">=</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="n">N</span><span class="p">)</span> <span class="c"># spike threshold varies across neurons</span>
+<span class="n">counter</span><span class="o">=</span><span class="n">SpikeCounter</span><span class="p">(</span><span class="n">neurons</span><span class="p">)</span>
+
+<span class="c"># Inputs are regular spikes, starting at T0</span>
+<span class="nb">input</span><span class="o">=</span><span class="n">SpikeGeneratorGroup</span><span class="p">(</span><span class="mi">1</span><span class="p">,[(</span><span class="mi">0</span><span class="p">,</span><span class="n">n</span><span class="o">*</span><span class="n">T</span><span class="o">+</span><span class="n">T0</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nspikes</span><span class="p">)])</span>
+<span class="n">C</span><span class="o">=</span><span class="n">Connection</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span><span class="n">neurons</span><span class="p">,</span><span class="s">&#39;v&#39;</span><span class="p">,</span><span class="n">weight</span><span class="o">=</span><span class="n">w</span><span class="p">)</span>
+
+<span class="c"># Calculate the false alarm rate</span>
+<span class="n">run</span><span class="p">(</span><span class="n">T0</span><span class="p">,</span><span class="n">report</span><span class="o">=</span><span class="s">&#39;text&#39;</span><span class="p">)</span>
+<span class="n">FR</span><span class="o">=</span><span class="n">tau_cd</span><span class="o">*</span><span class="n">counter</span><span class="o">.</span><span class="n">count</span><span class="o">*</span><span class="mf">1.</span><span class="o">/</span><span class="n">T0</span>
+<span class="c"># Calculate the hit rate</span>
+<span class="n">counter</span><span class="o">.</span><span class="n">reinit</span><span class="p">()</span>
+<span class="n">run</span><span class="p">(</span><span class="n">Nspikes</span><span class="o">*</span><span class="n">T</span><span class="p">,</span><span class="n">report</span><span class="o">=</span><span class="s">&#39;text&#39;</span><span class="p">)</span>
+<span class="n">HR</span><span class="o">=</span><span class="n">counter</span><span class="o">.</span><span class="n">count</span><span class="o">*</span><span class="mf">1.</span><span class="o">/</span><span class="n">Nspikes</span><span class="o">-</span><span class="n">FR</span><span class="o">*</span><span class="p">(</span><span class="n">T</span><span class="o">-</span><span class="n">tau_cd</span><span class="p">)</span><span class="o">/</span><span class="n">tau_cd</span>
+
+<span class="c"># Prediction based on Gaussian statistics</span>
+<span class="n">FRpred</span><span class="o">=</span><span class="n">spike_probability</span><span class="p">(</span><span class="n">neurons</span><span class="o">.</span><span class="n">vt</span><span class="o">/</span><span class="n">sigmav</span><span class="p">)</span>
+<span class="n">HRpred</span><span class="o">=</span><span class="n">spike_probability</span><span class="p">((</span><span class="n">neurons</span><span class="o">.</span><span class="n">vt</span><span class="o">-</span><span class="n">w</span><span class="p">)</span><span class="o">/</span><span class="n">sigmav</span><span class="p">)</span>
+
+<span class="c"># Figure</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">FR</span><span class="o">*</span><span class="mi">100</span><span class="p">,</span><span class="n">HR</span><span class="o">*</span><span class="mi">100</span><span class="p">,</span><span class="s">&#39;k&#39;</span><span class="p">)</span>          <span class="c"># simulations</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">FRpred</span><span class="o">*</span><span class="mi">100</span><span class="p">,</span><span class="n">HRpred</span><span class="o">*</span><span class="mi">100</span><span class="p">,</span><span class="s">&#39;r&#39;</span><span class="p">)</span>  <span class="c"># theoretical predictions</span>
+<span class="n">plot</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">100</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">100</span><span class="p">],</span><span class="s">&#39;k--&#39;</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">100</span><span class="p">],[</span><span class="mi">50</span><span class="p">,</span><span class="mi">50</span><span class="p">],</span><span class="s">&#39;k--&#39;</span><span class="p">)</span>
+<span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;False alarm rate (%)&#39;</span><span class="p">)</span>
+<span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;Hit rate (%)&#39;</span><span class="p">)</span>
+
+<span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/brian-logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Example: Fig1F_ROC (frompapers/computing with neural synchrony/coincidence detection and synchrony)</a><ul>
+<li><a class="reference internal" href="#brette-r-2012-computing-with-neural-synchrony-plos-comp-biol-8-6-e1002561-doi-10-1371-journal-pcbi-1002561">Brette R (2012). Computing with neural synchrony. PLoS Comp Biol. 8(6): e1002561. doi:10.1371/journal.pcbi.1002561</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig1C.html"
+                        title="previous chapter">Example: Fig1C (frompapers/computing with neural synchrony/coincidence detection and synchrony)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples-frompapers-computing with neural synchrony-hearing_Fig12A_Goodman_Brette_2010.html"
+                        title="next chapter">Example: Fig12A_Goodman_Brette_2010 (frompapers/computing with neural synchrony/hearing)</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig1F_ROC.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-hearing_Fig12A_Goodman_Brette_2010.html" title="Example: Fig12A_Goodman_Brette_2010 (frompapers/computing with neural synchrony/hearing)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples-frompapers-computing with neural synchrony-coincidence detection and synchrony_Fig1C.html" title="Example: Fig1C (frompapers/computing with neural synchrony/coincidence detection and synchrony)"
+             >previous</a> |</li>
+        <li><a href="index.html">Brian 1.4.1 documentation</a> &raquo;</li>
+          <li><a href="slowstart.html" >Getting started</a> &raquo;</li>
+          <li><a href="examples.html" >Examples</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2008, Romain Brette, Dan Goodman.
+      Last updated on May 01, 2013.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>
