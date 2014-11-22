@@ -1,0 +1,30 @@
+.. currentmodule:: brian
+
+Tutorials for Python and Scipy
+==============================
+
+Python
+------
+
+The first thing to do in learning how to use Brian
+is to have a basic grasp of the Python programming language.
+There are lots of good tutorials already out there. The best one is probably
+`the official Python tutorial
+<http://docs.python.org/tut/>`__. 
+There is also a course for biologists at the Pasteur Institute:
+`Introduction to programming using Python <http://www.pasteur.fr/formation/infobio/python/>`__.
+
+NumPy, SciPy and Pylab
+----------------------
+The first place to look is the `SciPy documentation website
+<http://docs.scipy.org/doc/>`__. To start using Brian, you do not need
+to understand much about how NumPy and SciPy work, although understanding how their
+array structures work will be useful for more advanced uses of Brian.
+
+The syntax of the Numpy and Pylab functions is very similar to Matlab.
+If you already know Matlab, you could read this tutorial:
+`NumPy for Matlab users <http://scipy.org/NumPy_for_Matlab_Users>`__
+and this list of `Matlab-Python translations <http://mathesaurus.sourceforge.net/>`__
+(`pdf version here <http://brian.di.ens.fr/matlab-python-xref.pdf>`__).
+A `tutorial <http://matplotlib.sourceforge.net/users/pyplot_tutorial.html>`__ is also available on
+the web site of Pylab.

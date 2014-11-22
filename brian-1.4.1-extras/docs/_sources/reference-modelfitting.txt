@@ -1,0 +1,19 @@
+.. currentmodule:: brian.library.modelfitting
+
+Model fitting toolbox
+=====================
+
+The model fitting toolbox uses the package
+`Playdoh <http://code.google.com/p/playdoh/>`__, you can see the
+documentation `here <http://playdoh.googlecode.com/svn/docs/index.html>`__.
+
+.. autofunction:: modelfitting(**kwds)
+.. autofunction:: print_table
+.. autofunction:: open_server
+.. autofunction:: get_spikes
+.. autofunction:: predict
+
+.. autoclass:: PSO()
+.. autoclass:: GA()
+.. autoclass:: CMAES()
+ 

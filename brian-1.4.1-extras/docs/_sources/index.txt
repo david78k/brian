@@ -1,0 +1,44 @@
+Welcome to Brian's documentation!
+*********************************
+
+.. module:: brian
+   :synopsis: The Brian package
+.. moduleauthor:: Romain Brette
+.. moduleauthor:: Dan Goodman
+
+.. toctree::
+   :maxdepth: 2
+   
+   introduction
+   installation
+   slowstart
+   usermanual
+   library
+   advanced
+   extending
+   reference
+   typicaltasks
+   experimental
+   developer
+
+See also the `reference sheet <http://brian.di.ens.fr//BrianReference.pdf>`__.
+You can download a PDF
+version of the documentation `here <http://brian.di.ens.fr/docs/Brian.pdf>`__.
+
+.. current removed because it's not written yet
+   quickstart
+
+.. TODO: where should these things go?
+
+	The manual is currently undergoing a restructuring, the following pages have not yet been placed.
+	
+	.. toctree::
+		:maxdepth: 2
+		
+		inside
+		channels
+		magic
+		moreunits
+		concepts
+		reference-scipy-numpy-pylab
+		

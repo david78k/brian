@@ -1,0 +1,21 @@
+.. currentmodule:: brian
+
+Advanced concepts
+*****************
+
+.. toctree::
+   :maxdepth: 1
+  
+   efficient
+   compiledcode
+   tasks_multiplefiles
+   advanced_connection_matrices
+   parameters
+   tabulate
+   reference-preferences
+   reference-logging
+
+.. TODO: advanced sections   
+   interfaces
+   compartments
+   

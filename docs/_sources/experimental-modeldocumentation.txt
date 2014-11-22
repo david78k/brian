@@ -1,5 +1,0 @@
-Automatic Model Documentation
-=============================
-
-.. automodule:: brian.experimental.model_documentation
-   :members:

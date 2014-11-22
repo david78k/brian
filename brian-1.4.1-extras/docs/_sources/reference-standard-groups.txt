@@ -1,0 +1,30 @@
+.. currentmodule:: brian
+
+Standard Groups
+===============
+
+Some standard types of :class:`NeuronGroup` have already been defined.
+:class:`PoissonGroup` and :class:`PoissonInput` to generate spikes with Poisson 
+statistics, :class:`PulsePacket` to generate pulse packets with specified 
+parameters, and :class:`SpikeGeneratorGroup` to generate spikes which fire at 
+prespecified times.
+
+.. index::
+	pair: poisson; group
+	pair: poisson; input
+
+.. autoclass:: PoissonGroup
+.. autoclass:: PoissonInput
+
+.. index::
+	single: input; pulse packet
+	single: pulse packet
+
+.. autoclass:: PulsePacket
+
+.. index::
+	pair: direct control; spikes
+
+.. autoclass:: SpikeGeneratorGroup
+.. autoclass:: MultipleSpikeGeneratorGroup
+

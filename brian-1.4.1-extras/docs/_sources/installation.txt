@@ -1,0 +1,157 @@
+.. _installation:
+
+Installation
+============
+
+If you already have a copy of Python 2.5-2.7, try the `Quick installation`_ below,
+otherwise take a look at `Manual installation`_.
+
+Quick installation
+------------------
+
+easy_install / pip
+^^^^^^^^^^^^^^^^^^
+
+The easiest way to install the most recent version of Brian if you already have
+a version of Python 2.5-2.7 including the ``easy_install`` script is to simply
+run the following in a shell::
+
+	easy_install brian
+
+This will download and install Brian and all its required packages (NumPy, SciPy, etc.).
+
+Similarly, you can use the ``pip`` utility::
+
+	pip install brian 
+
+Note that there are some optimisations you can make after installation, see the
+section below on `Optimisations`_.
+
+Debian/Ubuntu packages
+^^^^^^^^^^^^^^^^^^^^^^
+
+If you use a Debian-based Linux distribution (in addition to Debian itself, this
+includes for example Ubuntu or Linux Mint), you can install Brian directly
+from your favourite package manager (e.g. Synaptic or the Ubuntu Software
+Centre), thanks to the packages provided by the
+`NeuroDebian <http://neuro.debian.net/>`__ team.
+
+The package is called ``python-brian``, the documentation and tutorials can be
+found in ``python-brian-doc``. To install these packages from the command-line
+use::
+
+	sudo apt-get install python-brian python-brian-doc
+
+Note that in contrast to the procedure described above for
+`easy_install / pip`_, you will not necessarily get the most recent version of
+Brian this way. On the other hand, you do not have to take care of future
+updates yourself, as the Brian package gets updated with the standard update
+process. Additionally, the Brian package already includes all the compiled C
+code mentioned in the `Optimisations`_ section.
+Another way to install Brian which combines these advantages with up-to-date
+versions is to directly add the
+`NeuroDebian repository <http://neuro.debian.net/index.html#repository-howto>`__
+to your software sources.
+
+Manual installation
+-------------------
+
+Installing Brian requires the following components:
+
+#. `Python <http://www.python.org/download/>`__ version 2.5-2.7.
+#. `NumPy and Scipy <http://www.scipy.org/Download>`__ packages for Python:
+   an efficient scientific library.
+#. `PyLab <http://matplotlib.sourceforge.net/>`__ package for Python:
+   a plotting library similar to Matlab 
+   (see the `detailed installation instructions <http://matplotlib.sourceforge.net/installing.html>`__).
+#. `SymPy <http://code.google.com/p/sympy/>`__ package for Python:
+   a library for symbolic mathematics (not mandatory yet for Brian).
+#. `Brian <http://neuralensemble.org/trac/brian/wiki/Downloads>`__ itself (don't forget to download the extras.zip file,
+   which includes examples, tutorials, and a complete copy of the documentation).
+   Brian is also a Python package and can be installed as explained below.
+
+Fortunately, Python packages are very quick and easy to install, so the whole process shouldn't
+take very long. 
+
+We also recommend using the following for writing programs in Python (see details below):
+
+#. `Eclipse <http://www.eclipse.org/>`__ IDE with `PyDev <http://pydev.sourceforge.net/>`__
+#. `IPython <http://ipython.scipy.org/moin/>`__ shell
+
+Finally, if you want to use the (optional) automatic C++ code generation features of Brian, you should
+have the ``gcc`` compiler installed (on `Cygwin <http://www.cygwin.com/>`__ if you are
+running on Windows).
+
+Mac users: The Enthought Python Distribution (`EPD <http://www.enthought.com/products/edudownload.php/>`__ ) is free for academics and contains all the libraries necessary to run Brian. Otherwise, the `Scipy Superpack for Intel OS X <http://fonnesbeck.github.com/ScipySuperpack/>`__ also includes versions of Numpy, Scipy, Pylab and IPython.
+
+Windows users: the `Python(x,y) <http://www.pythonxy.com/>`__ distribution includes all the packages
+(including Eclipse and IPython) above except Brian (which is available as an optional plugin).
+
+Another option is the `Anaconda distribution <http://continuum.io/anaconda.html>`__, which also includes
+all the packages above except Brian and Eclipse.
+
+Installing Python packages
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+On Windows, Python packages (including Brian) are generally installed simply by running an .exe file.
+On other operating systems, you can download the source release (typically a compressed
+archive .tar.gz or .zip that you need to unzip) and then install the package by typing the following in your
+shell::
+
+	python setup.py install
+
+Installing Eclipse
+^^^^^^^^^^^^^^^^^^
+
+Eclipse is an Integrated Development Environment (IDE) for any programming language. PyDev is a plugin
+for Eclipse with features specifically for Python development. The combination of these two is
+excellent for Python development (it's what we use for writing Brian).
+
+To install Eclipse, go to `their web page <http://www.eclipse.org/>`__ and download any of the base
+language IDEs. It doesn't matter which one, but Python is not one of the base languages so you have
+to choose an alternative language. Probably the most useful is the C++ one or the Java one. The C++
+one can be downloaded `here <http://www.eclipse.org/cdt/downloads.php>`__.
+
+Having downloaded and installed Eclipse, you should download and install the PyDev plugin from
+`their web site <http://pydev.sourceforge.net/>`__. The best way to do this is directly from within
+the Eclipse IDE. Follow the instructions on the `PyDev manual page <http://pydev.org/manual_101_root.html>`__.
+
+Installing IPython
+^^^^^^^^^^^^^^^^^^
+
+`IPython <http://ipython.scipy.org/moin/>`__ is an interactive shell for Python.
+It has features for SciPy and PyLab built in, so it is a good choice for scientific work.
+Download from `their page <http://ipython.scipy.org/moin/Download>`__. If you are using Windows, you
+will also need to download PyReadline from the same page.
+
+C++ compilers
+^^^^^^^^^^^^^
+
+The default for Brian is to use the ``gcc`` compiler which will
+be installed already on most unix or linux distributions. If you are using Windows, you can
+install `cygwin <http://www.cygwin.com/>`__ (make sure to include the ``gcc`` package). Alternatively,
+some but not all versions of Microsoft Visual C++ should be compatible, but this is untested
+so far. See the documentation for the `SciPy Weave <http://www.scipy.org/Weave>`__ package for
+more information on this. Mac users should have XCode installed so as to have access to gcc and hence take advantage of brian compiled code. See also the section on :ref:`compiled-code`.
+
+
+Testing
+-------
+You can test whether Brian has installed properly by running Python and typing
+the following two lines::
+
+	from brian import *
+	brian_sample_run()
+
+A sample network should run and produce a raster plot.
+
+Optimisations
+-------------
+
+After a successful installation, there are some optimisations you can make to
+your Brian installation to get it running faster using compiled C code. We do
+not include these as standard because they do not work on all computers, and
+we want Brian to install without problems on all computers. Note that including
+all the optimisations can result in significant speed increases (around 30%).
+
+These optimisations are described in detail in the section on :ref:`compiled-code`.

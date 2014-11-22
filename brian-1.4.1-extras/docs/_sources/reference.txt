@@ -1,0 +1,34 @@
+.. currentmodule:: brian
+
+Reference
+=========
+
+For an overview of Brian, see the :ref:`user-manual` section.
+
+.. toctree::
+    :maxdepth: 2
+
+    reference-scipy
+    reference-units
+    reference-clocks
+    reference-models-and-groups
+    reference-integration
+    reference-standard-groups
+    reference-connections
+    reference-plasticity
+    reference-synapses
+    reference-network
+    reference-monitors
+    reference-plotting
+    reference-variableupdating
+    reference-analysis
+    reference-io
+    reference-taskfarm
+    reference-remotecontrol
+    reference-progressreporting
+    reference-modelfitting
+    reference-electrodecompensation
+    reference-hears
+    reference-magic
+    reference-tests
+    

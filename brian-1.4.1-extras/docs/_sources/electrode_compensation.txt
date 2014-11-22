@@ -1,0 +1,76 @@
+.. currentmodule:: brian
+
+Electrophysiology: electrode compensation
+=========================================
+The electrophysiology library also contains methods to compensate for the
+electrode voltage in single-electrode current clamp recordings.
+To import the electrophysiology library::
+
+  from brian.library.electrophysiology import *
+
+There is a series of example scripts in the examples/electrophysiology folder.
+
+Active Electrode Compensation (AEC)
+-----------------------------------
+The electrophysiology library includes the Active Electrode Compensation (AEC) technique
+described in Brette et al (2008),
+`High-resolution intracellular recordings using a real-time computational model of the electrode
+<http://www.di.ens.fr/~brette/papers/Brette2008Neuron.html>`__,
+Neuron 59(3):379-91.
+
+Given a digital current-clamp recording of the (uncompensated) potential ``v``
+(vector of values) and injected current ``i``, the following instructions
+calculate the full kernel of the system and the electrode kernel::
+
+  K=full_kernel(v,i,ksize)
+  Ke=electrode_kernel_soma(K,start_tail)
+  
+``ksize`` is the size of the full kernel (number of sampling steps; typical size is
+about 15 ms) and ``start_tail`` is the size of the electrode kernel (start point
+of the ''tail'' of the full kernel; typical size if about 4 ms). The electrode
+should be compensated for capacitance (capacitance neutralization)
+but not resistance (bridge compensation). The best choice for the
+input current is a series of independent random values, and the last ``ksize``
+steps of ``v`` should be null (i.e., the injection should stop before the end).
+Here it was assumed that the recording was done at the soma; if it is done in a thin
+process such as a dendrite or axon, the function ``electrode_kernel_dendrite``
+should be used instead. The full kernel can also be obtained from a step current
+injection::
+
+  K=full_kernel_from_step(v,i,ksize)
+  Ke=electrode_kernel_soma(K,start_tail)
+
+where ``i`` is a constant value in this case (note that this is not the best choice for
+real recordings).
+
+Once the electrode kernel has been found, any recording can be compensated as follows::
+
+  vcomp=AEC_compensate(v,i,ke)
+
+where ``v`` is the raw voltage recording, ``i`` is the injected current
+and ``ke`` is the electrode kernel.
+
+Lp compensation
+---------------
+
+The Lp compensation is an other electrode compensation method. It is based on 
+linear model fitting of an electrode and a neuron in response to an injected 
+current. The fitness function is the Lp error between the full model response
+and the raw trace, with p<2 to minimize the bias due to the nonlinear voltage
+excursions of action potentials.
+
+You can use it like this::
+
+	Vcomp, params = Lp_compensate(I, Vraw, .1*ms)
+	
+where ``I`` is the injected current, ``Vraw`` is the raw voltage trace, and the
+last parameter is the inverse of the sampling frequency. ``I`` and ``Vraw`` must be
+1D Numpy arrays with the same length. The ``Lp_compensate`` function returns the
+compensated trace ``Vcomp`` and the best parameters ``params``, which is a 2D 
+Numpy array where each column contains the parameters R, tau, Vr, Re, taue.
+Columns correspond to consecutive slices of the current and the voltage, the compensation
+is performed independently on each slice. The duration of the slices can be 
+specified with the ``slice_duration`` keyword argument.
+Also, the ``p`` parameter can also be specified as a keyword argument.
+
+

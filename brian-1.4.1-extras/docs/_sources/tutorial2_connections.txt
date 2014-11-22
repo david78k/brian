@@ -1,0 +1,19 @@
+.. currentmodule:: brian
+
+.. _tutorial2_connections:
+
+Tutorial 2: Connections
+-----------------------
+
+In this tutorial, we will cover in more detail the concept of a :class:`Connection`
+in Brian.
+
+
+**Tutorial contents**
+
+.. toctree::
+   :maxdepth: 2
+
+   tutorial_2a_the_concept_of_a_connection
+   tutorial_2b_excitatory_and_inhibitory_currents
+   tutorial_2c_the_cuba_network

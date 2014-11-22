@@ -1,6 +1,0 @@
-.. currentmodule:: brian.tools.taskfarm
-
-Task farming
-============
-
-.. autofunction:: run_tasks
