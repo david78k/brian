@@ -53,10 +53,10 @@ taue = 1*ms
 taui = 10*ms
 vt = 10*mV
 vr = 0*mV
-eqs = '''dv/dt = (-V + ge - gi)/taum : volt
+eqs = '''dv/dt = (-v + ge - gi)/taum : volt
         dge/dt = -ge/taue : volt
         dgi/dt = -gi/taui : volt
         '''
 spiketimes = [(0, 1*ms), (0, 10*ms), (1, 40*ms), (0,50*ms), (0, 55*ms)]
-#G1 = SpikeGeneratorGroup(2, spiketimes)
+G1 = SpikeGeneratorGroup(2, spiketimes)
 G2 = NeuronGroup(1, eqs, threshold = 'v>vt', reset = 'v=vr')
