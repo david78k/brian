@@ -13,13 +13,15 @@ spiketimes = [1*ms, 2*ms, 3*ms, 4*ms]
 G1 = SpikeGeneratorGroup(2, spikeindices, spiketimes)
 G2 = NeuronGroup(1, eqs, threshold = 'vb>vt', reset = 'vb=vr')
 
-C1 = Synapses(G1, G2)
-C2 = Synapses(G1, G2)
+C1 = Synapses(G1, G2, pre='va += 6*mV')
+C2 = Synapses(G1, G2, pre='vb += 3*mV')
+C1.connect('i==0')
+C2.connect('i==1')
 
 Ma = StateMonitor(G2, 'va', record = True)
 Mb = StateMonitor(G2, 'vb', record = True)
 
-run(100 * ms)
+run(10 * ms)
 
 figure()
 plot(Ma.t/ms, Ma[0].va.T)
