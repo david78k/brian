@@ -18,12 +18,12 @@ spiketimes = [1*ms, 10*ms, 40*ms, 50*ms, 55*ms]
 G1 = SpikeGeneratorGroup(2, spikeindices, spiketimes)
 G2 = NeuronGroup(1, eqs, threshold = 'v>vt', reset = 'v=vr')
 
-C1 = Synapses(G1, G2, pre='ge')
-C2 = Synapses(G1, G2, pre='gi')
+C1 = Synapses(G1, G2, pre='ge += 3*mV')
+C2 = Synapses(G1, G2, pre='gi += 3*mV')
 #C1[0,0] = 3*mV
 #C2[1,0] = 3*mV
-C1.w = 3
-C2.w = 3
+C1.connect('i==0')
+C2.connect('i==1')
 
 Mv = StateMonitor(G2, 'v', record = True)
 Mge = StateMonitor(G2, 'ge', record = True)
@@ -35,10 +35,10 @@ run(100 * ms)
 
 figure()
 subplot(211)
-plot(Mv.times, Mv[0])
+plot(Mv.t/ms, Mv[0].v.T)
 subplot(212)
-plot(Mge.times, Mge[0])
-plot(Mgi.times, Mgi[0])
+plot(Mge.t/ms, Mge[0].ge.T)
+plot(Mgi.t/ms, Mgi[0].gi.T)
 #plot(mon.t/ms, mon.i, '.k')
 show()
 
