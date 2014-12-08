@@ -56,7 +56,7 @@ legend(('normal','poisson'), 'upper left')
 
 show()
 
-#print mon.num_spikes
-print mon
-print mon.t
-print mon[0].v
+#print mon.t
+#print mon[0].v.T
+print np.array(filter(None,mon[0].v.T),dtype='|S10').astype(np.longdouble)
+
