@@ -12,8 +12,8 @@ output: motor power 0-100% (integer)
 
 #inN = 251
 inN = 10
-#outN = 8 # 202=101*2
-outN = 202
+outN = 8 # 202=101*2
+#outN = 202
 tau = 20 * ms
 vt = -50*mV
 vr = -60*mV
@@ -23,9 +23,11 @@ psp = 0.5*mV
 
 def snn(sensor_value): 
 #    index = encode(sensor_value)
-    index = 5
-    I = NeuronGroup (inN, model = 'dv/dt = - (v - El)/tau : volt', 
-                     threshold = 'v > vt', reset = 'v = vr')
+    indices = array([5])
+    times = array([0])*ms
+    I = SpikeGeneratorGroup(inN, indices, times)
+#    I = NeuronGroup (inN, model = 'dv/dt = - (v - El)/tau : volt', 
+#                     threshold = 'v > vt', reset = 'v = vr')
 #    I.v[index] = El
     I.v = 'vr + rand() * (vt - vr)'
     O = NeuronGroup (outN, model = 'dv/dt = - (v - El) / tau : volt', 
@@ -38,7 +40,7 @@ def snn(sensor_value):
     
     mon = StateMonitor(O, 'v', record = True)
     is_mon = SpikeMonitor(I) # for taster plot
-    s_mon = SpikeMonitor(O) # for taster plot
+    os_mon = SpikeMonitor(O) # for taster plot
     
     '''
     # poisson input stimuli
@@ -62,7 +64,7 @@ def snn(sensor_value):
         
     subplot(312)
     # rastor plot
-    plot(s_mon.t/ms, s_mon.i, '.')
+    plot(os_mon.t/ms, os_mon.i, '.')
     #plot(s_mon2.t/ms, s_mon2.i, '.')
     
     subplot(313)
