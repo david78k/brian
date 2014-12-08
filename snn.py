@@ -21,6 +21,14 @@ El = -49*mV # default -60
 w = 50*mV
 psp = 0.5*mV
 
+def decode(spikes):
+    half = spikes.length/2
+    leftSpikes = spikes[0:half]
+    rightSpikes = spikes[half + 1:spikes.length - 1]
+    powers[0] = sum(leftSpikes)
+    powers[1] = sum(rightSpikes)
+    return powers    
+    
 def snn(sensor_value): 
 #    index = encode(sensor_value)
     indices = array([sensor_value])
@@ -88,6 +96,8 @@ def snn(sensor_value):
     powers = os_mon.i # spike indices    
 #    power = np.array(filter(None,mon[0].v.T),dtype='|S10').astype(np.longdouble)
     potentials = o_mon[0].v.T # membrane potentials
+
+#    return decode(powers)
     return powers
 
 if __name__ == '__main__':
