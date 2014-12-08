@@ -23,7 +23,7 @@ psp = 0.5*mV
 
 def snn(sensor_value): 
 #    index = encode(sensor_value)
-    indices = array([5])
+    indices = array([sensor_value])
     times = array([0])*ms
     I = SpikeGeneratorGroup(inN, indices, times)
 #    I = NeuronGroup (inN, model = 'dv/dt = - (v - El)/tau : volt', 
@@ -37,8 +37,9 @@ def snn(sensor_value):
     C = Synapses(I,O, pre='v+=w', post='v+=psp', connect=True)
 #    C = Synapses(I,O, post='v+=psp', connect=True)
     #C.connect('i==j', p=0.1)
-    
-    mon = StateMonitor(O, 'v', record = True)
+   
+#    i_mon = StateMonitor(I, 'v', record = True)
+    o_mon = StateMonitor(O, 'v', record = True)
     is_mon = SpikeMonitor(I) # for taster plot
     os_mon = SpikeMonitor(O) # for taster plot
     
@@ -58,6 +59,9 @@ def snn(sensor_value):
     run(200*ms)
     
     figure()
+#    subplot(411)
+#    plot(i_mon.t/ms, i_mon[0].v.T/mV)
+    
     subplot(311)
     # rastor plot
     plot(is_mon.t/ms, is_mon.i, '.')
@@ -68,7 +72,7 @@ def snn(sensor_value):
     #plot(s_mon2.t/ms, s_mon2.i, '.')
     
     subplot(313)
-    plot(mon.t/ms, mon[0].v.T/mV)
+    plot(o_mon.t/ms, o_mon[0].v.T/mV)
     #plot(mon2.t/ms, mon2[0].v.T/mV)
     
     xlabel('Time (in ms)')
@@ -81,11 +85,11 @@ def snn(sensor_value):
     #print mon.t
     #print mon[0].v.T
 #    power = np.array(filter(None,mon[0].v.T),dtype='|S10').astype(np.longdouble)
-    power = mon[0].v.T
+    power = o_mon[0].v.T
     return power
 
 if __name__ == '__main__':
-    sensor_value = 35    
+    sensor_value = 5    
     power = snn(sensor_value)
 #    print power
     print np.round(power, 5)
