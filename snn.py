@@ -100,7 +100,15 @@ def snn(sensor_value):
 #    return decode(powers)
     return powers
 
+def train():
+    print 'train'
+        
+def test():
+    print 'test'
+    
 if __name__ == '__main__':
+    train() # plasticity on
+    test()  # plasticity off
     sensor_value = 5    
     powers = snn(sensor_value)
 #    print power
