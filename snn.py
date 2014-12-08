@@ -56,7 +56,7 @@ def snn(sensor_value):
     mon2 = StateMonitor(G2, 'v', record = True)
     s_mon2 = SpikeMonitor(G2) # for taster plot
     '''
-    run(200*ms)
+    run(20*ms)
     
     figure()
 #    subplot(411)
@@ -82,16 +82,21 @@ def snn(sensor_value):
     
     show()
     
+    # return two spike indices for L/R motor powers
     #print mon.t
-    #print mon[0].v.T
+#    print os_mon.i
+    powers = os_mon.i # spike indices    
 #    power = np.array(filter(None,mon[0].v.T),dtype='|S10').astype(np.longdouble)
-    power = o_mon[0].v.T
-    return power
+    potentials = o_mon[0].v.T # membrane potentials
+    return powers
 
 if __name__ == '__main__':
     sensor_value = 5    
-    power = snn(sensor_value)
+    powers = snn(sensor_value)
 #    print power
-    print np.round(power, 5)
+    print np.round(powers, 5)
 #    print np.around(power, 4)
+    leftPower = powers[0]
+    rightPower = powers[1] # - 102
+    print leftPower, rightPower    
     
