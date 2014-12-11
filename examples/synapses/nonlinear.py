@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-NMDA synapses.
+NMDA synapses. N-methyl-D-aspartate receptor
 """
 from brian2 import *
 

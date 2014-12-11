@@ -91,7 +91,7 @@ def snn(sensor_value):
     show()
     
     # return two spike indices for L/R motor powers
-    #print mon.t
+#    print o_mon.t
 #    print os_mon.i
     powers = os_mon.i # spike indices    
 #    power = np.array(filter(None,mon[0].v.T),dtype='|S10').astype(np.longdouble)
@@ -102,6 +102,8 @@ def snn(sensor_value):
 
 def train():
     print 'train'
+    import time
+    print time.time()
         
 def test():
     print 'test'
