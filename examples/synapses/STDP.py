@@ -44,8 +44,25 @@ mon = StateMonitor(S, 'w', record=[0, 1])
 s_mon = SpikeMonitor(input)
 r_mon = PopulationRateMonitor(input)
 
+# plot befre training
+subplot(311)
+plot(S.w / gmax, '.k')
+ylabel('Weight / gmax')
+xlabel('Synapse index')
+subplot(312)
+hist(S.w / gmax, 20)
+xlabel('Weight / gmax')
+subplot(313)
+plot(mon.t/second, mon.w.T/gmax)
+xlabel('Time (s)')
+ylabel('Weight / gmax')
+tight_layout()
+show()
+
+# train the network: takes about 20mins
 run(100*second, report='text')
 
+# plot befre training
 subplot(311)
 plot(S.w / gmax, '.k')
 ylabel('Weight / gmax')
