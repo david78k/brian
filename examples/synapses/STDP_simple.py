@@ -10,8 +10,10 @@ taum = 10*ms
 taupre = 20*ms
 taupost = taupre
 Ee = 0*mV
-vt = -54*mV
-vr = -60*mV
+#vt = -54*mV
+vt = -72*mV
+#vr = -60*mV
+vr = -73*mV
 El = -74*mV
 taue = 5*ms
 F = 15*Hz
@@ -40,7 +42,8 @@ S = Synapses(input, output,
              connect=True,
              )
 S.w = 'rand() * gmax'
-mon = StateMonitor(S, 'w', record=[0, 1])
+mon = StateMonitor(S, 'w', record=[0, 1, 2])
+#i_mon = StateMonitor(input, 'v', record = True)
 is_mon = SpikeMonitor(input)
 ir_mon = PopulationRateMonitor(input)
 
@@ -65,28 +68,33 @@ tight_layout()
 show()
 
 # train the network: takes about 1min for 10 second, 20mins for 100seconds
-run(10*second, report='text')
+run(1*second, report='text')
 
-figure(figsize=(6,8))
+figure(figsize=(6,10))
 # plot befre training
-subplot(511)
-plot(S.w / gmax, '.k')
+subplot(611)
+plot(S.w / gmax, '.')
 ylabel('Weight / gmax')
 xlabel('Synapse index')
-subplot(512)
+subplot(612)
 hist(S.w / gmax, 20)
 xlabel('Weight / gmax')
-subplot(513)
+subplot(613)
 plot(mon.t/second, mon.w.T/gmax)
 xlabel('Time (s)')
 ylabel('Weight / gmax')
-subplot(514)
+subplot(614)
+plot(is_mon.t/second, is_mon.i, '.')
+xlabel('Time (s)')
+ylabel('Neuron index')
+subplot(615)
 plot(ir_mon.t/second, ir_mon.rate/Hz)
 xlabel('Time (s)')
 ylabel('Firing rate (Hz)')
-subplot(515)
+subplot(616)
 # output neuron membrane potential
-plot(o_mon.t/second, o_mon[0].v.T/mV, '.')
+#plot(o_mon.t/second, o_mon[0].v.T/mV, '.')
+plot(o_mon.t/second, o_mon.v.T/mV, 'r')
 xlabel('Time (s)')
 ylabel('Potential (mV)')
 #ylabel('Neuron Output Membrane Potential (mV)')
